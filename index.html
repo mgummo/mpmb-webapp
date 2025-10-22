@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>D&D Spell Cards</title>
+
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- https://unpkg.com/mustache@latest/mustache.min.js -->
+    <script src="./lib/mustache.min.js"></script>
+    <script src="mpmb-host.js"></script>
+
+    <!-- todo: import from mpmb-host.js? -->
+    <script src="../2024_MPMBs-Character-Record-Sheet/_functions/FunctionsImport.js"></script>
+    <script src="../2024_MPMBs-Character-Record-Sheet/_functions/Functions0.js"></script>
+    <script src="../2024_MPMBs-Character-Record-Sheet/_functions/Functions1.js"></script>
+    <script src="../2024_MPMBs-Character-Record-Sheet/_functions/Functions2.js"></script>
+    <script src="../2024_MPMBs-Character-Record-Sheet/_functions/Functions3.js"></script>
+    <script src="../2024_MPMBs-Character-Record-Sheet/_functions/FunctionsSpells.js"></script>
+    <script src="../2024_MPMBs-Character-Record-Sheet/_functions/FunctionsResources.js"></script>
+
+    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/Lists.js"></script>
+    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsSpells.js"></script>
+    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsGear.js"></script>
+
+    <script>
+        mpmb.init();
+        // todo: implement this
+        // mpmb.load_plugin("../2024-PHB/pub_20240917_PHB.js")
+    </script>
+
+    <!-- requires mpmb.init() before this script can load -->
+    <script src="../2024-PHB/pub_20240917_PHB.js"></script>
+
+<body>
+    <div id="app"></div>
+
+    <template id="page-template">
+        {{#pages}}
+        <div class="page">
+            <div class="grid">
+                {{#spells}}
+                {{{cardHTML}}}
+                {{/spells}}
+            </div>
+        </div>
+        {{/pages}}
+    </template>
+
+    <template id="spell-card-template">
+        <div class="spell-card">
+            <div>
+                <span class="name">{{name}}</span><br>
+                <span class="subtitle">{{vm.subtitle}}</span><br>
+            </div>
+
+            <div class="summary">{{vm.summary}}</div>
+
+            <div>
+                <span class='label'>Casting Time: </span>{{vm.time}}<br>
+                <span class='label'>Range: </span>{{vm.range}}<br>
+                <span class='label'>Components: </span>{{vm.components}}<br>
+                <span class='label'>Duration: </span>{{vm.duration}}<br>
+            </div>
+
+            <div>
+                <span class="description">{{{vm.descriptionHtml}}}</span>
+            </div>
+
+            <div class="spacer"></div>
+
+            <div class="source">
+                {{vm.source}}
+            </div>
+        </div>
+    </template>
+
+    <script src="main.js"></script>
+    <script src="render.js"></script>
+
+    <script>
+        const spells = main.spells;
+        page.render(spells)
+    </script>
+
+</body>
