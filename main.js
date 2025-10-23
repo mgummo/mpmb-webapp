@@ -1,11 +1,15 @@
 (function (global) {
 
+    ExtendWeaponsList(mpmb.lists.WeaponsList)
+    ExtendSpellsList(mpmb.lists.SpellsList)
 
-    ExtendWeaponsList(mpmb.WeaponsList)
-
+    // let spells = SelectSpells(mpmb.lists.SpellsList)
+    let spells = SelectAllSpells(mpmb.lists.SpellsList)
 
 
     function ExtendWeaponsList(list) {
+
+        // fix description
         mpmb.AddWeapon("produce flame", {
             regExpSearch: /^(?=.*produce)(?=.*flame).*$/i,
             name: "Produce Flame",
@@ -19,6 +23,7 @@
             abilitytodamage: false
         });
 
+        // define attack
         mpmb.AddWeapon("thunderwave", {
             regExpSearch: /^(?=.*thunderwave).*$/i,
             name: "Thunderwave",
@@ -38,59 +43,78 @@
             // todo: get rid of this
             save: ["Con", null, "takes half damage"]
         });
+
+        // todo: is this a con save / wis save or what?
+        // I think I need to review the convulted modifier calcs
+        // from the attacks table
+        // Word of Radiance | Yes | Wis | 5-ft. radius | DC 10 | 1d6 | Radiant
+        // Con save, success - no damage; Only chosen creatures I can see are affected
+
+        // What I'd like the card to say:
+        // Each target within a 5-foot radius from you makes a Con saving throw (DC 10)
+        // On failure, they are dealt 1d6 Radiant damage.
+        // On success, they are dealt no damage.
+
+        const radiance = WeaponsList["word of radiance"];
+        console.debug(radiance);
+
+        // todo: healing word
+        // "1 creature heals 2d4+2d4/SL+5 (Wis) HP"
+
     }
 
-    // todo: is this a con save / wis save or what?
-    // I think I need to review the convulted modifier calcs
-    // from the attacks table
-    // Word of Radiance | Yes | Wis | 5-ft. radius | DC 10 | 1d6 | Radiant
-    // Con save, success - no damage; Only chosen creatures I can see are affected
+    function ExtendSpellsList(SpellsList) {
 
-    // What I'd like the card to say:
-    // Each target within a 5-foot radius from you makes a Con saving throw (DC 10)
-    // On failure, they are dealt 1d6 Radiant damage.
-    // On success, they are dealt no damage.
+        // spells are easier to work with, if they have a key property
+        for (const [key, value] of Object.entries(SpellsList)) {
+            value.key = key
+        }
+    }
 
-    const radiance = WeaponsList["word of radiance"];
-    console.debug(radiance);
+    function SelectSpells(SpellsList) {
 
-    // todo: healing word
-    // "1 creature heals 2d4+2d4/SL+5 (Wis) HP"
+        let spells = [
+            SpellsList['druidcraft'],
+            SpellsList['elementalism'],
+            SpellsList['produce flame'],
+            SpellsList['shocking grasp'],
+            SpellsList['detect magic'],
+            SpellsList['find familiar'],
+            SpellsList['healing word'],
+            SpellsList['purify food and drink'],
+            SpellsList['sleep'],
+            SpellsList['speak with animals'],
+            SpellsList['thunderwave'],
+            SpellsList['augury'],
+            SpellsList['locate animals or plants'],
+            SpellsList['misty step'],
+        ]
 
-
-    // todo: init this dynamically at startup?
-
-    let spells = [
-        { key: 'druidcraft', ...SpellsList['druidcraft'] },
-        { key: 'elementalism', ...SpellsList['elementalism'] },
-        { key: 'produce flame', ...SpellsList['produce flame'] },
-        { key: 'shocking grasp', ...SpellsList['shocking grasp'] },
-        { key: 'detect magic', ...SpellsList['detect magic'] },
-        { key: 'find familiar', ...SpellsList['find familiar'] },
-        { key: 'healing word', ...SpellsList['healing word'] },
-        { key: 'purify food and drink', ...SpellsList['purify food and drink'] },
-        { key: 'sleep', ...SpellsList['sleep'] },
-        { key: 'speak with animals', ...SpellsList['speak with animals'] },
-        { key: 'thunderwave', ...SpellsList['thunderwave'] },
-        { key: 'augury', ...SpellsList['augury'] },
-        { key: 'locate animals or plants', ...SpellsList['locate animals or plants'] },
-        { key: 'misty step', ...SpellsList['misty step'] },
-    ]
-
-    spells = [
         // temp, so that I have a DC Save based attack to look at
-        { key: 'word of radiance', ...SpellsList['word of radiance'] }, ...spells
-    ]
+        spells = [
+            SpellsList['word of radiance'], ...spells
+        ]
 
-    // todo: any additional sources i can load?
+        // debug - grab everything, and see what happens
 
-    // debug - grab everything, and see what happens
-    spells = Object.values(SpellsList)
 
-    // todo: filtering isn't working?
-    // .filter(_ => {
-    //     _.source[0] !== "LEGACYSPELLS"
-    // })
+        // todo: filtering isn't working?
+        // .filter(_ => {
+        //     _.source[0] !== "LEGACYSPELLS"
+        // })
+
+        return spells;
+
+    }
+
+    function SelectAllSpells(list) {
+        let spells = Object.values(SpellsList);
+        spells = spells.filter(_ => {
+            const allow = _.source[0][0] !== "LEGACYSPELLS"
+            return allow;
+        });
+        return spells;
+    }
 
 
     const pdf = {

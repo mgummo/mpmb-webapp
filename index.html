@@ -26,6 +26,10 @@
 
     <script>
         mpmb.init();
+        // todo: anything else I should be loading? 
+        // Tasha's Cauldron of Everything?
+        // Xanathar's Guide to Everything?
+        //
         // todo: implement this
         // mpmb.load_plugin("../2024-PHB/pub_20240917_PHB.js")
     </script>
@@ -39,7 +43,7 @@
     <template id="page-template">
         {{#pages}}
         <div class="page">
-            <div class="grid">
+            <div class="grid grid-{{grid_size}}">
                 {{#spells}}
                 {{{cardHTML}}}
                 {{/spells}}
@@ -49,7 +53,7 @@
     </template>
 
     <template id="spell-card-template">
-        <div class="spell-card">
+        <div class="spell-card" data-key="{{key}}">
             <div>
                 <span class="name">{{name}}</span><br>
                 <span class="subtitle">{{vm.subtitle}}</span><br>

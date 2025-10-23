@@ -52,8 +52,6 @@ body {
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
     gap: 5mm;
     padding: 5mm;
 
@@ -62,12 +60,14 @@ body {
     height: 297mm;
 }
 
-.overflow-page {
-    display: grid;
+.grid-3x3 {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+}
+
+.grid-2x2 {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);
-    gap: 5mm;
-    padding: 5mm;
 }
 
 .spell-card {

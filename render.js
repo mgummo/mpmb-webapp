@@ -2,18 +2,49 @@
 
     function render(spells) {
 
+        renderHelper(spells);
+
+        // next tick
+        window.setTimeout(() => {
+            reflow();
+        });
+    }
+
+    function renderHelper(spells, overflowing_spells) {
+
+        const pages = [];
+
+        overflowing_spells = overflowing_spells ?? []
+
         // render the cards
         const cardTemplate = document.getElementById("spell-card-template").innerHTML;
-        const spellsWithHTML = spells.map(spell => ({
+        let spellsWithHTML = spells.map(spell => ({
             ...spell,
             cardHTML: Mustache.render(cardTemplate, spell)
         }));
 
-        // groups cards into pages of 9
-        const cards_per_page = 9;
-        let pages = [];
+        // groups cards into 9 / page
+        let cards_per_page = 9;
         for (let i = 0; i < spellsWithHTML.length; i += cards_per_page) {
-            pages.push({ spells: spellsWithHTML.slice(i, i + cards_per_page) });
+            pages.push({
+                spells: spellsWithHTML.slice(i, i + cards_per_page),
+                grid_size: "3x3",
+            });
+        }
+
+        spellsWithHTML = overflowing_spells.map(spell => ({
+            ...spell,
+            cardHTML: Mustache.render(cardTemplate, spell)
+        }));
+
+        // groups overflow cards into 4 / page
+        // (so that they have more room, and shouldn't be overflowing the grid now)
+        cards_per_page = 4;
+        for (let i = 0; i < spellsWithHTML.length; i += cards_per_page) {
+            pages.push({
+                spells: spellsWithHTML.slice(i, i + cards_per_page),
+                grid_size: "2x2",
+            });
         }
 
         // render the pages
@@ -21,47 +52,38 @@
         const rendered = Mustache.render(pageTemplate, { pages });
         document.getElementById("app").innerHTML = rendered;
 
-        function findOverflowingCards() {
-            const cards = document.querySelectorAll('.spell-card');
-            const overflowing = [];
+    }
 
-            cards.forEach(card => {
-                if (card.scrollHeight > card.clientHeight) {
-                    // card.style.borderColor = 'red'; // mark visibly
-                    overflowing.push(card);
-                }
-            });
-
-            console.log(`Found ${overflowing.length} overflowing cards.`);
-            return overflowing;
+    function reflow() {
+        const cards = findOverflowingCards();
+        if (!cards.length) {
+            return;
         }
 
-        // Run after render
-        window.setTimeout(() => {
-            const overflows = findOverflowingCards();
+        const keys = new Set(cards.map(_ => _.dataset.key))
+        const [spells_that_fit, spells_that_overflow] = spells.reduce((acc, spell) => {
+            // maps bool to 0 or 1 (the group index)
+            const group_index = +keys.has(spell.key);
+            acc[group_index].push(spell);
+            return acc;
+        }, [[], []]);
 
-            // Example: move overflowing cards to a new section
-            if (overflows.length) {
-                const overflowContainer = document.createElement('div');
-                overflowContainer.className = 'page overflow-page';
-                document.body.appendChild(overflowContainer);
+        renderHelper(spells_that_fit, spells_that_overflow);
 
-                overflows.forEach(card => {
-                    const clone = card.cloneNode(true);
-                    overflowContainer.appendChild(clone);
-                    card.remove();
-                    // card.style.opacity = 0.3; // visually mark duplicates
-                });
+    }
+
+    function findOverflowingCards() {
+        const cards = document.querySelectorAll('.spell-card');
+        const overflowing = [];
+
+        cards.forEach(card => {
+            if (card.scrollHeight > card.clientHeight) {
+                overflowing.push(card);
             }
-
-            // todo: reflow
-            // fix here would be to move the cards out of the pages array.
-            // then rebuild it.
-
-            // that will also allow us to page the overflow cards, which fixes layout
-            // when too many cards overflow
-
         });
+
+        console.log(`Found ${overflowing.length} overflowing cards.`);
+        return overflowing;
     }
 
     // random junk
