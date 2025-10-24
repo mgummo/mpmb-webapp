@@ -155,6 +155,11 @@ function format_damage_dice(spell, caster_level, spell_slot_size) {
     // [dice_count, dice_size, damage_type]
     let damages = spell.action.damage;
 
+    if (!damages) {
+        return null;
+    }
+
+
     // if array, need to normalize into a multi-array 
     if (typeof (damages[0]) !== "object") {
         damages = [damages]
@@ -287,15 +292,15 @@ function format_spell_components(spell) {
 
     if (spell.compMaterial) {
 
-        let suffix = ''
+        let icons = ''
         if (is_costly) {
-            suffix = ' 💎'
+            icons = '💎 '
         }
         else if (is_consumed) {
-            suffix = ' 💎🔥'
+            icons = '🔥💎 '
         }
 
-        return `${components}(${spell.compMaterial})${suffix}`
+        return `${components} (${icons}${spell.compMaterial})`
     }
     else {
         return components
@@ -317,7 +322,11 @@ function format_spell_duration(spell) {
 
 function format_spell_description(spell) {
 
-    return spell.descriptionFull
+    text = mpmb.formatDescriptionFull(spell.descriptionFull, false);
+
+    return text
+
+        // In case the `>> <<` format wasn't used...
 
         // some descriptions are missing the bullet point, but are delimited with double space
         // lazy capture, but don't go too deep - we don't want to capture full sentences.

@@ -118,6 +118,9 @@
 
     }
 
+    const mpmb = new MpmbApp();
+    mpmb.formatDescriptionFull = formatDescriptionFull
+
     // shim the acrobat api
     const AcrobatApp = {
         platform: "browser",
@@ -125,7 +128,7 @@
     };
 
     global.app = AcrobatApp;
-    global.mpmb = new MpmbApp();
+    global.mpmb = mpmb;
 
 })(window)
 
