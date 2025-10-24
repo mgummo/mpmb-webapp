@@ -105,9 +105,14 @@
             console.debug(lists)
         }
 
-        // todo: also implement ExtendWeapon, which takes a partial weapon defintion, and merges it with the existing weapon definition
         AddWeapon(key, weapon) {
             weapon.key = key;
+            this.lists.WeaponsList[key] = weapon;
+        }
+
+        UpdateWeapon(key, partial_weapon) {
+            let weapon = this.lists.WeaponsList[key]
+            weapon = { ...weapon, ...partial_weapon }
             this.lists.WeaponsList[key] = weapon;
         }
 

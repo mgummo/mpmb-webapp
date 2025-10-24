@@ -4,9 +4,10 @@
 
         renderHelper(spells);
 
-        // next tick
+        // todo: optimize this
+        // [Violation] 'setTimeout' handler took 55ms
         window.setTimeout(() => {
-            reflow();
+            reflow(spells);
         });
     }
 
@@ -47,6 +48,9 @@
             });
         }
 
+        // todo: experiment with [alpine](https://github.com/alpinejs/alpine)
+        // looks like a vuejs-lite library, to replace mustache with 
+        //
         // render the pages
         const pageTemplate = document.getElementById("page-template").innerHTML;
         const rendered = Mustache.render(pageTemplate, { pages });
@@ -54,7 +58,7 @@
 
     }
 
-    function reflow() {
+    function reflow(spells) {
         const cards = findOverflowingCards();
         if (!cards.length) {
             return;

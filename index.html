@@ -22,7 +22,19 @@
 
     <script src="../2024_MPMBs-Character-Record-Sheet/_variables/Lists.js"></script>
     <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsSpells.js"></script>
-    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsGear.js"></script>
+
+    <!-- <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsBackgrounds.js"></script> -->
+    <!-- <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsClasses.js"></script>-->
+    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsCompanions.js"></script>
+    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsCreatures.js"></script>
+    <!--<script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsEvals.js"></script>
+    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsFeats.js"></script>
+    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsGear.js"></script>-->
+    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsMagicItems.js"></script>
+    <!-- <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsPsionics.js"></script>
+    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsRaces.js"></script>
+    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsSources.js"></script> -->
+
 
     <script>
         mpmb.init();
@@ -36,6 +48,7 @@
 
     <!-- requires mpmb.init() before this script can load -->
     <script src="../2024-PHB/pub_20240917_PHB.js"></script>
+    <script src="../2024-PHB/pub_20241112_DMG.js"></script>
 
 <body>
     <div id="app"></div>
@@ -82,10 +95,15 @@
 
     <script src="main.js"></script>
     <script src="render.js"></script>
+    <script src="format.js"></script>
+    <script src="string-util.js"></script>
 
     <script>
-        const spells = main.spells;
-        page.render(spells)
+        (function () {
+            const result = main.init();
+            const spells = result.spells;
+            page.render(spells);
+        })()
     </script>
 
 </body>

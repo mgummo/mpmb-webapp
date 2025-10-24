@@ -13,6 +13,9 @@ type Page = number
  */
 type AbilityId = number
 
+type Ability = "Str" | "Dex" | "Con" | "Int" | "Wis" | "Cha"
+type Skill = Ability
+
 /**
  * An expression used to calculate a modifier
  * 
@@ -456,6 +459,7 @@ interface Weapon {
     
         Setting this to an empty string ("") is the same as not including this attribute.
     */
+
     SpellsList: "eldritch blast",
     /*	SpellsList // OPTIONAL //
         TYPE:	string
@@ -498,7 +502,6 @@ interface Weapon {
      */
     useSpellcastingAbility?: boolean,
 
-
     useSpellMod: ["wizard", "cleric"],
     useSpellMod: "wizard",
     /*	useSpellMod // OPTIONAL //
@@ -538,6 +541,7 @@ interface Weapon {
     
     Setting this to an empty string ("") is the same as not including this attribute.
     */
+
     baseWeapon: "longsword",
     /*	baseWeapon // OPTIONAL //
         TYPE:	string
@@ -584,7 +588,7 @@ interface Weapon {
 
 type Internal<Weapon> = Weapon & {
     /** 
-     * The key used to register this weapon in the WeaponsList dictionar.
+     * The key used to register this weapon in the WeaponsList dictionary.
      * 
      * @example 'purple sword'
      * */
@@ -594,15 +598,14 @@ type Internal<Weapon> = Weapon & {
     damage: Arrayable<[[DiceAmount, DiceType, DamageType | string]]>
 
     // support more complex dc checks
-    // dc[0] is an expression that defines the skill check (todo: differentiate between DC 10 and SPELLCASTING DC +10)
-    // dc[1] pass description
+    // dc[0] is the skill being checked
+    // dc[1] is an expression that defines the skill check DC (todo: differentiate between DC 10 and SPELLCASTING DC +10)
+    // dc[2] pass description
     // ex: "half damage"
     // what to indicate for no damage
-    // dc[2] fail description
-    // what to indicate for full damage?
-    dc: [Expression, string, string]
+    // dc[3] fail description
+    // ex: "takes damage" // todo: wordsmithing?
+    dc: [skill, Expression, string, string]
 }
-
-// extensions
 
 
