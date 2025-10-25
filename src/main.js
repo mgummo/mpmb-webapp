@@ -1,62 +1,36 @@
-(function (global) {
+(function (window) {
 
-    // after other plugins have been loaded
-    async function init() {
+    /** @type {Global}
+     *  @ts-ignore */
+    const global = window;
 
-        await load_config();
-        await mpmb.load_plugins(main.config.plugins)
+    const mpmb = global.mpmb;
 
-        const result = {};
-
-        ExtendWeaponsList(mpmb.lists.WeaponsList)
-        ExtendSpellsList(mpmb.lists.SpellsList)
-
-        const dict = load_pdf()
-        const caster = load_character(dict)
-        const spells = select_spells_to_render(caster);
-
-        return {
-            spells,
-        }
-    }
-
-    async function load_config() {
-        await mpmb.load_plugin("../etc/config.js");
-
-        const defaults = {
-            plugins: [],
-        }
-
-        if (!main.config) {
-            main.config = {}
-        }
-
-        main.config = {
-            ...defaults,
-            ...main.config,
-        }
-    }
 
     function ExtendWeaponsList(list) {
 
+        // todo: might make more sense to issue pull requests for these
+
+        // Use 'Melee' not 'Touch'
         mpmb.UpdateWeapon("chill touch", {
             range: "Melee",
         })
 
-        // fix description
+        // Range was incorrect
         mpmb.UpdateWeapon("produce flame", {
             range: "60 ft",
             description: "20-ft radius bright light and 20-ft radius dim light until thrown",
         });
 
+        // Clarify that it's a melee attack, not ranged.
         mpmb.UpdateWeapon("thorn whip", {
             range: "30 ft Melee"
         });
 
-        // fix dc skill
+        // fix dc skill - use 'CON' not 'CHA'
         mpmb.UpdateWeapon("thunderclap", {
             ability: 3,
-            dc: ["Con", null, "takes no damage"],
+            dc: ["Con", "SPELLSAVE", null, "takes no damage"],
         });
 
         // define attacks for higher level spells
@@ -74,10 +48,10 @@
             abilitytodamage: false,
 
             // attempt to extend the def. with what happens on save
-            dc: ["Con", null, "takes half damage"],
+            dc: ["Con", "SPELLSAVE", null, "takes half damage"],
 
             // todo: get rid of this
-            save: ["Con", null, "takes half damage"]
+            save: ["Con", "SPELLSAVE", null, "takes half damage"]
         });
 
         // todo: is this a con save / wis save or what?
@@ -128,8 +102,27 @@
             spell.upcastable = spell.description.includes('/SL');
 
             // link together the spell with the actions (from the weapon list that it enables)
-            spell.action = WeaponsList[spell.key]
+            spell.action = mpmb.lists.WeaponsList[spell.key]
 
+            if (spell.action) {
+
+                // support rolling multiple types of damage dice
+                // todo: replace the old damage value with this value instead
+                // instead of making a new property
+                {
+                    let damages = spell.action.damage;
+
+                    if (!damages) {
+                        spell.action.damages = []
+                    }
+                    // if array, need to normalize into a multi-array 
+                    else if (typeof (damages[0]) !== "object") {
+                        spell.action.damages = [damages]
+                    }
+                }
+            }
+
+            // todo: build up the saving throw stats
             // if (spell.save && !spell.action.save)
 
         }
@@ -209,8 +202,9 @@
             return 0;
         });
 
-        for (spell of spells) {
-            spell.vm = build_spellcard_vm(spell, caster)
+        const main = global.main
+        for (const spell of spells) {
+            spell.vm = main.build_spellcard_vm(spell, caster)
         }
 
         return spells;
@@ -218,6 +212,9 @@
     }
 
     function select_spells_to_render(caster) {
+
+        const SpellsList = mpmb.lists.SpellsList;
+
         // let spells = SelectSpells(mpmb.lists.SpellsList)
         // let spells = SelectAllSpells(mpmb.lists.SpellsList)
         let spells = SelectAvailableSpells(caster.class, [0, 2])
@@ -259,9 +256,11 @@
             return 0;
         });
 
+        const main = global.main
+
         // build up view model that binds to the card
-        for (spell of spells) {
-            spell.vm = build_spellcard_vm(spell, caster)
+        for (const spell of spells) {
+            spell.vm = main.build_spellcard_vm(spell, caster)
         }
 
         // Let's see if we have anything
@@ -306,18 +305,16 @@
     }
 
     function SelectAllSpells(list) {
-        let spells = Object.values(SpellsList);
+        let spells = Object.values(list);
         return spells;
     }
 
     function SelectAvailableSpells(caster_class, spell_level_range) {
+
+        const SpellsList = mpmb.lists.SpellsList;
+
         let spells = Object.values(SpellsList);
         spells = spells.filter(_ => {
-
-            if (!_.classes) {
-                debugger;
-            }
-
             const match_class = _.classes.includes(caster_class);
             const match_min = _.level >= spell_level_range[0];
             const match_max = _.level <= spell_level_range[1];
@@ -327,35 +324,82 @@
         return spells;
     }
 
-    // https://github.com/morepurplemorebetter/2024_MPMBs-Character-Record-Sheet/tree/main/additional%20content%20syntax
+    class Main {
 
-    // schema definition for objects in WeaponsList:
-    // https://github.com/morepurplemorebetter/2024_MPMBs-Character-Record-Sheet/blob/main/additional%20content%20syntax/weapon%20(WeaponsList).js
+        constructor() {
+            this.config = undefined;
+        }
 
-    // todo: pass a casting context
-    // include things like the caster, upcasted spell slots,k bonuses, etc.
-    function build_spellcard_vm(spell, caster, casting_context) {
-        const vm = {};
+        // after other plugins have been loaded
+        async init() {
 
-        // vm.title = ... ommitted - no need to format the spell title
-        vm.subtitle = format_spell_subtitle(spell)
+            await this._load_config();
+            await this._load_plugins(this.config.plugins)
 
-        vm.summary = format_spell_summary(spell, caster);
+            const result = {};
 
-        vm.time = format_spell_time(spell);
-        vm.range = format_spell_range(spell);
-        vm.components = format_spell_components(spell);
-        vm.duration = format_spell_duration(spell);
+            ExtendWeaponsList(mpmb.lists.WeaponsList)
+            ExtendSpellsList(mpmb.lists.SpellsList)
 
-        vm.descriptionHtml = format_spell_description(spell);
+            const dict = load_pdf()
+            const caster = load_character(dict)
+            const spells = select_spells_to_render(caster);
 
-        vm.source = format_spell_source(spell);
+            return {
+                spells,
+            }
+        }
 
-        return vm;
+        async _load_config() {
+            await this.load_plugin("../etc/config.js");
+
+            const defaults = {
+                plugins: [],
+            }
+
+            if (!this.config) {
+                this.config = {}
+            }
+
+            this.config = {
+                ...defaults,
+                ...this.config,
+            }
+        }
+
+        async _load_plugins(plugins) {
+            if (!plugins) {
+                return;
+            }
+
+            for (const plugin of plugins) {
+                await this.load_plugin(plugin);
+            }
+        }
+
+        load_plugin(url) {
+
+            return new Promise((resolve, reject) => {
+
+                const script = document.createElement('script');
+                script.src = url;
+                script.async = true;
+
+                // if (resolve)
+                script.onload = () => resolve(window); // resolve with global scope
+                script.onerror = () => reject(new Error(`Failed to load script ${url}`));
+
+                document.head.appendChild(script);
+            });
+        }
+
+
+        build_spellcard_vm() {
+            // Initially undefined
+            throw new Error("build_spellcard_vm not yet initialized");
+        }
     }
 
-    global.main = {
-        init: init
-    }
+    global.main = new Main()
 
 })(window)

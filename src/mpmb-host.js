@@ -1,7 +1,7 @@
 // defines interface to shim the [Adobe javascript api](https://opensource.adobe.com/dc-acrobat-sdk-docs/library/jsapiref/doc.html)
 // defines interface to interact with the MPMB api
 
-(function (global) {
+(function (/** @type {any} */ global) {
 
     Object.prototype.toSource = function () {
         try {
@@ -66,43 +66,61 @@
 
     Object.assign(window, tDoc);
 
-    class MpmbApp {
+    class MpmbWrapper {
         constructor() {
+            // check to see if it looks like mpmb scripts have been included, based on what's been dumped into globla namespace
+            if (!global.What || !global.tDoc) {
+                // Functions0.js
+                throw new Error("MPMB is not loaded!");
+            }
+
+            /** @type {Record<string, any>} */
+            this._lists = {}
+
+            this.formatDescriptionFull = global.formatDescriptionFull;
+            this.stringSource = global.stringSource;
+
         }
 
         init() {
-            InitiateLists();
 
-            const lists = {
-
-                BackgroundList,
-                BackgroundSubList,
-                BackgroundFeatureList,
-                ClassList,
-                ClassSubList,
-                CompanionList,
-                CreatureList,
-                DefaultEvalsList,
-                FeatsList,
-                MagicItemsList,
-                ArmourList,
-                WeaponsList,
-                AmmoList,
-                PacksList,
-                GearList,
-                ToolsList,
-                RaceList,
-                RaceSubList,
-                SourceList,
-                SpellsList,
-                PsionicsList,
-                spellLevelList,
-                spellSchoolList
+            if (!global.InitiateLists) {
+                // Lists.js
+                throw new Error("MPMB is not loaded!");
             }
 
-            this.lists = lists
+            global.InitiateLists();
 
-            console.debug(lists)
+            this._lists = {
+                BackgroundSubList: global.BackgroundSubList,
+                BackgroundFeatureList: global.BackgroundFeatureList,
+                ClassList: global.ClassList,
+                ClassSubList: global.ClassSubList,
+                CompanionList: global.CompanionList,
+                CreatureList: global.CreatureList,
+                DefaultEvalsList: global.DefaultEvalsList,
+                FeatsList: global.FeatsList,
+                MagicItemsList: global.MagicItemsList,
+                ArmourList: global.ArmourList,
+                WeaponsList: global.WeaponsList,
+                AmmoList: global.AmmoList,
+                PacksList: global.PacksList,
+                GearList: global.GearList,
+                ToolsList: global.ToolsList,
+                RaceList: global.RaceList,
+                RaceSubList: global.RaceSubList,
+                SourceList: global.SourceList,
+                SpellsList: global.SpellsList,
+                PsionicsList: global.PsionicsList,
+                spellLevelList: global.spellLevelList,
+                spellSchoolList: global.spellSchoolList,
+            }
+
+            console.debug("Discovered the following lists from mdmb: %o", this.lists)
+        }
+
+        get lists() {
+            return this._lists;
         }
 
         AddWeapon(key, weapon) {
@@ -116,36 +134,9 @@
             this.lists.WeaponsList[key] = weapon;
         }
 
-        async load_plugins(plugins) {
-            if (!plugins) {
-                return;
-            }
-
-            for (const plugin of plugins) {
-                await this.load_plugin(plugin);
-            }
-        }
-
-        load_plugin(url) {
-
-            return new Promise((resolve, reject) => {
-
-                const script = document.createElement('script');
-                script.src = url;
-                script.async = true;
-
-                // if (resolve)
-                script.onload = () => resolve(window); // resolve with global scope
-                script.onerror = () => reject(new Error(`Failed to load script ${url}`));
-
-                document.head.appendChild(script);
-            });
-        }
-
     }
 
-    const mpmb = new MpmbApp();
-    mpmb.formatDescriptionFull = formatDescriptionFull;
+    const mpmb = new MpmbWrapper();
 
     // shim the acrobat api
     const AcrobatApp = {
@@ -153,8 +144,11 @@
         alert: () => { }
     };
 
-    global.app = AcrobatApp;
-    global.mpmb = mpmb;
+    /** @type {Global} */
+    const global2 = global;
+
+    global2.app = AcrobatApp;
+    global2.mpmb = mpmb;
 
 })(window)
 

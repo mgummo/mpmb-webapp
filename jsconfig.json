@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "target": "es6",
         "checkJs": true,
         "allowJs": true,
         "maxNodeModuleJsDepth": 2,
@@ -7,6 +8,10 @@
         "typeRoots": [
             "./types",
             "./node_modules/@types"
+        ],
+        "lib": [
+            "ES2024",
+            "DOM"
         ]
     },
     "include": [
@@ -14,3 +19,42 @@
         "types/**/*.d.ts"
     ]
 }
+// todo: In case I want to validate Acrobat JS 
+// needs to be in it's own file
+// {
+//     "compilerOptions": {
+//         "target": "ES5",
+//         "lib": [
+//             "ES5"
+// no DOM library
+//         ],
+//         "module": "none",
+//         "checkJs": true
+//     },
+//     "include": [
+//         "acrobatscripts/**/*.js"
+//     ]
+// }
+// todo: type library for Acrobat
+// types/acrobat.d.ts
+// /** Acrobat Application object */
+// declare const app: {
+//   alert(message: string, nIcon?: number, nTitle?: string): void;
+//   execMenuItem(menuItem: string): void;
+//   // add more commonly used app methods here
+// };
+// /** Acrobat Document object */
+// declare const doc: {
+//   getField(name: string): any;
+//   addField(name: string, type: string, page: number, rect?: number[]): any;
+//   // add more commonly used doc methods here
+// };
+// /** Acrobat Event object */
+// declare const event: {
+//   value: any;
+//   source: any;
+//   // add more properties as needed
+// };
+// /** Other Acrobat objects */
+// declare const util: any;
+// declare const color: any;

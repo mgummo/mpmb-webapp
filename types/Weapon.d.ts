@@ -36,7 +36,7 @@ type DamageType =
 // The object name here is 'purple sword'. You can use any object name as long as it is not already in use.
 // If you do use an object name that is already in use, you will be overwriting that object.
 // Note the use of only lower case! Also note the absence of the word "var" and the use of brackets [].
-interface Weapon {
+interface MpmbWeapon {
     /**  
      * The display name of the weapon.
      * 
@@ -169,15 +169,17 @@ interface Weapon {
      */
     ability: AbilityId | 0 | false,
 
-    abilitytodamage: true,
-    /*	abilitytodamage // REQUIRED //
-        TYPE:	boolean
-        USE:	whether (true) or not (false) to add the ability score modifier to the damage
-    
-        When set to 'true', the ability score modifier set with the 'ability' attribute
-        is added to the calculated damage of the weapon/attack.
-        This will happen even if the ability score modifier is negative.
-    */
+    /**
+     * whether (true) or not (false) to add the ability score modifier to the damage
+     * 
+     * @remarks
+     * When set to 'true', the ability score modifier set with the 'ability' attribute
+     * is added to the calculated damage of the weapon/attack.
+     * This will happen even if the ability score modifier is negative.
+     * 
+     * @example true
+     */
+    abilitytodamage: boolean,
 
     /**
      * determine the damage die and type of the damage
@@ -227,20 +229,22 @@ interface Weapon {
      */
     range: string,
 
-    description: "Finesse, light",
-    /*	description // REQUIRED //
-        TYPE:	string
-        USE:	the text as it will be put in the Description field for the attack
-    
-        This string is put on the sheet literally.
-        The sheet will look in the description for attributes such as 'finesse' to
-        determine the ability score to use.
-        Thus, be sure to include all the weapon's properties here, like 'heavy', 'light', and 'two-handed'.
-    
-        One exception, you don't have to include the 'special' property, but can instead include an
-        explanation of what that special property is.
-        If you decide to do so, than don't forget to set the `special` attribute but true (see below).
-    */
+    /**
+     * the text as it will be put in the Description field for the attack
+     * 
+     * @remarks
+     * This string is put on the sheet literally.
+     * The sheet will look in the description for attributes such as 'finesse' to
+     *  determine the ability score to use.
+     *  Thus, be sure to include all the weapon's properties here, like 'heavy', 'light', and 'two-handed'.
+     *
+     *  One exception, you don't have to include the 'special' property, but can instead include an
+     *  explanation of what that special property is.
+     *  If you decide to do so, than don't forget to set the `special` attribute but true (see below).
+     * 
+     * @example "Finesse, light"
+     */
+    description: string,
 
     tooltip: "Special: I have disadvantage when I use a lance to attack a target within 5 feet. Also, a lance requires two hands to wield when I'm not mounted.",
     /*	tooltip // OPTIONAL //
@@ -583,7 +587,10 @@ interface Weapon {
         Setting this to false is the same as not including this attribute.
     */
     selectNow: true,
+}
 
+type Weapon = Omit<MpmbWeapon, 'dc'> & {
+    dc: boolean | [skill, Expression, string, string]
 }
 
 type Internal<Weapon> = Weapon & {
@@ -605,7 +612,7 @@ type Internal<Weapon> = Weapon & {
     // what to indicate for no damage
     // dc[3] fail description
     // ex: "takes damage" // todo: wordsmithing?
-    dc: [skill, Expression, string, string]
+    dc?: [skill, Expression, string, string]
 }
 
 
