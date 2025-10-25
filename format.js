@@ -236,21 +236,25 @@ function format_modifier(amount) {
 
 function format_spell_subtitle(spell) {
 
-    // todo: clean this up
-    if (!spell.classes) {
-        spell.classes = []
-    }
-
     const school = toTitleCase(Base_spellSchoolList[spell.school]);
     const classes = `(${toTitleCase(spell.classes.join(', '))
         })`;
 
+    let line1 = "";
+    let line2 = "";
     if (spell.level === 0) {
-        return `${school} Cantrip ${classes}`
+        line1 = `${school} Cantrip ${classes}`
     }
     else {
-        return `Level ${spell.level}${spell.upcastable ? '+' : ''} ${school} ${classes}`
+        line1 = `Level ${spell.level}${spell.upcastable ? '+' : ''} ${school} ${classes}`
     }
+
+    if (spell.always_prepared) {
+        line2 = `Always Prepared: ${spell.always_prepared.because}`
+    }
+
+    // join lines together, filtering out falsey lines.
+    return [line1, line2].filter(Boolean).join("\n")
 }
 
 function format_spell_time(spell) {
@@ -387,6 +391,7 @@ function toTitleCase(str) {
 
     // todo: is this function defined elsewhere already in mpmb?
     global.unabbreviate = function unabbreviate(text) {
+        text = text ?? "";
         const result = text.replace(regex, match => glossary[match] ?? match);
         return result;
     }

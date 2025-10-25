@@ -1,3 +1,6 @@
+// This is an example config file.
+// To use, rename to config.js and edit the desired values.
+
 (function (main) {
     main.config = {
 

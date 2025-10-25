@@ -185,7 +185,31 @@
         // let spells = SelectAllSpells(mpmb.lists.SpellsList)
         let spells = SelectAvailableSpells(caster.class, [0, 2])
 
-        spells = [...spells, SpellsList['find familiar'],]
+        const always_prepared = [
+            { ...SpellsList['find familiar'], always_prepared: { "because": "Wild Companion (Druid 2, P24 81)" } },
+
+            // Arid 
+            { ...SpellsList["blur"], always_prepared: { "because": "Arid Land (Druid Circle of the Land 3, P24 84)" } },
+            { ...SpellsList["burning hands"], always_prepared: { "because": "Arid Land (Druid Circle of the Land 3, P24 84)" } },
+            { ...SpellsList["fire bolt"], always_prepared: { "because": "Arid Land (Druid Circle of the Land 3, P24 84)" } },
+
+            // Polar
+            { ...SpellsList["fog cloud"], always_prepared: { "because": "Polar Land (Druid Circle of the Land 3, P24 84)" } },
+            { ...SpellsList["hold person"], always_prepared: { "because": "Polar Land (Druid Circle of the Land 3, P24 84)" } },
+
+            // Temperate 
+            { ...SpellsList["misty step"], always_prepared: { "because": "Temperate Land (Druid Circle of the Land 3, P24 84)" } },
+            { ...SpellsList["shocking grasp"], always_prepared: { "because": "Temperate Land (Druid Circle of the Land 3, P24 84)" } },
+            { ...SpellsList["sleep"], always_prepared: { "because": "Temperate Land (Druid Circle of the Land 3, P24 84)" } },
+
+            //  
+            { ...SpellsList["acid splash"], always_prepared: { "because": "Tropical Land (Druid Circle of the Land 3, P24 84)" } },
+            { ...SpellsList["ray of sickness"], always_prepared: { "because": "Tropical Land (Druid Circle of the Land 3, P24 84)" } },
+            { ...SpellsList["web"], always_prepared: { "because": "Tropical Land (Druid Circle of the Land 3, P24 84)" } },
+
+        ]
+
+        spells = [...spells, ...always_prepared]
 
         spells = spells.sort((lhs, rhs) => {
 
