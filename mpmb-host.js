@@ -116,10 +116,36 @@
             this.lists.WeaponsList[key] = weapon;
         }
 
+        async load_plugins(plugins) {
+            if (!plugins) {
+                return;
+            }
+
+            for (plugin of plugins) {
+                await this.load_plugin(plugin);
+            }
+        }
+
+        load_plugin(url) {
+
+            return new Promise((resolve, reject) => {
+
+                const script = document.createElement('script');
+                script.src = url;
+                script.async = true;
+
+                // if (resolve)
+                script.onload = () => resolve(window); // resolve with global scope
+                script.onerror = () => reject(new Error(`Failed to load script ${url}`));
+
+                document.head.appendChild(script);
+            });
+        }
+
     }
 
     const mpmb = new MpmbApp();
-    mpmb.formatDescriptionFull = formatDescriptionFull
+    mpmb.formatDescriptionFull = formatDescriptionFull;
 
     // shim the acrobat api
     const AcrobatApp = {

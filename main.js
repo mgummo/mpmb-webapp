@@ -1,7 +1,10 @@
 (function (global) {
 
     // after other plugins have been loaded
-    function init() {
+    async function init() {
+
+        await load_config();
+        await mpmb.load_plugins(main.config.plugins)
 
         const result = {};
 
@@ -10,9 +13,28 @@
 
         const dict = load_pdf()
         const caster = load_character(dict)
-        result.spells = select_spells_to_render(caster);
+        const spells = select_spells_to_render(caster);
 
-        return result;
+        return {
+            spells,
+        }
+    }
+
+    async function load_config() {
+        await mpmb.load_plugin("./etc/config.js");
+
+        const defaults = {
+            plugins: [],
+        }
+
+        if (!main.config) {
+            main.config = {}
+        }
+
+        main.config = {
+            ...main.config,
+            ...defaults
+        }
     }
 
     function ExtendWeaponsList(list) {
@@ -162,6 +184,8 @@
         // let spells = SelectSpells(mpmb.lists.SpellsList)
         // let spells = SelectAllSpells(mpmb.lists.SpellsList)
         let spells = SelectAvailableSpells(caster.class, [0, 2])
+
+        spells = [...spells, SpellsList['find familiar'],]
 
         spells = spells.sort((lhs, rhs) => {
 

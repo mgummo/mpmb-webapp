@@ -8,6 +8,8 @@ Printable spell cards
 Usage:
 clone the 2024_MPMBs-Character-Record-Sheet repo.
 clone this repo.
+copy the etc/config.example.js to config.js
+add urls to any plugin scripts you wish to load
 edit file main.js, fn select_spells_to_render to select which spells should display in the spell card sheet. 
 open the index.html file. (no need for a webserver - should be able to run locally)
 
