@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "checkJs": true,
+        "allowJs": true,
+        "maxNodeModuleJsDepth": 2,
+        "baseUrl": ".",
+        "typeRoots": [
+            "./types",
+            "./node_modules/@types"
+        ]
+    },
+    "include": [
+        "**/*.js",
+        "types/**/*.d.ts"
+    ]
+}

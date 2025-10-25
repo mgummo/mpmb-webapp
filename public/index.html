@@ -8,30 +8,31 @@
     <link rel="stylesheet" href="styles.css">
 
     <!-- https://unpkg.com/mustache@latest/mustache.min.js -->
-    <script src="./lib/mustache.min.js"></script>
+    <script src="../lib/mustache.min.js"></script>
 
-    <!-- todo: import from mpmb-host.js? -->
-    <script src="../2024_MPMBs-Character-Record-Sheet/_functions/FunctionsImport.js"></script>
-    <script src="../2024_MPMBs-Character-Record-Sheet/_functions/Functions0.js"></script>
-    <script src="../2024_MPMBs-Character-Record-Sheet/_functions/Functions1.js"></script>
-    <script src="../2024_MPMBs-Character-Record-Sheet/_functions/Functions2.js"></script>
-    <script src="../2024_MPMBs-Character-Record-Sheet/_functions/Functions3.js"></script>
-    <script src="../2024_MPMBs-Character-Record-Sheet/_functions/FunctionsSpells.js"></script>
-    <script src="../2024_MPMBs-Character-Record-Sheet/_functions/FunctionsResources.js"></script>
+    <!-- todo: put this in the lib folder? -->
+    <!-- original reason not to, was because it makes onboarding easier. -->
+    <script src="../../2024_MPMBs-Character-Record-Sheet/_functions/FunctionsImport.js"></script>
+    <script src="../../2024_MPMBs-Character-Record-Sheet/_functions/Functions0.js"></script>
+    <script src="../../2024_MPMBs-Character-Record-Sheet/_functions/Functions1.js"></script>
+    <script src="../../2024_MPMBs-Character-Record-Sheet/_functions/Functions2.js"></script>
+    <script src="../../2024_MPMBs-Character-Record-Sheet/_functions/Functions3.js"></script>
+    <script src="../../2024_MPMBs-Character-Record-Sheet/_functions/FunctionsSpells.js"></script>
+    <script src="../../2024_MPMBs-Character-Record-Sheet/_functions/FunctionsResources.js"></script>
 
-    <script src="mpmb-host.js"></script>
+    <script src="../src/mpmb-host.js"></script>
 
-    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/Lists.js"></script>
-    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsSpells.js"></script>
+    <script src="../../2024_MPMBs-Character-Record-Sheet/_variables/Lists.js"></script>
+    <script src="../../2024_MPMBs-Character-Record-Sheet/_variables/ListsSpells.js"></script>
 
     <!-- <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsBackgrounds.js"></script> -->
     <!-- <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsClasses.js"></script>-->
-    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsCompanions.js"></script>
-    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsCreatures.js"></script>
+    <script src="../../2024_MPMBs-Character-Record-Sheet/_variables/ListsCompanions.js"></script>
+    <script src="../../2024_MPMBs-Character-Record-Sheet/_variables/ListsCreatures.js"></script>
     <!--<script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsEvals.js"></script>
     <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsFeats.js"></script>
     <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsGear.js"></script>-->
-    <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsMagicItems.js"></script>
+    <script src="../../2024_MPMBs-Character-Record-Sheet/_variables/ListsMagicItems.js"></script>
     <!-- <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsPsionics.js"></script>
     <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsRaces.js"></script>
     <script src="../2024_MPMBs-Character-Record-Sheet/_variables/ListsSources.js"></script> -->
@@ -79,10 +80,18 @@
         </div>
     </template>
 
-    <script src="main.js"></script>
-    <script src="render.js"></script>
-    <script src="format.js"></script>
-    <script src="string-util.js"></script>
+    <template id="monster-card-template">
+        <div class="monster-card" data-key="{{key}}">
+            <div>
+                <span class="name">{{name}}</span><br>
+            </div>
+        </div>
+    </template>
+
+    <script src="../src/main.js"></script>
+    <script src="../src/render.js"></script>
+    <script src="../src/format.js"></script>
+    <script src="../src/string-util.js"></script>
 
     <script>
         (async () => {
@@ -90,6 +99,9 @@
             const result = await main.init();
             const spells = result.spells;
             page.render(spells);
+
+            const temp = mpmb.lists.CreatureList
+
         })()
     </script>
 

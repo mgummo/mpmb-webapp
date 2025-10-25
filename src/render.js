@@ -4,6 +4,10 @@
 
         renderHelper(spells);
 
+        const creatures = Object.values(CreatureList);
+        console.info(`I have ${creatures.length} creatures to show.`);
+        render_creatures(creatures);
+
         // todo: optimize this
         // [Violation] 'setTimeout' handler took 55ms
         window.setTimeout(() => {
@@ -56,6 +60,16 @@
         const rendered = Mustache.render(pageTemplate, { pages });
         document.getElementById("app").innerHTML = rendered;
 
+    }
+
+    // todo: get this working
+    function render_creatures(creatures) {
+        return;
+        const cardTemplate = document.getElementById("monster-card-template").innerHTML;
+        let cards = spells.map(spell => ({
+            ...spell,
+            html: Mustache.render(cardTemplate, spell)
+        }));
     }
 
     function reflow(spells) {

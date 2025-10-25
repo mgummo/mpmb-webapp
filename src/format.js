@@ -326,7 +326,7 @@ function format_spell_duration(spell) {
 
 function format_spell_description(spell) {
 
-    text = mpmb.formatDescriptionFull(spell.descriptionFull, false);
+    let text = mpmb.formatDescriptionFull(spell.descriptionFull, false);
 
     return text
 

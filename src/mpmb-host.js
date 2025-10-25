@@ -121,7 +121,7 @@
                 return;
             }
 
-            for (plugin of plugins) {
+            for (const plugin of plugins) {
                 await this.load_plugin(plugin);
             }
         }

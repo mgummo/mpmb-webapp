@@ -21,7 +21,7 @@
     }
 
     async function load_config() {
-        await mpmb.load_plugin("./etc/config.js");
+        await mpmb.load_plugin("../etc/config.js");
 
         const defaults = {
             plugins: [],
@@ -32,8 +32,8 @@
         }
 
         main.config = {
+            ...defaults,
             ...main.config,
-            ...defaults
         }
     }
 
@@ -163,6 +163,11 @@
 
     }
 
+    /**
+     * 
+     * @param {*} dict 
+     * @returns Caster
+     */
     function load_character(dict) {
 
         // todo: d.ts file for this type
@@ -178,6 +183,38 @@
         }
 
         return caster;
+    }
+
+    function select_spells_to_render2() {
+        const caster = {
+            level: 1,
+            class: "wizard",
+            spell_ability: "Int",
+            spell_mod: +2,
+            prof_mod: +2,
+            spell_attack_mod: +4,
+            spell_save_dc: 12,
+        }
+
+        let spells = SelectAvailableSpells(caster.class, [0, 9])
+
+        spells = spells.sort((lhs, rhs) => {
+
+            if (lhs.level < rhs.level) return -1;
+            if (lhs.level > rhs.level) return 1;
+
+            if (lhs.name < rhs.name) return -1;
+            if (lhs.name > rhs.name) return 1;
+
+            return 0;
+        });
+
+        for (spell of spells) {
+            spell.vm = build_spellcard_vm(spell, caster)
+        }
+
+        return spells;
+
     }
 
     function select_spells_to_render(caster) {
