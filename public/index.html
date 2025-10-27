@@ -40,16 +40,34 @@
 <body>
     <div id="app"></div>
 
-    <template id="page-template">
-        {{#pages}}
-        <div class="page">
-            <div class="grid grid-{{grid_size}}">
-                {{#spells}}
-                {{{cardHTML}}}
-                {{/spells}}
+    <template id="root-template">
+        {{#sections}}
+        <section>
+            {{#spell-cards.pages}}
+            <div class="page">
+                <div class="grid grid-{{grid_size}}">
+                    {{#cards}}
+                    {{> spell-card}}
+                    {{/cards}}
+                </div>
             </div>
+            {{/spell-cards.pages}}
+        </section>
+        <section>
+            {{#monster-cards.pages}}
+            test
+            {{#cards}}
+            {{> monster-card}}
+            {{/cards}}
+            {{/monster-cards.pages}}
+        </section>
+        {{/sections}}
+    </template>
+
+    <template id="character-sheet-template">
+        <div class="page">
+            <div>Name: {{name}}</div>
         </div>
-        {{/pages}}
     </template>
 
     <template id="spell-card-template">
@@ -97,11 +115,8 @@
         (async () => {
             mpmb.init();
             const result = await main.init();
-            const spells = result.spells;
-            page.render(spells);
-
-            const temp = mpmb.lists.CreatureList
-
+            result.monsters = Object.values(mpmb.lists.CreatureList);
+            main.render(result);
         })()
     </script>
 

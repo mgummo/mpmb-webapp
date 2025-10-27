@@ -1,82 +1,136 @@
-(function (global) {
+(function (window) {
 
-    function render(spells) {
+    /** @type {Global}
+     *  @ts-ignore */
+    const global = window;
 
-        renderHelper(spells);
+    const Mustache = global.Mustache;
 
-        const creatures = Object.values(CreatureList);
-        console.info(`I have ${creatures.length} creatures to show.`);
-        render_creatures(creatures);
-
-        // todo: optimize this
-        // [Violation] 'setTimeout' handler took 55ms
-        window.setTimeout(() => {
-            reflow(spells);
-        });
+    function load_template(name) {
+        return document.getElementById(`${name}-template`)?.innerHTML
+            .replaceAll('&gt;', '>');
     }
 
-    function renderHelper(spells, overflowing_spells) {
+    function render(data, reflow_count) {
+        const spells = data.spells;
+        const spells_that_overflow = data.spells_that_overflow ?? [];
+        const monsters = data.monsters;
 
-        const pages = [];
+        const templates = {
+            "root": load_template("root"),
+            "spell-card": load_template("spell-card"),
+            "monster-card": load_template("monster-card"),
+        };
 
-        overflowing_spells = overflowing_spells ?? []
+        const vm = {
+            sections: {
+                "character-sheet": {
+                },
+                "spell-cards": {
+                    pages: [
+                        // { cards: spells, grid_size: null, },
+                    ],
+                },
+                "monster-cards": {
+                    pages: [
+                        // { cards: monsters, grid_size: "3x3", },
+                    ],
+                },
 
-        // render the cards
-        const cardTemplate = document.getElementById("spell-card-template").innerHTML;
-        let spellsWithHTML = spells.map(spell => ({
-            ...spell,
-            cardHTML: Mustache.render(cardTemplate, spell)
-        }));
+            }
+        };
 
-        // groups cards into 9 / page
-        let cards_per_page = 9;
-        for (let i = 0; i < spellsWithHTML.length; i += cards_per_page) {
-            pages.push({
-                spells: spellsWithHTML.slice(i, i + cards_per_page),
-                grid_size: "3x3",
-            });
-        }
+        // group every 9 cards into a page
+        (function () {
+            const pages = vm.sections["spell-cards"].pages
 
-        spellsWithHTML = overflowing_spells.map(spell => ({
-            ...spell,
-            cardHTML: Mustache.render(cardTemplate, spell)
-        }));
+            const cards_per_page = 9;
+            const cards = spells;
+            for (let i = 0; i < cards.length; i += cards_per_page) {
+                const page = {
+                    cards: cards.slice(i, i + cards_per_page),
+                    grid_size: "3x3",
+                };
+
+                pages.push(page);
+            }
+        })();
+
+        // group every 9 cards into a page
+        (function () {
+            const pages = vm.sections["monster-cards"].pages
+
+            const cards_per_page = 9;
+            const cards = monsters;
+            for (let i = 0; i < cards.length; i += cards_per_page) {
+                const page = {
+                    cards: cards.slice(i, i + cards_per_page),
+                    grid_size: "3x3",
+                };
+
+                pages.push(page);
+            }
+        })();
 
         // groups overflow cards into 4 / page
         // (so that they have more room, and shouldn't be overflowing the grid now)
-        cards_per_page = 4;
-        for (let i = 0; i < spellsWithHTML.length; i += cards_per_page) {
-            pages.push({
-                spells: spellsWithHTML.slice(i, i + cards_per_page),
-                grid_size: "2x2",
-            });
-        }
+        (function () {
+
+            const pages = vm.sections["spell-cards"].pages
+
+            const cards_per_page = 4;
+            const cards = spells_that_overflow;
+            for (let i = 0; i < cards.length; i += cards_per_page) {
+                const page = {
+                    cards: cards.slice(i, i + cards_per_page),
+                    grid_size: "2x2",
+                };
+
+                pages.push(page);
+            }
+
+        })();
+
 
         // todo: experiment with [alpine](https://github.com/alpinejs/alpine)
         // looks like a vuejs-lite library, to replace mustache with 
-        //
-        // render the pages
-        const pageTemplate = document.getElementById("page-template").innerHTML;
-        const rendered = Mustache.render(pageTemplate, { pages });
-        document.getElementById("app").innerHTML = rendered;
+        const html = Mustache.render(templates.root, vm, templates);
+        document.getElementById("app").innerHTML = html;
 
+        if (!reflow_count) {
+            // todo: optimize this
+            // [Violation] 'setTimeout' handler took 55ms
+            window.setTimeout(() => {
+                reflow(data);
+            });
+        }
     }
 
-    // todo: get this working
+
+
+
+
     function render_creatures(creatures) {
+
+        console.info(`I have ${creatures.length} creatures to show.`);
+
         return;
+
         const cardTemplate = document.getElementById("monster-card-template").innerHTML;
         let cards = spells.map(spell => ({
             ...spell,
-            html: Mustache.render(cardTemplate, spell)
+            html: global.Mustache.render(cardTemplate, spell)
         }));
     }
 
-    function reflow(spells) {
+
+    function reflow(data) {
         const cards = findOverflowingCards();
         if (!cards.length) {
             return;
         }
+
+        const spells = data.spells;
 
         const keys = new Set(cards.map(_ => _.dataset.key))
         const [spells_that_fit, spells_that_overflow] = spells.reduce((acc, spell) => {
@@ -86,7 +140,10 @@
             return acc;
         }, [[], []]);
 
-        renderHelper(spells_that_fit, spells_that_overflow);
+        data.spells = spells_that_fit;
+        data.spells_that_overflow = spells_that_overflow
+
+        render(data);
 
     }
 
@@ -131,9 +188,7 @@
         }
     }
 
-    global.page = {
-        render: render
-    }
+    global.main.render = render
 
     // Name          Prof?   Ability Range TO HIT DAMAGE DAMAGE TYPE
     // Produce Flame :check: Wis     60ft  +5     1d8    Fire

@@ -2,6 +2,7 @@
 
 interface Global {
     mpmb: MpmbWrapper;
-    app: AcrobatApp
+    app: AcrobatApp;
     main: Main;
+    Mustache: any;
 }

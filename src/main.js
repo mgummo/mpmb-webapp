@@ -3,9 +3,7 @@
     /** @type {Global}
      *  @ts-ignore */
     const global = window;
-
     const mpmb = global.mpmb;
-
 
     function ExtendWeaponsList(list) {
 
@@ -392,7 +390,6 @@
                 document.head.appendChild(script);
             });
         }
-
 
         build_spellcard_vm() {
             // Initially undefined
