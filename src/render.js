@@ -16,6 +16,12 @@
         const spells_that_overflow = data.spells_that_overflow ?? [];
         const monsters = data.monsters;
 
+        if (reflow_count === undefined) {
+            // Let's see if we have anything
+            console.debug("Rendering the following spells: %o", spells)
+            console.debug("Rendering the following monsters: %o", monsters)
+        }
+
         const templates = {
             "root": load_template("root"),
             "spell-card": load_template("spell-card"),

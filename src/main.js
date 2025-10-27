@@ -261,17 +261,6 @@
             spell.vm = main.build_spellcard_vm(spell, caster)
         }
 
-        // Let's see if we have anything
-        console.info(spells)
-
-        // dump the informatkion i'm currently degguking
-        // not found for some reason?
-        // let temp = spells.find((spell) => {
-        //     return spell.key === "thunderwave"
-        // })
-        // temp = spells[11]
-        // console.info({ summary: temp.vm.summary, description: temp.vm.descriptionHtml })
-
         return spells;
     }
 

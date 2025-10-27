@@ -6,7 +6,7 @@
         padding: 0;
     }
 
-    .spell-card {
+    .card {
         box-shadow: none;
     }
 }
@@ -70,7 +70,7 @@ body {
     grid-template-rows: repeat(2, 1fr);
 }
 
-.spell-card {
+.card {
     padding: 5px;
     border: 2px solid #222;
     border-radius: 10px;

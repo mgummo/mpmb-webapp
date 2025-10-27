@@ -55,10 +55,13 @@
         </section>
         <section>
             {{#monster-cards.pages}}
-            test
-            {{#cards}}
-            {{> monster-card}}
-            {{/cards}}
+            <div class="page">
+                <div class="grid grid-{{grid_size}}">
+                    {{#cards}}
+                    {{> monster-card}}
+                    {{/cards}}
+                </div>
+            </div>
             {{/monster-cards.pages}}
         </section>
         {{/sections}}
@@ -71,7 +74,7 @@
     </template>
 
     <template id="spell-card-template">
-        <div class="spell-card" data-key="{{key}}">
+        <div class="card spell-card" data-key="{{key}}">
             <div>
                 <span class="name">{{name}}</span><br>
                 <span class="subtitle">{{vm.subtitle}}</span><br>
@@ -99,10 +102,34 @@
     </template>
 
     <template id="monster-card-template">
-        <div class="monster-card" data-key="{{key}}">
-            <div>
-                <span class="name">{{name}}</span><br>
+        <div class="card monster-card" data-key="{{key}}">
+            <div class="row">
+                <div>Name: {{name}}</div>
+                <div>AC: {{ac}}</div>
+                <div>Actions: {{actions}}</div>
+                <div>CR: {{challengeRating}}</div>
+                <div>condition_immunities: {{condition_immunities}}</div>
+                <div>damage_immunities: {{damage_immunities}}</div>
+                <div>damage_resistances: {{damage_resistances}}</div>
+                <div>hp: {{hp}}</div>
+                <div>languages: {{languages}}</div>
+                <div>Proficiency Bonus: {{proficiencyBonus}}</div>
+                <div>Scores: {{scores}}</div>
+                <div>Senses: {{senses}}</div>
+                <div>Size: {{size}}</div>
+                <div>Source: {{source}}</div>
+                <div>Speed: {{speed}}</div>
+                <div>Traits: {{source}}</div>
+                <div>Type: {{source}}</div>
             </div>
+
+            <div class="row">
+                <div>Alignment: {{alignmnet}}</div>
+                <div>attacksAction: {{attacksAction}}</div>
+                <div>hd: {{hd}}</div>
+                <div>nameAlt: {{nameAlt}}</div>
+            </div>
+
         </div>
     </template>
 
