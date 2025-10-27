@@ -2,6 +2,7 @@
 
 interface Global {
     mpmb: MpmbWrapper;
+    // todo: rename to pdf
     app: AcrobatApp;
     main: Main;
     Mustache: any;

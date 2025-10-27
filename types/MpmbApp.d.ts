@@ -13,6 +13,12 @@ interface MpmbApp_Lists {
 // functions from Functions0.js
 interface MpmbApp_Functions0 {
 
+    // sets the value of a pdf field
+    Value(key: string, FldValue: unknown, tooltip?: string, submitNm?: string);
+
+    // returns the value of a pdf field
+    What(key: string)
+
     // todo: comment
     formatDescriptionFull: (description: string, bIgnoreUnicode: boolean) => string;
 }
@@ -41,7 +47,11 @@ interface MpmbApp_FunctionsResources {
      * @returns 
      */
     stringSource: (obj: unknown, verbosity: string, prefix?: string, suffix?: string) => string;
+}
 
+interface AcrobatApp {
+    getField: (name) => { name, value };
+    getFields: () => { name, value }[];
 }
 
 interface MpmbApp extends

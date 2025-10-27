@@ -1,7 +1,7 @@
-interface Class { }
+interface CharacterClass { }
 
 interface Subclass { }
 
-interface Caster extends Class {
+interface Caster extends CharacterClass {
 
 }

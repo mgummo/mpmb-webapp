@@ -19,11 +19,12 @@
     //     }
     // }
 
-    dict = {};
+    // dictionary for the PDF fields
+    const dict = {};
 
     const tDoc = {
         getField: (name) => {
-            entry = dict[name];
+            let entry = dict[name];
             if (!entry) {
                 entry = {
                     value: null,
@@ -77,8 +78,11 @@
             /** @type {Record<string, any>} */
             this._lists = {}
 
+            this.Value = global.Value;
+            this.What = global.What;
             this.formatDescriptionFull = global.formatDescriptionFull;
             this.stringSource = global.stringSource;
+
 
         }
 
@@ -141,7 +145,11 @@
     // shim the acrobat api
     const AcrobatApp = {
         platform: "browser",
-        alert: () => { }
+        alert: () => { },
+        getField: tDoc.getField,
+        getFields: () => {
+            return Object.values(dict);
+        },
     };
 
     /** @type {Global} */

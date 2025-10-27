@@ -5,54 +5,6 @@
     const global = window;
     const mpmb = global.mpmb;
 
-    function load_pdf() {
-
-        // simulate loading a pdf
-
-        const pdf = {
-            fields: {}
-        }
-        const dict = pdf.fields;
-
-        // Guessing about fields names, since there's no documentation.
-        // not working, this pointer jank?
-        // Value('Character Level', 3);
-        // Value('Wis Mod', +3);
-        // Value('Prof Bonus', +2);
-
-        // todo: how does multiclassing work?
-        dict['Character Class'] = 'druid'
-        dict['Character Level'] = 3;
-        dict['Wis Mod'] = 3;
-        dict['Prof Bonus'] = 2;
-        dict['Spell Attack Bonus'] = dict['Prof Bonus'] + dict['Wis Mod'];
-        dict['Spell Save DC'] = 8 + dict['Prof Bonus'] + dict['Wis Mod'];
-
-        return dict;
-
-    }
-
-    /**
-     * 
-     * @param {*} dict 
-     * @returns Caster
-     */
-    function load_character(dict) {
-
-        // todo: d.ts file for this type
-
-        // build the dto for the spell caster stats
-        const caster = {
-            level: dict['Character Level'],
-            class: dict['Character Class'],
-            spell_mod: dict['Wis Mod'],
-            prof_mod: dict['Prof Bonus'],
-            spell_attack_mod: dict['Spell Attack Bonus'],
-            spell_save: dict['Spell Save DC'],
-        }
-
-        return caster;
-    }
 
     function select_spells_to_render2() {
         const caster = {
@@ -192,7 +144,9 @@
     class Main {
 
         constructor() {
-            this.config = undefined;
+
+            // this is initalized when init() is called
+            this.config = {};
         }
 
         // after other plugins have been loaded
@@ -202,13 +156,11 @@
             await this._load_plugins(this.config.plugins)
             this.normalize_spells(mpmb.lists.SpellsList);
 
-            const dict = load_pdf()
-            const caster = load_character(dict)
-            const spells = select_spells_to_render(caster);
+            const caster = this.config.load_character();
+            var data = { caster };
 
-            return {
-                spells,
-            }
+            const manifest = this.get_print_manifest(this.config, data);
+            return manifest;
         }
 
         async _load_config() {
@@ -310,7 +262,13 @@
 
         }
 
-
+        get_print_manifest(config, data) {
+            const caster = data.caster;
+            const spells = select_spells_to_render(caster);
+            return {
+                spells,
+            };
+        }
 
         build_spellcard_vm() {
             // Initially undefined

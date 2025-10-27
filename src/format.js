@@ -9,6 +9,13 @@
 
     // todo: pass a casting context
     // include things like the caster, upcasted spell slots,k bonuses, etc.
+    /**
+     * 
+     * @param {*} spell 
+     * @param {Character} caster 
+     * @param {*} casting_context 
+     * @returns 
+     */
     function build_spellcard_vm(spell, caster, casting_context) {
         const vm = {};
 
@@ -30,7 +37,17 @@
     }
 
     // formats the spell's casting summary, resolving variables from the caster
+    /**
+     * 
+     * @param {*} spell 
+     * @param {Character} caster 
+     * @returns 
+     */
     function format_spell_summary(spell, caster) {
+
+        // todo: handle multiclass case
+        let spell_save = caster.class.spell_save;
+        let spell_attack_mod = caster.class.spell_attack_mod;
 
         // example edge cases 
         // - 'Produce Flame' has two actions. The spell itself is a bonus action. But enables a magic attack action.
@@ -49,7 +66,7 @@
         const spell_slot_size = spell.level
 
         const range = format_range(spell);
-        const to_hit = format_modifier(caster.spell_attack_mod);
+        const to_hit = format_modifier(spell_attack_mod);
         const dice = `${format_damage_dice(spell, caster.level, spell_slot_size)}`;
 
         let text = ""
@@ -59,7 +76,6 @@
             // which I think was a custom extension I made?
             // If not available, then use the caster's spell save.
 
-            let spell_save = caster.spell_save;
             let unformatted_ability = (spell.action.save?.at(0) ?? spell.action.ability);
 
             let ability = format_ability(unformatted_ability);
