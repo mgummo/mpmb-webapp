@@ -1,8 +1,13 @@
 // This is an example config file.
 // To use, rename to config.js and edit the desired values.
 
-(function (main) {
-    main.config = {
+(function (window) {
+
+    /** @type {Global}
+     *  @ts-ignore */
+    const global = window;
+
+    global.main.config = {
 
         // List of any other scripts to load
         //
@@ -12,4 +17,4 @@
             "../path/to/another/script.js",
         ]
     }
-})(main)
+})(window)

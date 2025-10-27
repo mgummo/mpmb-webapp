@@ -1,1 +1,5 @@
+# ignore any configuration changes
 etc/config.js
+
+# ignore any custom scripts
+etc/*.user.js

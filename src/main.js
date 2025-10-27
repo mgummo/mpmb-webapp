@@ -5,128 +5,6 @@
     const global = window;
     const mpmb = global.mpmb;
 
-    function ExtendWeaponsList(list) {
-
-        // todo: might make more sense to issue pull requests for these
-
-        // Use 'Melee' not 'Touch'
-        mpmb.UpdateWeapon("chill touch", {
-            range: "Melee",
-        })
-
-        // Range was incorrect
-        mpmb.UpdateWeapon("produce flame", {
-            range: "60 ft",
-            description: "20-ft radius bright light and 20-ft radius dim light until thrown",
-        });
-
-        // Clarify that it's a melee attack, not ranged.
-        mpmb.UpdateWeapon("thorn whip", {
-            range: "30 ft Melee"
-        });
-
-        // fix dc skill - use 'CON' not 'CHA'
-        mpmb.UpdateWeapon("thunderclap", {
-            ability: 3,
-            dc: ["Con", "SPELLSAVE", null, "takes no damage"],
-        });
-
-        // define attacks for higher level spells
-        mpmb.AddWeapon("thunderwave", {
-            regExpSearch: /^(?=.*thunderwave).*$/i,
-            name: "Thunderwave",
-            source: ['P24', 334],
-            list: "spell",
-            useSpellcastingAbility: false,
-            ability: 2, // con
-            type: "Spell",
-            damage: [["2", 8, "thunder"], ["USL", 8, 'thunder']],
-            range: "self 15-ft cube",
-            description: "All crea/unsecured obj 2d8+1d8/SL Thunder, pushed 10 ft away; save 1/2 dmg only; audible 300ft",
-            abilitytodamage: false,
-
-            // attempt to extend the def. with what happens on save
-            dc: ["Con", "SPELLSAVE", null, "takes half damage"],
-
-            // todo: get rid of this
-            save: ["Con", "SPELLSAVE", null, "takes half damage"]
-        });
-
-        // todo: is this a con save / wis save or what?
-        // I think I need to review the convulted modifier calcs
-        // from the attacks table
-        // Word of Radiance | Yes | Wis | 5-ft. radius | DC 10 | 1d6 | Radiant
-        // Con save, success - no damage; Only chosen creatures I can see are affected
-
-        // What I'd like the card to say:
-        // Each target within a 5-foot radius from you makes a Con saving throw (DC 10)
-        // On failure, they are dealt 1d6 Radiant damage.
-        // On success, they are dealt no damage.
-
-        // const radiance = WeaponsList["word of radiance"];
-        // console.debug(radiance);
-
-        // todo: healing word
-        // "1 creature heals 2d4+2d4/SL+5 (Wis) HP"
-
-    }
-
-    function ExtendSpellsList(SpellsList) {
-
-        for (const [key, spell] of Object.entries(SpellsList)) {
-
-            // ensure required properties are defined
-            if (!spell.source) {
-                console.debug(`%o is ill-formed: missing source property`, spell)
-                spell.source = [['HB', 0]]
-            }
-
-            if (!spell.classes) {
-                console.debug(`%o is ill-formed: missing classes property`, spell)
-                spell.classes = []
-            }
-
-            // remove obsolete spells
-            if (spell.source[0][0] === "LEGACYSPELLS") {
-                delete SpellsList[key];
-            }
-
-            // extend spell object with properties that make it easier to work with:
-
-            // spells are easier to work with, if they have a key property
-            spell.key = key
-
-            // todo: there's already a allowUpCasting property?
-            spell.upcastable = spell.description.includes('/SL');
-
-            // link together the spell with the actions (from the weapon list that it enables)
-            spell.action = mpmb.lists.WeaponsList[spell.key]
-
-            if (spell.action) {
-
-                // support rolling multiple types of damage dice
-                // todo: replace the old damage value with this value instead
-                // instead of making a new property
-                {
-                    let damages = spell.action.damage;
-
-                    if (!damages) {
-                        spell.action.damages = []
-                    }
-                    // if array, need to normalize into a multi-array 
-                    else if (typeof (damages[0]) !== "object") {
-                        spell.action.damages = [damages]
-                    }
-                }
-            }
-
-            // todo: build up the saving throw stats
-            // if (spell.save && !spell.action.save)
-
-        }
-
-    }
-
     function load_pdf() {
 
         // simulate loading a pdf
@@ -322,11 +200,7 @@
 
             await this._load_config();
             await this._load_plugins(this.config.plugins)
-
-            const result = {};
-
-            ExtendWeaponsList(mpmb.lists.WeaponsList)
-            ExtendSpellsList(mpmb.lists.SpellsList)
+            this.normalize_spells(mpmb.lists.SpellsList);
 
             const dict = load_pdf()
             const caster = load_character(dict)
@@ -379,6 +253,64 @@
                 document.head.appendChild(script);
             });
         }
+
+        normalize_spells(SpellsList) {
+
+            for (const [key, spell] of Object.entries(SpellsList)) {
+
+                // ensure required properties are defined
+                if (!spell.source) {
+                    console.debug(`%o is ill-formed: missing source property`, spell)
+                    spell.source = [['HB', 0]]
+                }
+
+                if (!spell.classes) {
+                    console.debug(`%o is ill-formed: missing classes property`, spell)
+                    spell.classes = []
+                }
+
+                // remove obsolete spells
+                if (spell.source[0][0] === "LEGACYSPELLS") {
+                    delete SpellsList[key];
+                }
+
+                // extend spell object with properties that make it easier to work with:
+
+                // spells are easier to work with, if they have a key property
+                spell.key = key
+
+                // todo: there's already a allowUpCasting property?
+                spell.upcastable = spell.description.includes('/SL');
+
+                // link together the spell with the actions (from the weapon list that it enables)
+                spell.action = mpmb.lists.WeaponsList[spell.key]
+
+                if (spell.action) {
+
+                    // support rolling multiple types of damage dice
+                    // todo: replace the old damage value with this value instead
+                    // instead of making a new property
+                    {
+                        let damages = spell.action.damage;
+
+                        if (!damages) {
+                            spell.action.damages = []
+                        }
+                        // if array, need to normalize into a multi-array 
+                        else if (typeof (damages[0]) !== "object") {
+                            spell.action.damages = [damages]
+                        }
+                    }
+                }
+
+                // todo: build up the saving throw stats
+                // if (spell.save && !spell.action.save)
+
+            }
+
+        }
+
+
 
         build_spellcard_vm() {
             // Initially undefined
