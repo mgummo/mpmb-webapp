@@ -6,6 +6,12 @@
     const mpmb = global.mpmb;
     const main = global.main;
 
+    /**
+     * Builds a character, by using the field values from the pdf
+     * 
+     * @param {MpmbApp} mpmb 
+     * @returns {Character}
+     */
     function build_character_from_pdf(mpmb) {
 
         const pdf = global.app;
@@ -15,15 +21,14 @@
 
         character.level = pdf.getField("Character Level").value
 
-        // todo: parse this i guess into the class and subclass
-        global.app.getField("Class and Levels").value
-        const character_class = 'druid';
-        const subclass = "circle of the land"
+        let value = pdf.getField("Class and Levels").value
+        const [mainclass, subclass] = mpmb.ParseClass(value) ?? [null, null]
 
         character.class = {
             // todo: dont know where this is coming from - assume the character level
             level: character.level,
-            class: character_class,
+
+            class: mainclass,
             subclass: subclass,
         }
 
@@ -71,7 +76,7 @@
                 case "Class and Levels":
                     break;
                 default:
-                    console.debug("Unrecognized field: ${field.name}")
+                    console.debug(`Unrecognized field: ${field.name}`)
                     break;
             }
 

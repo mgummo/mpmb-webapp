@@ -11,24 +11,18 @@
         }
     };
 
-    // function RequiredSheetVersion(version) {
-    //     // todo: make robust
-    //     // verify version against the only version i've tested against
-    //     if (version !== "13.2.3") {
-    //         throw `unsupportred version ${version}`
-    //     }
-    // }
-
     // dictionary for the PDF fields
     const dict = {};
 
     const tDoc = {
-        getField: (name) => {
+        getField: (/** @type {string } */ name) => {
             let entry = dict[name];
             if (!entry) {
                 entry = {
                     value: null,
                     name: name,
+
+                    isBoxChecked: () => false,
                 }
                 dict[name] = entry;
             }
@@ -82,7 +76,10 @@
             this.What = global.What;
             this.formatDescriptionFull = global.formatDescriptionFull;
             this.stringSource = global.stringSource;
-
+            this.ParseClass = global.ParseClass;
+            this.UpdateLevelFeatures = global.UpdateLevelFeatures;
+            this.CalcAC = global.CalcAC;
+            this.CalcAllSkills = global.CalcAllSkills;
 
         }
 
@@ -152,6 +149,19 @@
         },
     };
 
+    // defined in the acrobat api, assumed to exist by mbam
+    Object.defineProperty(Object.prototype, 'toSource', {
+        value: function () {
+            try {
+                return "(" + JSON.stringify(this, null, 2) + ")";
+            } catch (e) {
+                return "[object with circular refs]";
+            }
+        },
+        enumerable: false,
+    });
+
+
     /** @type {Global} */
     const global2 = global;
 
@@ -160,4 +170,10 @@
 
 })(window)
 
-
+// function RequiredSheetVersion(version) {
+//     // todo: make robust
+//     // verify version against the only version i've tested against
+//     if (version !== "13.2.3") {
+//         throw `unsupportred version ${version}`
+//     }
+// }

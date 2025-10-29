@@ -157,6 +157,12 @@
             this.normalize_spells(mpmb.lists.SpellsList);
 
             const caster = this.config.load_character();
+
+            // todo: this isn't working how I expect it
+            // mods are being initialized to null instead of calculated
+            mpmb.CalcAllSkills(false);
+            console.log("fields: %o", global.app.getFields())
+
             var data = { caster };
 
             const manifest = this.get_print_manifest(this.config, data);
