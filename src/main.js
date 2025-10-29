@@ -176,10 +176,10 @@
 
             const caster = data.caster;
 
-            const spell_filter = config.layout["spell-cards"].filter;
+            const spell_filter = build_filter(config.layout["spell-cards"].filter);
             const spells = Object.values(all_spells).filter((spell) => spell_filter(spell, caster));
 
-            const monster_filter = config.layout["monster-cards"].filter;
+            const monster_filter = build_filter(config.layout["monster-cards"].filter);
             const monsters = Object.values(all_monsters).filter((monster) => monster_filter(monster))
 
             return {
@@ -188,12 +188,35 @@
             };
         }
 
-
         build_spellcard_vm(spell, caster, casting_context) {
             // Initially undefined - defined in format.js
             throw new Error("build_spellcard_vm not yet initialized");
         }
     }
+
+    // todo: i haven't tested this yet
+    function build_filter(filter_factory, context) {
+
+        if (typeof filter_factory !== "function") {
+            throw "invalid filter definition"
+        }
+
+        // Check how many parameters the function declares
+        if (filter_factory.length != 1) {
+            // It's the 2-arg form: (item, context)
+            return filter_factory
+        }
+
+        // Otherwise, its in factory form
+        const filter = filter_factory(context);
+        if (typeof filter === "function") {
+            return filter;
+        }
+
+        // Execpt it didn't return a function. So it prob took in a single item param
+        return filter_factory;
+    }
+
 
     global.main = new Main()
 

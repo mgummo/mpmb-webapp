@@ -16,6 +16,70 @@
             "../path/to/another/script.js",
         ],
 
+        layout: {
+            "spell-cards": {
+
+                /**
+                 * example 1 - hard code list
+                 * @param {Internal<Spell>} spell 
+                 */
+                filter1: (spell) => {
+
+
+                    const selection = ["acid splash", "ray of sickness", "web"]
+                    return selection.includes(spell.key);
+                },
+
+                /**
+                 * example 2 - prepared spells list
+                 * @param {Internal<Spell>} spell 
+                 * @param {Caster} caster 
+                 */
+                filter2: (spell, caster) => {
+                    return caster.spells.prepared.includes(spell.key);
+                },
+
+                /**
+                 * example 3 - known spells list
+                 * @remarks 
+                 * this demonstrates returning a factory function
+                 * this can be more efficient - allows precomputing values before filtering starts.
+                 * @param {Caster} caster  
+                 * @returns (spell, caster) => boolean
+                 */
+                filter3: (caster) => {
+                    const set = new Set(caster.spells.known.map(spell => spell.key));
+                    return function (spell, caster) {
+                        set.has(spell.key);
+                    }
+                },
+
+                // all available spells for current level
+                filter4: (spell, caster) => {
+                    const match_class = spell.classes.includes(caster.class);
+                    const match_min = spell.level >= 0;
+                    const match_max = spell.level <= caster.level;
+                    return match_class && match_min && match_max;
+                },
+
+                filter5: (spell, caster) => {
+                    const match_class = spell.classes.includes(caster.class);
+                    return match_class;
+                },
+
+                // all spells
+                filter6: () => true,
+            },
+            "monster-cards": {
+                filter1: (/** @type {Creature} */ monster) => {
+                    return Number(monster.challengeRating) < 1
+                },
+                filter2: () => true,
+            }
+        }
+
+
+
         // a function that describes how the character should be loaded
         load_character: function () {
 

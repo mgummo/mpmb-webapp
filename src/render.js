@@ -149,7 +149,7 @@
         data.spells = spells_that_fit;
         data.spells_that_overflow = spells_that_overflow
 
-        render(data);
+        render(data, 1);
 
     }
 

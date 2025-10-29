@@ -768,7 +768,7 @@ interface Spell {
 }
 
 
-type Internal<Spell> = Spell & {
+interface Internal<Spell> extends Spell {
 
 	/**
 	 * The key used to register this weapon in the WeaponsList dictionary.
