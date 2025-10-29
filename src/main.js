@@ -5,20 +5,7 @@
     const global = window;
     const mpmb = global.mpmb;
 
-
-    function select_spells_to_render2() {
-        const caster = {
-            level: 1,
-            class: "wizard",
-            spell_ability: "Int",
-            spell_mod: +2,
-            prof_mod: +2,
-            spell_attack_mod: +4,
-            spell_save_dc: 12,
-        }
-
-        let spells = SelectAvailableSpells(caster.class, [0, 9])
-
+    function sort_spells(spells) {
         spells = spells.sort((lhs, rhs) => {
 
             if (lhs.level < rhs.level) return -1;
@@ -28,114 +15,6 @@
             if (lhs.name > rhs.name) return 1;
 
             return 0;
-        });
-
-        const main = global.main
-        for (const spell of spells) {
-            spell.vm = main.build_spellcard_vm(spell, caster)
-        }
-
-        return spells;
-
-    }
-
-    function select_spells_to_render(caster) {
-
-        const SpellsList = mpmb.lists.SpellsList;
-
-        // let spells = SelectSpells(mpmb.lists.SpellsList)
-        // let spells = SelectAllSpells(mpmb.lists.SpellsList)
-        let spells = SelectAvailableSpells(caster.class, [0, 2])
-
-        const always_prepared = [
-            { ...SpellsList['find familiar'], always_prepared: { "because": "Wild Companion (Druid 2, P24 81)" } },
-
-            // Arid 
-            { ...SpellsList["blur"], always_prepared: { "because": "Arid Land (Druid Circle of the Land 3, P24 84)" } },
-            { ...SpellsList["burning hands"], always_prepared: { "because": "Arid Land (Druid Circle of the Land 3, P24 84)" } },
-            { ...SpellsList["fire bolt"], always_prepared: { "because": "Arid Land (Druid Circle of the Land 3, P24 84)" } },
-
-            // Polar
-            { ...SpellsList["fog cloud"], always_prepared: { "because": "Polar Land (Druid Circle of the Land 3, P24 84)" } },
-            { ...SpellsList["hold person"], always_prepared: { "because": "Polar Land (Druid Circle of the Land 3, P24 84)" } },
-
-            // Temperate 
-            { ...SpellsList["misty step"], always_prepared: { "because": "Temperate Land (Druid Circle of the Land 3, P24 84)" } },
-            { ...SpellsList["shocking grasp"], always_prepared: { "because": "Temperate Land (Druid Circle of the Land 3, P24 84)" } },
-            { ...SpellsList["sleep"], always_prepared: { "because": "Temperate Land (Druid Circle of the Land 3, P24 84)" } },
-
-            //  
-            { ...SpellsList["acid splash"], always_prepared: { "because": "Tropical Land (Druid Circle of the Land 3, P24 84)" } },
-            { ...SpellsList["ray of sickness"], always_prepared: { "because": "Tropical Land (Druid Circle of the Land 3, P24 84)" } },
-            { ...SpellsList["web"], always_prepared: { "because": "Tropical Land (Druid Circle of the Land 3, P24 84)" } },
-
-        ]
-
-        spells = [...spells, ...always_prepared]
-
-        spells = spells.sort((lhs, rhs) => {
-
-            if (lhs.level < rhs.level) return -1;
-            if (lhs.level > rhs.level) return 1;
-
-            if (lhs.name < rhs.name) return -1;
-            if (lhs.name > rhs.name) return 1;
-
-            return 0;
-        });
-
-        const main = global.main
-
-        // build up view model that binds to the card
-        for (const spell of spells) {
-            spell.vm = main.build_spellcard_vm(spell, caster)
-        }
-
-        return spells;
-    }
-
-    function SelectSpells(SpellsList) {
-
-        let spells = [
-            SpellsList['druidcraft'],
-            SpellsList['elementalism'],
-            SpellsList['produce flame'],
-            SpellsList['shocking grasp'],
-            SpellsList['detect magic'],
-            SpellsList['find familiar'],
-            SpellsList['healing word'],
-            SpellsList['purify food and drink'],
-            SpellsList['sleep'],
-            SpellsList['speak with animals'],
-            SpellsList['thunderwave'],
-            SpellsList['augury'],
-            SpellsList['locate animals or plants'],
-            SpellsList['misty step'],
-        ]
-
-        // temp, so that I have a DC Save based attack to look at
-        spells = [
-            SpellsList['word of radiance'], ...spells
-        ]
-
-        return spells;
-    }
-
-    function SelectAllSpells(list) {
-        let spells = Object.values(list);
-        return spells;
-    }
-
-    function SelectAvailableSpells(caster_class, spell_level_range) {
-
-        const SpellsList = mpmb.lists.SpellsList;
-
-        let spells = Object.values(SpellsList);
-        spells = spells.filter(_ => {
-            const match_class = _.classes.includes(caster_class);
-            const match_min = _.level >= spell_level_range[0];
-            const match_max = _.level <= spell_level_range[1];
-            return match_class && match_min && match_max;
         });
 
         return spells;
@@ -156,16 +35,27 @@
             await this._load_plugins(this.config.plugins)
             this.normalize_spells(mpmb.lists.SpellsList);
 
-            const caster = this.config.load_character();
+            let character = this.config.load_character();
+            character = this.normalize_character(character);
 
             // todo: this isn't working how I expect it
             // mods are being initialized to null instead of calculated
             mpmb.CalcAllSkills(false);
             console.log("fields: %o", global.app.getFields())
 
-            var data = { caster };
+            var data = {
+                caster: character,
+                spells: mpmb.lists.SpellsList,
+                monsters: mpmb.lists.CreatureList,
+            };
 
             const manifest = this.get_print_manifest(this.config, data);
+
+            // build up view model that binds to the card
+            for (const spell of manifest.spells) {
+                spell.vm = this.build_spellcard_vm(spell, data.caster)
+            }
+
             return manifest;
         }
 
@@ -216,6 +106,7 @@
 
             for (const [key, spell] of Object.entries(SpellsList)) {
 
+                // todo: build this up as an array, to cut down on log noise
                 // ensure required properties are defined
                 if (!spell.source) {
                     console.debug(`%o is ill-formed: missing source property`, spell)
@@ -268,16 +159,38 @@
 
         }
 
+        normalize_character(character) {
+
+            // todo: this isn't working how I expect it
+            // mods are being initialized to null instead of calculated
+            mpmb.CalcAllSkills(false);
+            console.log("fields: %o", global.app.getFields())
+
+            return character;
+        }
+
         get_print_manifest(config, data) {
+
+            const all_spells = data.spells;
+            const all_monsters = data.monsters;
+
             const caster = data.caster;
-            const spells = select_spells_to_render(caster);
+
+            const spell_filter = config.layout["spell-cards"].filter;
+            const spells = Object.values(all_spells).filter((spell) => spell_filter(spell, caster));
+
+            const monster_filter = config.layout["monster-cards"].filter;
+            const monsters = Object.values(all_monsters).filter((monster) => monster_filter(monster))
+
             return {
                 spells,
+                monsters,
             };
         }
 
-        build_spellcard_vm() {
-            // Initially undefined
+
+        build_spellcard_vm(spell, caster, casting_context) {
+            // Initially undefined - defined in format.js
             throw new Error("build_spellcard_vm not yet initialized");
         }
     }
