@@ -97,8 +97,7 @@
             }
 
             if (context.warnings.length) {
-                console.debug("The following spells had validation warnings:")
-                console.debug(context.warnings);
+                console.debug("The following spells had validation warnings: %o", context.warnings)
             }
 
         }

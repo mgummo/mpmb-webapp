@@ -14,6 +14,13 @@
 
             // initialized by loader.js
             this.loader = undefined;
+
+            // initialized by formatters/base.js
+            this.formatters = undefined;
+
+            // populated by various modules that need to register their types
+            // (to make available for inheritance, etc.)
+            this.types = {}
         }
 
         // after other plugins have been loaded
@@ -26,12 +33,12 @@
 
             // build up view model that binds to the card
             for (const spell of manifest.spells) {
-                spell.vm = this.build_spellcard_vm(spell, data.caster)
+                spell.vm = this.formatters.spell_card.build_spellcard_vm(spell, data.caster)
             }
 
             // build up view model that binds to the card
             for (const monster of manifest.monsters) {
-                monster.vm = this.build_monstercard_vm(monster)
+                monster.vm = this.formatters.monster_card.build_monstercard_vm(monster)
             }
 
             return manifest;
@@ -57,16 +64,6 @@
                 spells: spells_sorted,
                 monsters,
             };
-        }
-
-        build_spellcard_vm(spell, caster, casting_context) {
-            // Initially undefined - defined in format.js
-            throw new Error("build_spellcard_vm not yet initialized");
-        }
-
-        build_monstercard_vm(spell, caster, casting_context) {
-            // Initially undefined - defined in format.js
-            throw new Error("build_spellcard_vm not yet initialized");
         }
 
     }

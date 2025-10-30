@@ -163,7 +163,7 @@
             }
         });
 
-        console.log(`Found ${overflowing.length} overflowing cards.`);
+        console.debug(`Found ${overflowing.length} overflowing cards: %o`, overflowing);
         return overflowing;
     }
 
