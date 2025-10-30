@@ -26,28 +26,16 @@
 
             // this is initalized when init() is called
             this.config = {};
+
+            // initialized by loader.js
+            this.loader = undefined;
         }
 
         // after other plugins have been loaded
         async init() {
 
-            await this._load_config();
-            await this._load_plugins(this.config.plugins)
-            this.normalize_spells(mpmb.lists.SpellsList);
-
-            let character = this.config.load_character();
-            character = this.normalize_character(character);
-
-            // todo: this isn't working how I expect it
-            // mods are being initialized to null instead of calculated
-            mpmb.CalcAllSkills(false);
-            console.log("fields: %o", global.app.getFields())
-
-            var data = {
-                caster: character,
-                spells: mpmb.lists.SpellsList,
-                monsters: mpmb.lists.CreatureList,
-            };
+            await this.loader.load_config();
+            var data = await this.loader.run();
 
             const manifest = this.get_print_manifest(this.config, data);
 
@@ -56,117 +44,12 @@
                 spell.vm = this.build_spellcard_vm(spell, data.caster)
             }
 
+            // build up view model that binds to the card
+            for (const monster of manifest.monsters) {
+                monster.vm = this.build_monstercard_vm(monster)
+            }
+
             return manifest;
-        }
-
-        async _load_config() {
-            await this.load_plugin("../etc/config.js");
-
-            const defaults = {
-                plugins: [],
-            }
-
-            if (!this.config) {
-                this.config = {}
-            }
-
-            this.config = {
-                ...defaults,
-                ...this.config,
-            }
-        }
-
-        async _load_plugins(plugins) {
-            if (!plugins) {
-                return;
-            }
-
-            for (const plugin of plugins) {
-                await this.load_plugin(plugin);
-            }
-        }
-
-        load_plugin(url) {
-
-            return new Promise((resolve, reject) => {
-
-                const script = document.createElement('script');
-                script.src = url;
-                script.async = true;
-
-                // if (resolve)
-                script.onload = () => resolve(window); // resolve with global scope
-                script.onerror = () => reject(new Error(`Failed to load script ${url}`));
-
-                document.head.appendChild(script);
-            });
-        }
-
-        normalize_spells(SpellsList) {
-
-            for (const [key, spell] of Object.entries(SpellsList)) {
-
-                // todo: build this up as an array, to cut down on log noise
-                // ensure required properties are defined
-                if (!spell.source) {
-                    console.debug(`%o is ill-formed: missing source property`, spell)
-                    spell.source = [['HB', 0]]
-                }
-
-                if (!spell.classes) {
-                    console.debug(`%o is ill-formed: missing classes property`, spell)
-                    spell.classes = []
-                }
-
-                // remove obsolete spells
-                if (spell.source[0][0] === "LEGACYSPELLS") {
-                    delete SpellsList[key];
-                }
-
-                // extend spell object with properties that make it easier to work with:
-
-                // spells are easier to work with, if they have a key property
-                spell.key = key
-
-                // todo: there's already a allowUpCasting property?
-                spell.upcastable = spell.description.includes('/SL');
-
-                // link together the spell with the actions (from the weapon list that it enables)
-                spell.action = mpmb.lists.WeaponsList[spell.key]
-
-                if (spell.action) {
-
-                    // support rolling multiple types of damage dice
-                    // todo: replace the old damage value with this value instead
-                    // instead of making a new property
-                    {
-                        let damages = spell.action.damage;
-
-                        if (!damages) {
-                            spell.action.damages = []
-                        }
-                        // if array, need to normalize into a multi-array 
-                        else if (typeof (damages[0]) !== "object") {
-                            spell.action.damages = [damages]
-                        }
-                    }
-                }
-
-                // todo: build up the saving throw stats
-                // if (spell.save && !spell.action.save)
-
-            }
-
-        }
-
-        normalize_character(character) {
-
-            // todo: this isn't working how I expect it
-            // mods are being initialized to null instead of calculated
-            mpmb.CalcAllSkills(false);
-            console.log("fields: %o", global.app.getFields())
-
-            return character;
         }
 
         get_print_manifest(config, data) {
@@ -192,6 +75,12 @@
             // Initially undefined - defined in format.js
             throw new Error("build_spellcard_vm not yet initialized");
         }
+
+        build_monstercard_vm(spell, caster, casting_context) {
+            // Initially undefined - defined in format.js
+            throw new Error("build_spellcard_vm not yet initialized");
+        }
+
     }
 
     // todo: i haven't tested this yet

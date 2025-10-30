@@ -12,6 +12,7 @@
 
     <!-- todo: put this in the lib folder? -->
     <!-- original reason not to, was because it makes onboarding easier. -->
+    <!-- (using npm to manage packages, vs just clone this one dependency yourself) -->
     <script src="../../2024_MPMBs-Character-Record-Sheet/_functions/FunctionsImport.js"></script>
     <script src="../../2024_MPMBs-Character-Record-Sheet/_functions/Functions0.js"></script>
     <script src="../../2024_MPMBs-Character-Record-Sheet/_functions/Functions1.js"></script>
@@ -104,47 +105,72 @@
     <template id="monster-card-template">
         <div class="card monster-card" data-key="{{key}}">
             <div class="row">
-                <div>Name: {{name}}</div>
-                <div>AC: {{ac}}</div>
-                <div>Actions: {{actions}}</div>
-                <div>CR: {{challengeRating}}</div>
-                <div>condition_immunities: {{condition_immunities}}</div>
-                <div>damage_immunities: {{damage_immunities}}</div>
-                <div>damage_resistances: {{damage_resistances}}</div>
-                <div>hp: {{hp}}</div>
-                <div>languages: {{languages}}</div>
-                <div>Proficiency Bonus: {{proficiencyBonus}}</div>
+                <div class="name">{{name}}</div>
+                <div>{{vm.size}} {{type}}, {{alignmnet}}</div>
+                <hr />
+                <div>Armor Class {{ac}}</div>
+                <div>Hit Points {{hp}} ({{hd}})</div>
+                <div>Speed {{speed}}</div>
+                <hr />
                 <div>Scores: {{scores}}</div>
-                <div>Senses: {{senses}}</div>
-                <div>Size: {{size}}</div>
-                <div>Source: {{source}}</div>
-                <div>Speed: {{speed}}</div>
-                <div>Traits: {{source}}</div>
-                <div>Type: {{source}}</div>
+                <div>Skills ?</div>
+                <div>Senses {{senses}}</div>
+                <div>Languages {{languages}}</div>
+                <div>Challenge {{challengeRating}} (? XP)</div>
+                <hr />
             </div>
 
             <div class="row">
-                <div>Alignment: {{alignmnet}}</div>
+                <div>Actions: {{actions}}</div>
+                <div>condition_immunities: {{condition_immunities}}</div>
+                <div>damage_immunities: {{damage_immunities}}</div>
+                <div>damage_resistances: {{damage_resistances}}</div>
+                <div>Traits: {{json traits}}</div>
+            </div>
+
+            <div class="row">
+                <div>Proficiency Bonus: {{proficiencyBonus}}</div>
                 <div>attacksAction: {{attacksAction}}</div>
-                <div>hd: {{hd}}</div>
                 <div>nameAlt: {{nameAlt}}</div>
+            </div>
+
+            <div class="spacer" />
+
+            <div class="row">
+                {{source}}
             </div>
 
         </div>
     </template>
 
-    <script src="../src/main.js"></script>
-    <script src="../src/render.js"></script>
-    <script src="../src/format.js"></script>
-    <script src="../src/string-util.js"></script>
-    <script src="../src/character-loader.js"></script>
+    <!-- load mbam-webapp scripts here -->
+    <!--
+    Can't use ES Modules / systemjs because we're trying to keep running this simple.
+    Meaning we're avoiding:
+    - having to run a build step (nodejs)
+    - having to run a local file server
+    - the CORS issues that pop up when loading other files from the filesystem
+      (can't use <script type=module src="../src/lib.js" )
 
+    Which means we're stuck loading modules via wrapped in IIFE
+    that register themselves to a well-known singleton (window.main)
+    -->
+
+    <!-- general utility functions -->
+    <script src="../src/util/util.js"></script>
+    <script src="../src/util/string-util.js"></script>
+
+    <!-- program logic -->
+    <script src="../src/main.js"></script>
+    <script src="../src/loader.js"></script>
+    <script src="../src/character-loader.js"></script>
+    <script src="../src/format.js"></script>
+    <script src="../src/render.js"></script>
 
     <script>
         (async () => {
             mpmb.init();
             const result = await main.init();
-            result.monsters = Object.values(mpmb.lists.CreatureList);
             main.render(result);
         })()
     </script>

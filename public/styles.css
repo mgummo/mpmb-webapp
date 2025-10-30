@@ -92,11 +92,12 @@ body {
     margin-top: 0;
 }
 
-.spell-card .label {
+.card .label {
     font-weight: bold;
 }
 
-.spell-card .name {
+.spell-card .name,
+.monster-card .name {
     margin-top: 0;
     font-size: larger;
     /* font-size: 1.4em; */
@@ -128,4 +129,8 @@ body {
 
 .spell-card .source {
     align-self: flex-end;
+}
+
+.row {
+    width: 100%;
 }

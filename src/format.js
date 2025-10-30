@@ -36,6 +36,13 @@
         return vm;
     }
 
+    function build_monstercard_vm(monster) {
+        const vm = {}
+        vm.size = format_creature_size(monster)
+
+        return vm;
+    }
+
     // formats the spell's casting summary, resolving variables from the caster
     /**
      * 
@@ -440,9 +447,26 @@
     }
 
     global.main.build_spellcard_vm = build_spellcard_vm;
+    global.main.build_monstercard_vm = build_monstercard_vm;
 
 })(window)
 
 
 
+
+function format_creature_size(monster) {
+
+    const sizes = monster.size.map(value => {
+        switch (monster.size) {
+            case 0: return "Gargantuan";
+            case 1: return "Huge"
+            case 2: return "Large"
+            case 3: return "Medium"
+            case 4: return "Small"
+            case 5: return "Tiny"
+                defualt: return "?"
+        }
+    });
+    return sizes.join(" / ")
+}
 

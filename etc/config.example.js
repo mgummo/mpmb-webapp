@@ -76,9 +76,7 @@
                 },
                 filter2: () => true,
             }
-        }
-
-
+        },
 
         // a function that describes how the character should be loaded
         load_character: function () {
