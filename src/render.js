@@ -116,18 +116,18 @@
 
 
 
-    function render_creatures(creatures) {
+    // function render_creatures(creatures) {
 
-        console.info(`I have ${creatures.length} creatures to show.`);
+    //     console.info(`I have ${creatures.length} creatures to show.`);
 
-        return;
+    //     return;
 
-        const cardTemplate = document.getElementById("monster-card-template").innerHTML;
-        let cards = spells.map(spell => ({
-            ...spell,
-            html: global.Mustache.render(cardTemplate, spell)
-        }));
-    }
+    //     const cardTemplate = document.getElementById("monster-card-template").innerHTML;
+    //     let cards = spells.map(spell => ({
+    //         ...spell,
+    //         html: global.Mustache.render(cardTemplate, spell)
+    //     }));
+    // }
 
 
     function reflow(data) {
@@ -141,7 +141,7 @@
         const keys = new Set(cards.map(_ => _.dataset.key))
         const [spells_that_fit, spells_that_overflow] = spells.reduce((acc, spell) => {
             // maps bool to 0 or 1 (the group index)
-            const group_index = +keys.has(spell.key);
+            const group_index = Number(keys.has(spell.key));
             acc[group_index].push(spell);
             return acc;
         }, [[], []]);

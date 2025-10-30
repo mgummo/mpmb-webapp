@@ -22,7 +22,7 @@
         // vm.title = ... ommitted - no need to format the spell title
         vm.subtitle = format_spell_subtitle(spell)
 
-        vm.summary = format_spell_summary(spell, caster);
+        vm.summary = format_spell_summary(spell, caster.class);
 
         vm.time = format_spell_time(spell);
         vm.range = format_spell_range(spell);
@@ -47,14 +47,14 @@
     /**
      * 
      * @param {*} spell 
-     * @param {Character} caster 
+     * @param {SpellCaster} caster 
      * @returns 
      */
     function format_spell_summary(spell, caster) {
 
         // todo: handle multiclass case
-        let spell_save = caster.class.spell_save;
-        let spell_attack_mod = caster.class.spell_attack_mod;
+        let spell_save = caster.spell_save;
+        let spell_attack_mod = caster.spell_attack_mod;
 
         // example edge cases 
         // - 'Produce Flame' has two actions. The spell itself is a bonus action. But enables a magic attack action.
@@ -451,20 +451,17 @@
 
 })(window)
 
-
-
-
 function format_creature_size(monster) {
 
     const sizes = monster.size.map(value => {
-        switch (monster.size) {
+        switch (value) {
             case 0: return "Gargantuan";
             case 1: return "Huge"
             case 2: return "Large"
             case 3: return "Medium"
             case 4: return "Small"
             case 5: return "Tiny"
-                defualt: return "?"
+            default: return "?"
         }
     });
     return sizes.join(" / ")

@@ -33,10 +33,10 @@
                 /**
                  * example 2 - prepared spells list
                  * @param {Internal<Spell>} spell 
-                 * @param {Caster} caster 
+                 * @param {SpellCaster} caster 
                  */
                 filter2: (spell, caster) => {
-                    return caster.spells.prepared.includes(spell.key);
+                    return caster.spells.prepared.some(_ => _.key == spell.key);
                 },
 
                 /**
@@ -44,7 +44,7 @@
                  * @remarks 
                  * this demonstrates returning a factory function
                  * this can be more efficient - allows precomputing values before filtering starts.
-                 * @param {Caster} caster  
+                 * @param {SpellCaster} caster  
                  * @returns (spell, caster) => boolean
                  */
                 filter3: (caster) => {

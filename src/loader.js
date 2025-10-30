@@ -85,25 +85,44 @@
         }
 
         normalize_spells(SpellsList) {
+            const context = {
+                warnings: []
+            }
             for (const [key, spell] of Object.entries(SpellsList)) {
-                const result = this.normalize_spell(spell, key);
+                context.key = key
+                const result = this.normalize_spell(spell, context);
                 if (!result) {
                     delete SpellsList[key];
                 }
             }
+
+            if (context.warnings.length) {
+                console.debug("The following spells had validation warnings:")
+                console.debug(context.warnings);
+            }
+
         }
 
-        normalize_spell(spell, key) {
+        normalize_spell(spell, context) {
+
+            const key = context.key;
+
             // todo: build this up as an array, to cut down on log noise
             // ensure required properties are defined
             if (!spell.source) {
-                console.debug(`%o is ill-formed: missing source property`, spell)
                 spell.source = [['HB', 0]]
+
+                const message = "%o is ill-formed: missing source property";
+                context.warnings.push([message, spell])
+                // console.debug(message, spell)
             }
 
             if (!spell.classes) {
-                console.debug(`%o is ill-formed: missing classes property`, spell)
                 spell.classes = []
+
+                const message = "%o is ill-formed: missing classes property"
+                context.warnings.push([message, spell])
+                // console.debug(message, spell)
             }
 
             // remove obsolete spells
