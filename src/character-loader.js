@@ -35,6 +35,7 @@
         character.ability = {}
 
 
+        const unrecongnized = [];
         const fields = pdf.getFields();
         for (const field of fields) {
             switch (field.name) {
@@ -76,10 +77,13 @@
                 case "Class and Levels":
                     break;
                 default:
-                    console.debug(`Unrecognized field: ${field.name}`)
+                    unrecongnized.push([field.name, field.value])
                     break;
             }
 
+        }
+        if (unrecongnized.length) {
+            console.debug("The following pdf fields were not recognized: %o", unrecongnized)
         }
 
         // todo: fix this.

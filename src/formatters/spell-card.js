@@ -34,7 +34,7 @@
 
             vm.descriptionHtml = this.format_spell_description(spell);
 
-            vm.source = this.format_spell_source(spell);
+            vm.source = this.format_source_book(spell);
 
             return vm;
         }

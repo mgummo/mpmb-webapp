@@ -1,4 +1,21 @@
 type TCreatureSizeKey = 0 | 1 | 2 | 3 | 4 | 5
+type TCreatureType = string
+
+/**
+ * the six ability scores
+ * 
+ * @remarks
+ * [Str, Dex, Con, Int, Wis, Cha]
+ * These six correspond to the ability scores in their usual order:
+ *      INDEX	ABILITY SCORE
+ *      (0)	 	Strength
+ *      (1)  	Dexterity
+ *      (2)  	Constitution
+ *      (3)  	Intelligence
+ *      (4)  	Wisdom
+ *      (5)  	Charisma
+ */
+type score_array = number[6];
 
 /**
  * The syntax for adding a new crature to the sheet, for use by the companion and wild shape pages.
@@ -14,7 +31,6 @@ type TCreatureSizeKey = 0 | 1 | 2 | 3 | 4 | 5
  */
 interface Creature {
 
-
     /**
      * name of the creature as it will be used by the sheet
      * 
@@ -25,22 +41,22 @@ interface Creature {
      */
     name: string;
 
-    nameAlt: ["Purple Creeper"],
     /*	nameAlt // OPTIONAL //
-        TYPE:	array of strings (variable size)
-        USE:	alternative names for the creature
-        ADDED:	v13.0.6
-        CHANGE: v13.1.3 (also appears in drop-down boxes)
-    
-        These names will be used to recognize what is entered into the race drop-down on
-        the companion and wild shape pages, and will be displayed in those drop-down boxes.
-        This last part was changed in v13.1.3, that the names in this attribute will now all
-        appear in the drop-down boxes along with the `name` attribute of the creature.
-    
-        If this creature is an option for Wild Shape, Find Familiar, Warlock Pact of the Chain,
-        Find Steed, Find Greater Steed, a ranger's companion or something similar,
-        then these alternative names will also be shown in the menu options.
-    */
+     TYPE:	array of strings (variable size)
+     USE:	alternative names for the creature
+     ADDED:	v13.0.6
+     CHANGE: v13.1.3 (also appears in drop-down boxes)
+ 
+     These names will be used to recognize what is entered into the race drop-down on
+     the companion and wild shape pages, and will be displayed in those drop-down boxes.
+     This last part was changed in v13.1.3, that the names in this attribute will now all
+     appear in the drop-down boxes along with the `name` attribute of the creature.
+ 
+     If this creature is an option for Wild Shape, Find Familiar, Warlock Pact of the Chain,
+     Find Steed, Find Greater Steed, a ranger's companion or something similar,
+     then these alternative names will also be shown in the menu options.
+ */
+    nameAlt: ["Purple Creeper"];
 
     source: ["SRD", 204],
     source: [["E", 7], ["S", 115]],
@@ -109,60 +125,68 @@ interface Creature {
      * @example 3
      * @example [4,3]
     */
-    size: Arrayable<number>
+    size: Arrayable<number>;
 
-    type: "Fiend",
-    type: ["Celestial", "Fey", "Fiend"],
-    /*	type // REQUIRED //
-        TYPE:	string or array (since v13.1.0)
-        USE:	set the type drop-down box
-    
-        This can be either a:
-        1) String
-            The name of the creature type
-        2) Array (since v13.1.0)
-            If the creature can be several different creature types, using an array will prompt the player
-            to make a choice which one to use.
-    
-        You can put here anything you like, but is usually one of the known creature types:
-            Aberration
-            Beast
-            Celestial
-            Construct
-            Dragon
-            Elemental
-            Fey
-            Fiend
-            Giant
-            Humanoid
-            Monstrosity
-            Ooze
-            Plant
-            Undead
-    
-        This value is put in the type drop-down box of the sheet without any changes,
-        thus it is recommended to capitalize it for consistency.
-    */
-    subtype: "devil",
-    subtype: ["demon", "devil"],
-    /*	subtype // OPTIONAL //
-        TYPE:	string or array (since v13.1.0)
-        USE:	add the subtype in the type drop-down box
-    
-        This can be either a:
-        1) String
-            The name of the creature subtype
-        2) Array (since v13.1.0)
-            If the creature can be several different creature subtypes, using an array will prompt the player
-            to make a choice which one to use.
-    
-        This can be anything you like. It will be added to the string of the `type` attribute
-        in brackets, and together will be set in the type drop-down box.
-        In the first example, it will end up reading as "Fiend (devil)".
-    
-        This value is put in the type drop-down box of the sheet without any changes,
-        only with added brackets around it,	thus it is recommended to have it all lowercase for consistency.
-    */
+    /**
+     * set the type drop-down box
+     * 
+     * @remarks
+     *  This can be either a:
+     *  1) String
+     *      The name of the creature type
+     *  2) Array (since v13.1.0)
+     *      If the creature can be several different creature types, using an array will prompt the player
+     *      to make a choice which one to use.
+     *
+     *  You can put here anything you like, but is usually one of the known creature types:
+     *      Aberration
+     *      Beast
+     *      Celestial
+     *      Construct
+     *      Dragon
+     *      Elemental
+     *      Fey
+     *      Fiend
+     *      Giant
+     *      Humanoid
+     *      Monstrosity
+     *      Ooze
+     *      Plant
+     *      Undead
+     *
+     *  This value is put in the type drop-down box of the sheet without any changes,
+     *  thus it is recommended to capitalize it for consistency.
+     *
+     * @example "Fiend"
+     * @example ["Celestial", "Fey", "Fiend"]
+     */
+    type: Arrayable<TCreatureType>;
+
+
+
+    /**
+     * add the subtype in the type drop-down box
+     * 
+     * @remarks
+     * This can be either a:
+     *      1) String
+     *          The name of the creature subtype
+     *      2) Array (since v13.1.0)
+     *          If the creature can be several different creature subtypes, using an array will prompt the player
+     *          to make a choice which one to use.
+     *  
+     *      This can be anything you like. It will be added to the string of the `type` attribute
+     *      in brackets, and together will be set in the type drop-down box.
+     *      In the first example, it will end up reading as "Fiend (devil)".
+     *  
+     *      This value is put in the type drop-down box of the sheet without any changes,
+     *      only with added brackets around it,	thus it is recommended to have it all lowercase for consistency.
+     *
+     * @example "devil"
+     * @example ["demon", "devil"]
+     */
+    subtype?: Arrayable<string>;
+
     companion: "familiar",
     companion: ["familiar_not_al", "mount"],
     /*	companion // OPTIONAL //
@@ -237,14 +261,17 @@ interface Creature {
     
         Be aware that this list is slightly different than the one for the `companion` attribute!
     */
-    alignment: "Unaligned",
-    /*	alignment // REQUIRED //
-        TYPE:	string
-        USE:	set the alignment drop-down box
-    
-        This value is put in the alignment drop-down box of the sheet without any changes,
-        thus it is recommended to capitalize it for consistency.
-    */
+
+    /**
+     * set the alignment drop-down box
+     * 
+     * @remarks
+     * This value is put in the alignment drop-down box of the sheet without any changes,
+     * thus it is recommended to capitalize it for consistency.
+     * @example "Unaligned" 
+     */
+    alignment: string;
+
     ac: 11,
     /*	ac // REQUIRED //
         TYPE:	number
@@ -345,32 +372,25 @@ interface Creature {
         Setting this attribute to false is the same as not including this attribute.
     */
 
-    challengeRating: "1/2",
-    /*	challengeRating // REQUIRED //
-        TYPE:	string
-        USE:	set the challenge rating
-    
-        This value is put in the challenge rating field (on the wild shape page) without any changes.
-        This value is used on the wild shape page to show the creature in the right submenu.
-    */
-    scores: [15, 13, 12, 2, 13, 8],
-    /*	scores // REQUIRED //
-        TYPE:	array of six numbers
-        USE:	set the ability scores
-    
-        This array has six entries, all of which have to be a number.
-        These six correspond to the ability scores in their usual order:
-    
-        INDEX	ABILITY SCORE
-        (0)	 	Strength
-        (1)  	Dexterity
-        (2)  	Constitution
-        (3)  	Intelligence
-        (4)  	Wisdom
-        (5)  	Charisma
-    
-        [Str, Dex, Con, Int, Wis, Cha]
-    */
+    /**
+     * set the challenge rating
+     * 
+     * @remarks
+     *  This value is put in the challenge rating field (on the wild shape page) without any changes.
+     *  This value is used on the wild shape page to show the creature in the right submenu.
+     * 
+     * @example "1/2"
+     */
+    challengeRating: string;
+
+
+    /**
+     * set the ability scores
+     * 
+     * @example [15, 13, 12, 2, 13, 8] 
+     */
+    scores: score_array;
+
     saves: ["", 3, "", "", "", ""],
     /*	saves // OPTIONAL //
         TYPE:	array of six numbers
@@ -433,13 +453,7 @@ interface Creature {
         This value is not displayed on the wild shape page, hence it is recommended to also explain
         the multiattack trait in the description of the appropriate attack and/or in the `traits` attribute.
     */
-    attacks: [{
-        name: "Claws",
-        ability: 1,
-        damage: [2, 6, "slashing"],
-        range: "Melee (5 ft)",
-        description: "Two claws attacks as an Attack action"
-    }],
+
     /*	attacks // REQUIRED //
         TYPE:	array (variable length) of WeaponsList objects
         USE:	set the attack entries
@@ -459,45 +473,50 @@ interface Creature {
         You can have attacks with identical names as weapon options in the attack drop-down box.
         The companion page will always use the attacks defined in the creature's entry over those in the WeaponsList.
     */
-    skills: {
-        "Athletics": 4,
-        "Perception": 5
-    },
-    /*	skills // OPTIONAL //
-        TYPE:	object with skill names as attribute names
-        USE:	set the proficiency, expertise, and extra bonus for skills
-     
-        Use this attribute when the creature has a bonus for a skill that is different
-        than just the associated ability score modifier.
-    	
-        Add each skill as its own attribute with a value of the total skill bonus.
-     
-        The automation will then determine if the skill is considered to be proficient,
-        with expertise (twice the proficiency bonus added), and/or any other bonuses.
-     
-        In the example here the Athletics skill will have the proficiency checkbox checked,
-        because the creature has Str 15 (+2) and a Proficiency Bonus of +2,
-        thus the +4 in Athletics is ability score modifier + Proficiency Bonus.
-        However, the creature is considered to have expertise in Perception,
-        as it only has Wis 13 (+1), so the total of +5 Perception must be due adding twice
-        the Proficiency Bonus of +2.
-    */
-    damage_vulnerabilities: "cold",
-    vulnerabilities: "cold",
-    damage_resistances: "lightning; thunder; bludgeoning, piercing, and slashing from nonmagical weapons",
-    resistances: "Cold, Fire, Lightning",
-    damage_immunities: "poison",
-    condition_immunities: "exhaustion, grappled, paralyzed, petrified, poisoned, prone, restrained, unconscious",
-    immunities: "Acid, Poison; Poisoned",
-    languages: "Terran",
-    /*	damage_vulnerabilities	// OPTIONAL //
+    attacks: [{
+        name: "Claws",
+        ability: 1,
+        damage: [2, 6, "slashing"],
+        range: "Melee (5 ft)",
+        description: "Two claws attacks as an Attack action"
+    }];
+
+
+    /**
+     * set the proficiency, expertise, and extra bonus for skills
+     * 
+     * @remarks
+     *  Use this attribute when the creature has a bonus for a skill that is different
+     *  than just the associated ability score modifier.
+     *
+     *  Add each skill as its own attribute with a value of the total skill bonus.
+     *
+     *  The automation will then determine if the skill is considered to be proficient,
+     *  with expertise (twice the proficiency bonus added), and/or any other bonuses.
+     *
+     *  In the example here the Athletics skill will have the proficiency checkbox checked,
+     *  because the creature has Str 15 (+2) and a Proficiency Bonus of +2,
+     *  thus the +4 in Athletics is ability score modifier + Proficiency Bonus.
+     *  However, the creature is considered to have expertise in Perception,
+     *  as it only has Wis 13 (+1), so the total of +5 Perception must be due adding twice
+     *  the Proficiency Bonus of +2.
+     *
+     * 
+     * @example {
+     *  "Athletics": 4,
+     *  "Perception": 5
+     * }
+     */
+    skills?: Record<string, number>;
+
+    /**
+     *  damage_vulnerabilities	// OPTIONAL //
         vulnerabilities       	// OPTIONAL //
         damage_resistances    	// OPTIONAL //
         resistances	          	// OPTIONAL //
         damage_immunities     	// OPTIONAL //
         condition_immunities  	// OPTIONAL //
         immunities            	// OPTIONAL //
-        languages             	// OPTIONAL //
         TYPE:	string
         USE:	add text to the Features section on the Companion/Wild Shape page
         CHANGE: v14.0.0 (formatting characters)
@@ -531,7 +550,21 @@ interface Creature {
             ##text## = Header 2:
                        - italic, bold, and theme color (Colourful)
                        - italic and bold (Printer Friendly)
-    */
+     */
+    damage_vulnerabilities: "cold",
+    vulnerabilities: "cold",
+    damage_resistances: "lightning; thunder; bludgeoning, piercing, and slashing from nonmagical weapons",
+    resistances: "Cold, Fire, Lightning",
+    damage_immunities: "poison",
+    condition_immunities: "exhaustion, grappled, paralyzed, petrified, poisoned, prone, restrained, unconscious",
+    immunities: "Acid, Poison; Poisoned",
+
+    /**
+     * @example "Common"
+     * 
+     */
+    languages: string;
+
     features: [{
         name: "False Appearance",
         description: "While the purple crawler remains motionless, it is indistinguishable from an ordinary purple flower.",
@@ -550,12 +583,12 @@ interface Creature {
         eval: function (prefix, lvl) {
             // Increase size to Large
             PickDropdown(prefix + "Comp.Desc.Size", 2);
-                                            },
+                },
 removeeval: function (prefix, lvl) {
     // Change size back to Medium
     PickDropdown(prefix + "Comp.Desc.Size", 3);
 }
-                                        }],
+            }],
 notes: [{
     name: "Lila Laser Light (Purplemancer 13)",
     minlevel: 13,
@@ -657,6 +690,9 @@ notes: [{
                        - italic and bold (Printer Friendly)
     */
 
+}
+
+interface CompanionCreature {
     // >>>>>>>>>>>>>>>>>>>>>>>>>>> //
     // >>> Companion Page Only >>> //
     // >>>>>>>>>>>>>>>>>>>>>>>>>>> //
@@ -695,7 +731,7 @@ notes: [{
     */
 
     minlevelLinked: ["artificer", "wizard"],
-        minlevelLinked: function (prefix) { return classes.known.warlock ? classes.known.warlock.level + 1 : 0; },
+    minlevelLinked: function (prefix) { return classes.known.warlock ? classes.known.warlock.level + 1 : 0; },
 /*	minlevelLinked // OPTIONAL //
     TYPE:	array with ClassList object names (variable length) or function
     USE:	dynamically select which level to use for level-dependent features
@@ -753,8 +789,8 @@ header: "Summon",
             "_common attributes.js" file.
             Please look there for a complete explanation.
         */
-        calcChanges: {
-    /*	calcChanges // OPTIONAL //
+
+        /*	calcChanges // OPTIONAL //
         TYPE:	object (optional attributes)
         USE:	change how the hit points automation works
                 This will only affect hit points on the companion page, not wild shapes
@@ -765,41 +801,9 @@ header: "Summon",
         Note that `calcChanges` also appears in the list of common attributes,
         but only its `hp` attribute is shared with the object here.
     */
-    hp: function (totalHD, HDobj, prefix) {
-        if (!classes.known.ranger) return;
-        var creaHP = CurrentCompRace[prefix] && CurrentCompRace[prefix].hp ? CurrentCompRace[prefix].hp : 0;
-        var creaName = CurrentCompRace[prefix] && CurrentCompRace[prefix].name ? CurrentCompRace[prefix].name : "the creature";
-        var rngrLvl = classes.known.ranger.level;
-        var rngrCompHp = 4 * rngrLvl;
-        HDobj.alt.push(Math.max(creaHP, rngrCompHp));
-        HDobj.altStr.push(" = the highest of either\n \u2022 " + creaHp + " from " + creaName + "'s normal maximum HP, or\n \u2022 4 \xD7 " + rngrLvl + " from four times my ranger level (" + rngrCompHp + ")");
-    },
-    /*	hp // OPTIONAL //
-        TYPE:	function
-        USE:	change how Hit Points are calculated and what the Hit Points tooltip says
- 
-        This function works identical to the `calcChanges.hp` function found in the
-        "_common attributes.js" file.
-        Please look there for a complete explanation.
-    */
-    setAltHp: true,
-        /*	setAltHp // OPTIONAL //
-            TYPE:	boolean
-            USE:	set the maximum HP field to automatically assume the alternative calculation method added with the `hp` function
-    
-            This attribute will only work if you set the `hp` attribute (see above) in the same object.
-            Set this attribute to true if you push a value to the HDobj.alt array with the function in the `hp` attribute.
-    
-            Setting this attribute to false is the same as not including it.
-        */
-    },
+        calcChanges: { };
 
-eval: function (prefix, lvl) {
-    var fldName = prefix + "Comp.Use.Speed";
-    var newSpeed = "40 ft, fly 60 ft, swim 40 ft";
-    if (What("Unit System") === "metric") newSpeed = ConvertToMetric(newSpeed, 0.5);
-    Value(fldName, newSpeed);
-},
+
 /*	eval // OPTIONAL //
     TYPE:	function
     USE:	runs a piece of code when the creature is selected on the Companion page
@@ -820,13 +824,13 @@ eval: function (prefix, lvl) {
     This can be any JavaScript you want to have run whenever this creature is selected on a Companion page.
     This attribute is processed last, after all other attributes are processed.
 */
-
-removeeval: function (prefix, lvl) {
+eval: function (prefix, lvl) {
     var fldName = prefix + "Comp.Use.Speed";
-    var newSpeed = "30 ft, fly 45 ft, swim 30 ft";
+    var newSpeed = "40 ft, fly 60 ft, swim 40 ft";
     if (What("Unit System") === "metric") newSpeed = ConvertToMetric(newSpeed, 0.5);
     Value(fldName, newSpeed);
 },
+
 /*	removeeval // OPTIONAL //
     TYPE:	function
     USE:	runs a piece of code when the creature is removed from the Companion page
@@ -843,10 +847,13 @@ removeeval: function (prefix, lvl) {
     This can be any JavaScript you want to have run whenever the creature is removed from a Companion page.
     This attribute is processed last, after all other attributes are processed.
 */
-
-changeeval: function (prefix, lvl) {
-    Value(prefix + "Comp.Use.HD.Die", lvl[1] < 15 ? 8 : 10);
+removeeval: function (prefix, lvl) {
+    var fldName = prefix + "Comp.Use.Speed";
+    var newSpeed = "30 ft, fly 45 ft, swim 30 ft";
+    if (What("Unit System") === "metric") newSpeed = ConvertToMetric(newSpeed, 0.5);
+    Value(fldName, newSpeed);
 },
+
 /*	changeeval // OPTIONAL //
     TYPE:	function
     USE:	runs a piece of code every time the main character's level changes
@@ -874,16 +881,55 @@ changeeval: function (prefix, lvl) {
     It is processed both when the creature is first added to the companion page and
     when the main character's level changes, but not when the creature is removed.
 */
+changeeval: function (prefix, lvl) {
+    Value(prefix + "Comp.Use.HD.Die", lvl[1] < 15 ? 8 : 10);
+},
 
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>> //
-// >>> Wild Shape Page Only >>> //
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>> //
-/*
-    The below attributes won't affect anything when the creature is select as a companion,
-    but they will work on a Wild Shape page.
+}
+
+interface calcChanges {
+    /*	hp // OPTIONAL //
+    TYPE:	function
+    USE:	change how Hit Points are calculated and what the Hit Points tooltip says
+ 
+    This function works identical to the `calcChanges.hp` function found in the
+    "_common attributes.js" file.
+    Please look there for a complete explanation.
 */
+    hp: function (totalHD, HDobj, prefix) {
+    if (!classes.known.ranger) return;
+    var creaHP = CurrentCompRace[prefix] && CurrentCompRace[prefix].hp ? CurrentCompRace[prefix].hp : 0;
+    var creaName = CurrentCompRace[prefix] && CurrentCompRace[prefix].name ? CurrentCompRace[prefix].name : "the creature";
+    var rngrLvl = classes.known.ranger.level;
+    var rngrCompHp = 4 * rngrLvl;
+    HDobj.alt.push(Math.max(creaHP, rngrCompHp));
+    HDobj.altStr.push(" = the highest of either\n \u2022 " + creaHp + " from " + creaName + "'s normal maximum HP, or\n \u2022 4 \xD7 " + rngrLvl + " from four times my ranger level (" + rngrCompHp + ")");
+},
 
-wildshapeString: "Darkvision 60 ft; Tremorsense 60 ft| Knows Terran| Vulnerable to: thunder| Resistant to: bludgeoning, piercing, and slashing from nonmagical weapons| Immune to: poison, exhaustion, paralyzed, petrified, poisoned, unconscious| Earth Glide: can burrow through nonmagical, unworked earth and stone without disturbing the material| Siege Monster: does double damage to objects and structures",
+/*	setAltHp // OPTIONAL //
+TYPE:	boolean
+USE:	set the maximum HP field to automatically assume the alternative calculation method added with the `hp` function
+ 
+This attribute will only work if you set the `hp` attribute (see above) in the same object.
+Set this attribute to true if you push a value to the HDobj.alt array with the function in the `hp` attribute.
+ 
+Setting this attribute to false is the same as not including it.
+*/
+setAltHp: true,
+
+}
+
+
+interface WildshapeCreature {
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>> //
+    // >>> Wild Shape Page Only >>> //
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>> //
+    /*
+        The below attributes won't affect anything when the creature is select as a companion,
+        but they will work on a Wild Shape page.
+    */
+
+    wildshapeString: "Darkvision 60 ft; Tremorsense 60 ft| Knows Terran| Vulnerable to: thunder| Resistant to: bludgeoning, piercing, and slashing from nonmagical weapons| Immune to: poison, exhaustion, paralyzed, petrified, poisoned, unconscious| Earth Glide: can burrow through nonmagical, unworked earth and stone without disturbing the material| Siege Monster: does double damage to objects and structures",
     /*	wildshapeString	// OPTIONAL	 //
         TYPE:	string
         USE:	add text to the Traits & Features section on the Wild Shape page
@@ -896,27 +942,19 @@ wildshapeString: "Darkvision 60 ft; Tremorsense 60 ft| Knows Terran| Vulnerable 
         However, that can result in too much content for the limited space on the Wild Shape pages and
         hence the need for the `wildshapeString` attribute.
     */
-
-
-
-
-    name: string
-challengeRating: string
 }
 
 interface Internal<Creature> implments Creature {
 
-
     /**
-    USE:	object name of the creature as it will be used by the sheet
- 
-    By adding a new object to the existing CreatureList object, we create a new creature.
-    The object name here is 'purple crawler'. You can use any object name as long as it is not already in use.
-    If you do use an object name that is already in use, you will be overwriting that object.
-    Note the use of only lower case! Also note the absence of the word "var" and the use of brackets [].
-*/
+     * The key used to register this creature in the CreatureList dictionary.
+    */
     key: string;
 
-    size: TCreatureSizeKey[]
+    size: TCreatureSizeKey[];
+
+    type: TCreatureType[];
+
+    subtype: string[];
 
 }

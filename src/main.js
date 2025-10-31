@@ -57,8 +57,15 @@
             // todo: make this configurable
             const spells_sorted = sort_spells(spells_filtered);
 
-            const monster_filter = build_filter(config.layout["monster-cards"].filter);
-            const monsters = Object.values(all_monsters).filter((monster) => monster_filter(monster))
+            const monsters = (() => {
+                if (!config.layout["monster-cards"]) {
+                    return []
+                }
+
+                const monster_filter = build_filter(config.layout["monster-cards"].filter);
+                const monsters = Object.values(all_monsters).filter((monster) => monster_filter(monster))
+                return monsters;
+            })()
 
             return {
                 spells: spells_sorted,

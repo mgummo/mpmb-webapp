@@ -1,0 +1,18 @@
+.flex-row {
+    display: flex;
+    gap: 1rem;
+    /* space between fields */
+}
+
+.flex-row>* {
+    flex: 1;
+    /* make both fields equal width */
+}
+
+.spacer {
+    margin: auto;
+}
+
+.row {
+    width: 100%;
+}

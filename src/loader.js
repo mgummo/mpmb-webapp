@@ -79,7 +79,7 @@
             // todo: this isn't working how I expect it
             // mods are being initialized to null instead of calculated
             mpmb.CalcAllSkills(false);
-            console.log("fields: %o", global.app.getFields())
+            console.log("pdf fields: %o", global.app.getFields())
 
             return character;
         }
@@ -183,7 +183,49 @@
             // standardize on an array for this property
             creature.size = castArray(creature.size);
 
+            creature.type = castArray(creature.type);
+            creature.subtype = castArray(creature.subtype)
+
+            creature.abilities = this.build_ability_stats(creature.scores)
+
             return creature;
+        }
+
+        // [Str, Dex, Con, Int, Wis, Cha]
+        build_ability_stats(scores) {
+            const abilities = {
+                'str': {
+                    score: scores[0],
+                    mod: this.calc_ability_mod(scores[0])
+                },
+                'dex': {
+                    score: scores[1],
+                    mod: this.calc_ability_mod(scores[1])
+                },
+                'con': {
+                    score: scores[2],
+                    mod: this.calc_ability_mod(scores[2])
+                },
+                'int': {
+                    score: scores[3],
+                    mod: this.calc_ability_mod(scores[3])
+                },
+                'wis': {
+                    score: scores[4],
+                    mod: this.calc_ability_mod(scores[4])
+                },
+                'cha': {
+                    score: scores[5],
+                    mod: this.calc_ability_mod(scores[5])
+                },
+
+            }
+            return abilities;
+        }
+
+        calc_ability_mod(score) {
+            const mod = Math.floor((score - 10) / 2);
+            return mod;
         }
 
 

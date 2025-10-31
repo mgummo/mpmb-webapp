@@ -169,6 +169,7 @@
 
     // random junk
 
+    /*
     function f(aSpell) {
         if (aSpell.descriptionCantripDie) {
             var cDie = cantripDie[Math.min(CurrentFeats.level, cantripDie.length) - 1];
@@ -193,6 +194,7 @@
             aSpell.description = spellAbiDescr;
         }
     }
+        */
 
     global.main.render = render
 

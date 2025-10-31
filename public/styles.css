@@ -92,10 +92,6 @@ body {
     margin-top: 0;
 }
 
-.card .label {
-    font-weight: bold;
-}
-
 .spell-card .name,
 .monster-card .name {
     margin-top: 0;
@@ -111,11 +107,16 @@ body {
     /* border-bottom: 1px solid #ccc; */
 }
 
-.spell-card .subtitle {
+.spell-card .subtitle,
+.monster-card .subtitle {
     font-size: 0.85em;
     color: #555;
     margin-bottom: 0.5em;
     white-space: pre-wrap;
+}
+
+.monster-card .subtitle {
+    font-style: italic;
 }
 
 .spell-card .description {
@@ -123,14 +124,10 @@ body {
     white-space: pre-wrap;
 }
 
-.spacer {
-    margin: auto;
+.card .label {
+    font-weight: bold;
 }
 
-.spell-card .source {
+.card .source-book {
     align-self: flex-end;
-}
-
-.row {
-    width: 100%;
 }

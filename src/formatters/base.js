@@ -53,9 +53,8 @@
 
         }
 
-        // todo: rename to format_source_book?
-        format_spell_source(spell) {
-            return mpmb.stringSource(spell, "full,page,multi");
+        format_source_book(entity) {
+            return mpmb.stringSource(entity, "full,page,multi");
         }
 
 

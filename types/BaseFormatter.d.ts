@@ -3,7 +3,7 @@ interface BaseFormatter {
 
     format_ability;
     format_modifier;
-    format_spell_source;
+    format_source_book;
 
     unabbreviate;
 

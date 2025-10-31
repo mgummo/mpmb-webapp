@@ -775,11 +775,11 @@ interface Internal<Spell> extends Spell {
 	 * 
 	 * @example 'sindering purple'
 	 */
-	key: string,
+	key: string;
 
 	// might not be needed? - theres a allowUpCasting property
-	upcastable: boolean,
+	upcastable: boolean;
 
-	action: Weapon
+	action: Weapon;
 
 }
