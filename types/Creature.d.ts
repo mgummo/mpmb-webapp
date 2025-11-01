@@ -18,13 +18,34 @@ type TCreatureType = string
 type score_array = number[6];
 
 /**
+ * text that supports rich text formatting
+ * @remarks
+ *      The `description` can be formatted using the Rich Text formatting characters.
+ *      Text between the formatting characters will be displayed differently on the sheet.
+ *      The formatting characters are as follows:
+ *          *text*   = italic
+ *          **text** = bold
+ *          _text_   = underlined [doesn't work in tooltips/pop-ups]
+ *          ~text~   = strikethrough [doesn't work in tooltips/pop-ups]
+ *          #text#   = Header 1:
+ *                     - bold and theme color (Colourful)
+ *                     - bold and 15% size increase (Printer Friendly)
+ *          ##text## = Header 2:
+ *                     - italic, bold, and theme color (Colourful)
+ *                     - italic and bold (Printer Friendly)
+ * 
+ * @since v14.0.0
+  */
+type rich_text = string;
+
+/**
  * The syntax for adding a new crature to the sheet, for use by the companion and wild shape pages.
  * 
  * @remarks
- * You will also need the syntax for adding a weapon if you want the creature
- * to have attack options.
- * You will also need the syntax for adding a source if you want the creature
- * to have a source that doesn't yet exist in the sheet.
+ * You will also need the syntax for adding a weapon 
+ * if you want the creature to have attack options.
+ * You will also need the syntax for adding a source 
+ * if you want the creature to have a source that doesn't yet exist in the sheet.
  * You will also need the syntax for common attributes if you want to use a
  * custom calculation for hit points (calcChanges.hp).
  * @since v24.0.0
@@ -41,12 +62,10 @@ interface Creature {
      */
     name: string;
 
-    /*	nameAlt // OPTIONAL //
-     TYPE:	array of strings (variable size)
-     USE:	alternative names for the creature
-     ADDED:	v13.0.6
-     CHANGE: v13.1.3 (also appears in drop-down boxes)
- 
+    /**
+     * alternative names for the creature
+     * 
+     * @remarks
      These names will be used to recognize what is entered into the race drop-down on
      the companion and wild shape pages, and will be displayed in those drop-down boxes.
      This last part was changed in v13.1.3, that the names in this attribute will now all
@@ -55,49 +74,30 @@ interface Creature {
      If this creature is an option for Wild Shape, Find Familiar, Warlock Pact of the Chain,
      Find Steed, Find Greater Steed, a ranger's companion or something similar,
      then these alternative names will also be shown in the menu options.
- */
-    nameAlt: ["Purple Creeper"];
+     * @example ["Purple Creeper"]
+     * @since v13.0.6
+     */
+    nameAlt?: string[];
 
-    source: ["SRD", 204],
-    source: [["E", 7], ["S", 115]],
-    /*	source // REQUIRED //
-        TYPE:	array with two entries (or array of these arrays)
-        USE:	define where the creature is found
-    
-        This attribute is used by the sheet to determine if the creature should be available depending on the sources included and excluded.
-    
-        This array has two entries, a string followed by a number
-        1. string
-            The first entry has to be the object name of a SourceList object.
-        2. number
-            The second entry is the page number to find the creature at.
-            This can be any number and is ignored if it is a 0.
-    
-        See the "source (SourceList).js" file for learning how to add a custom source.
-    
-        Alternatively, this can be an array of arrays to indicate it appears in multiple sources.
-        The example above says something appears on both page 7 of the Elemental Evil Player's Companion and
-        on page 115 of the Sword Coast Adventure Guide.
-    
-        If a creature is completely homebrew, or you don't want to make a custom source, just put the following:
-            source: ["HB", 0],
-        "HB" refers to the 'homebrew' source.
-    */
+    /**
+     * Which source book(s) the creature is defined.
+     */
+    source: SourceList;
 
-    defaultExcluded: true,
-    /*	defaultExcluded // OPTIONAL //
-        TYPE:	boolean
-        USE:	whether this creature should be excluded by default (true) or included by default (false)
-    
-        Include this attribute and set it to true if the creature should appear in the Excluded list of the
-        Source Selection Dialog when the script is added for the first time.
-        It will have to be manually set to be included before it is used by the sheet's automation.
-        The user will be made aware of this exclusion.
-    
-        This is useful for optional creatures that you wouldn't normally want to use (e.g. playtest or campaign-specific).
-    
-        Setting this attribute to false is the same as not including this attribute.
-    */
+    /** 
+     * whether this creature should be excluded by default (true) or included by default (false)
+     * 
+     * @remarks
+     * Include this attribute and set it to true if the creature should appear in the Excluded list of the
+     * Source Selection Dialog when the script is added for the first time.
+     * It will have to be manually set to be included before it is used by the sheet's automation.
+     * The user will be made aware of this exclusion.
+     * 
+     * This is useful for optional creatures that you wouldn't normally want to use (e.g. playtest or campaign-specific).
+     * @defaultValue false
+     * @example true
+     */
+    defaultExcluded?: boolean;
 
     /**
      * the size of the creature
@@ -161,8 +161,6 @@ interface Creature {
      * @example ["Celestial", "Fey", "Fiend"]
      */
     type: Arrayable<TCreatureType>;
-
-
 
     /**
      * add the subtype in the type drop-down box
@@ -272,48 +270,49 @@ interface Creature {
      */
     alignment: string;
 
-    ac: 11,
-    /*	ac // REQUIRED //
-        TYPE:	number
-        USE:	set the armour class
-    
-        This number is filled in the AC field as-is, no calculations are done with regards to armour worn
-        or anything like that.
-    */
-    hp: 10,
+    /**	
+     * set the armour class
+     * @remarks
+     * This number is filled in the AC field as-is
+     * (no calculations are done with regards to armour worn, etc.)
+     * @example 11
+     */
+    ac: number;
+
     /*	hp // REQUIRED //
-        TYPE:	number
-        USE:	set the maximum amount of hit points
-    
-        This number is filled in the Max HP field without any changed, no calculations are done with
-        regards to hit dice, Constitution modifier, or anything like that.
-        It is still possible to enable automatic updates for the Max HP field using the "Set Max HP" button,
-        but by default only the hp value set here will be displayed and it will not automatically update.
-    */
-    hd: [3, 4],
+    TYPE:	number
+    USE:	set the maximum amount of hit points
+ 
+    This number is filled in the Max HP field without any changed, no calculations are done with
+    regards to hit dice, Constitution modifier, or anything like that.
+    It is still possible to enable automatic updates for the Max HP field using the "Set Max HP" button,
+    but by default only the hp value set here will be displayed and it will not automatically update.
+*/
+    hp: 10;
+
     /*	hd // REQUIRED //
-        TYPE:	array with two number entries
-        USE:	set the hit dice
-    
-        This array has two entries, both have to be a number or an empty string ""
-        1. number
-            The first entry is the amount of hit dice.
-            This will be filled in the "Level" field on the companion page.
-        2. number
-            The second entry is the die type of the hit dice.
-            This can be any number, but normally it is 4, 6, 8, 10, or 12.
-            This will be filled in the "Die" field on the companion page.
-            Don't worry, the "d" will be added automatically (e.g. the 4 above will display as "d4").
-    
-        The example above is for 3d4 hit dice.
-    */
+     TYPE:	array with two number entries
+     USE:	set the hit dice
+ 
+     This array has two entries, both have to be a number or an empty string ""
+     1. number
+         The first entry is the amount of hit dice.
+         This will be filled in the "Level" field on the companion page.
+     2. number
+         The second entry is the die type of the hit dice.
+         This can be any number, but normally it is 4, 6, 8, 10, or 12.
+         This will be filled in the "Die" field on the companion page.
+         Don't worry, the "d" will be added automatically (e.g. the 4 above will display as "d4").
+ 
+     The example above is for 3d4 hit dice.
+ */
+    hd: [3, 4];
 
     /**
-     * USE:	dynamically set the number of HD to a class level (array) or anything you want (function)
-     * TYPE:	array with ClassList object names (variable length) or function
+     * dynamically set the number of HD to a class level (array) or anything you want (function)
      * 
      * @remarks
-     *   This attribute is complimentary to the `hd` attribute, it does not replace it.
+     *  This attribute is complimentary to the `hd` attribute, it does not replace it.
      *  This attribute can only set the number of HD (the first entry in the `hd` attribute),
      *  not the type of die.
      *
@@ -334,7 +333,7 @@ interface Creature {
      * @example function (prefix) { return classes.known.ranger ? classes.known.ranger.level - 3 : 0; }
      * @since v13.0.6
      */
-    hdLinked?,
+    hdLinked?: unknown; // array with ClassList object names (variable length) or function
 
     speed: "20 ft, climb 30 ft",
     /*	speed // REQUIRED //
@@ -346,17 +345,17 @@ interface Creature {
         a comma followed by a line break.
     */
 
-    proficiencyBonus: 2,
-    /*	speed // REQUIRED //
-        TYPE:	number
-        USE:	set the proficiency bonus
-    
+    /**
+     * set the proficiency bonus
+     * 
+     * @remarks
         This value is put in the proficiency bonus field without any changes.
         It is also used for determining the creature's proficiency with skills and saving throws (see below).
-    */
+     * @example 2
+     */
+    proficiencyBonus: number;
 
-    proficiencyBonusLinked: true,
-    /*	proficiencyBonusLinked // OPTIONAL //
+        /*	proficiencyBonusLinked // OPTIONAL //
         TYPE:	boolean
         USE:	whether the proficiency bonus is the same (true) as the main character or not (false)
         ADDED:	v13.0.6
@@ -371,6 +370,7 @@ interface Creature {
     
         Setting this attribute to false is the same as not including this attribute.
     */
+    proficiencyBonusLinked: true,
 
     /**
      * set the challenge rating
@@ -560,52 +560,23 @@ interface Creature {
     immunities: "Acid, Poison; Poisoned",
 
     /**
-     * @example "Common"
+     * Defines the language(s) the creature knows
      * 
+     * @remarks
+     * Comma delitmited string.
+     * 
+     * @example "Common"
      */
     languages: string;
 
-    features: [{
-        name: "False Appearance",
-        description: "While the purple crawler remains motionless, it is indistinguishable from an ordinary purple flower.",
-        joinString: "\n   "
-    }],
-    actions: [{
-        name: "Invisibility",
-        minlevel: 5,
-        description: "As an action, the purple crawler magically turns invisible until it attacks or casts a spell, or until its concentration ends (as if concentrating on a spell).",
-        addMod: [{ type: "skill", field: "all", mod: "max(oCha|1)", text: "The purple crawler adds its master's Charisma modifier (min 1) to all its skill checks." }]
-    }],
-    traits: [{
-        name: "Keen Sight",
-        minlevel: 8,
-        description: "The purple crawler has advantage on Wisdom (Perception) checks that rely on sight. It size increases to Large.",
-        eval: function (prefix, lvl) {
-            // Increase size to Large
-            PickDropdown(prefix + "Comp.Desc.Size", 2);
-                },
-removeeval: function (prefix, lvl) {
-    // Change size back to Medium
-    PickDropdown(prefix + "Comp.Desc.Size", 3);
-}
-            }],
-notes: [{
-    name: "Lila Laser Light (Purplemancer 13)",
-    minlevel: 13,
-    description: desc([
-        "The purple companion gains the ability to shine in a bright purple color",
-        "Once per long rest, it can cast Hypnotic Pattern without requiring components"
-    ]),
-    joinString: ""
-}],
-    /*	features // OPTIONAL //
-        actions  // OPTIONAL //
-        traits   // OPTIONAL //
-        notes   // OPTIONAL // since v13.1.11
+
+
+    /**
+     * @remarks
+/*	
         TYPE:	array (variable length) with objects
         USE:	add text to the Traits and Features sections on the Companion page
         CHANGE:	v13.1.0 (added `joinString` attribute)
-        CHANGE:	v13.1.11 (added `notes`)
         CHANGE: v14.0.0 (formatting characters)
     
         Each of these three attributes work in the same way.
@@ -672,23 +643,64 @@ notes: [{
         Also, `eval`, `removeeval`, and `changeeval` are not executed when this creature is selected/removed on the Wild Shape page.
         As the wild shape pages offer limited space, it is recommended to test if all of
         these and the other attributes together will fit.
-        If they don't fit (well), consider using the `wildshapeString` attribute, see below.
-    
-        FORMATTING CHARACTERS (since v14.0.0)
-        The `description` can be formatted using the Rich Text formatting characters.
-        Text between the formatting characters will be displayed differently on the sheet.
-        The formatting characters are as follows:
-            *text*   = italic
-            **text** = bold
-            _text_   = underlined [doesn't work in tooltips/pop-ups]
-            ~text~   = strikethrough [doesn't work in tooltips/pop-ups]
-            #text#   = Header 1:
-                       - bold and theme color (Colourful)
-                       - bold and 15% size increase (Printer Friendly)
-            ##text## = Header 2:
-                       - italic, bold, and theme color (Colourful)
-                       - italic and bold (Printer Friendly)
-    */
+        If they don't fit (well), consider using the `wildshapeString` attribute, see below.    
+   
+     * @example
+     * [{
+     *    name: "False Appearance",
+     *    description: "While the purple crawler remains motionless, it is indistinguishable from an ordinary purple flower.",
+     *    joinString: "\n   "
+     * }],
+     */
+    features?: unknown;
+
+    /**
+     * @example
+     * [{
+        name: "Invisibility",
+        minlevel: 5,
+        description: "As an action, the purple crawler magically turns invisible until it attacks or casts a spell, or until its concentration ends (as if concentrating on a spell).",
+        addMod: [{ type: "skill", field: "all", mod: "max(oCha|1)", text: "The purple crawler adds its master's Charisma modifier (min 1) to all its skill checks." }]
+    }]
+     */
+    actions?: unknown;
+
+    /**
+     * @example
+     * [{
+     *  name: "Keen Sight",
+     *  minlevel: 8,
+     *  description: "The purple crawler has advantage on Wisdom (Perception) checks that rely on sight. It size increases to Large.",
+     *  eval: function (prefix, lvl) {
+     *      // Increase size to Large
+     *      PickDropdown(prefix + "Comp.Desc.Size", 2);
+     *  },
+     *  removeeval: function (prefix, lvl) {
+     *      // Change size back to Medium
+     *      PickDropdown(prefix + "Comp.Desc.Size", 3);
+     *  }
+     * }]
+     */
+    traits?: unknown
+
+    /**
+     * 
+     * @example
+     * [{
+     *  name: "Lila Laser Light (Purplemancer 13)",
+     *  minlevel: 13,
+     *  description: desc([
+     *      "The purple companion gains the ability to shine in a bright purple color",
+     *      "Once per long rest, it can cast Hypnotic Pattern without requiring components"
+     *  ]),
+     *  joinString: ""
+     * }],
+     * 
+     * 
+     * @since v13.1.11
+     */
+    notes?: unknown;
+
 
 }
 
@@ -730,35 +742,35 @@ interface CompanionCreature {
         using the `minlevel` attribute, see above.
     */
 
-    minlevelLinked: ["artificer", "wizard"],
-    minlevelLinked: function (prefix) { return classes.known.warlock ? classes.known.warlock.level + 1 : 0; },
-/*	minlevelLinked // OPTIONAL //
-    TYPE:	array with ClassList object names (variable length) or function
-    USE:	dynamically select which level to use for level-dependent features
- 
-    This attribute is used to determine at which level objects in the `features`, `traits`,
-    or `actions` arrays are added/removed,
-    and it is used to determine what level is passed to the `eval`, `removeeval`, and `changeeval` functions.
- 
-    This attribute can be one of two things:
-    1. an array with ClassList object names
-        The level to use will be the class level of the class(es) entered here.
-        If you enter multiple ClassList object names, the highest class level will be used.
-        The ClassList object names are always written in all lower case (e.g. "wizard").
-        If none of the classes are currently selected by the main character, the sheet will default
-        to the total class level, or 1 if the level field is empty.
-    2. function that returns the number
-        The function is called upon any time a level needs to be determined for the creature,
-        be it to determine which level to pass to `changeeval` (see below),
-        or to determine which `features`, `traits`, `actions`, or `notes` to add.remove (see `minlevel` above).
-        It is passed one variable: a string: the prefix of the Companion page this creature was selected on.
-        If it returns false, 0, "", or anything that is not a number, the sheet will default
-        to the total class level, or 1 if the level field is empty.
- 
-    ADDED:	v13.0.6
-*/
+    /** 
+     * dynamically select which level to use for level-dependent features
+     * 
+     * @remarks
+    * This attribute is used to determine at which level objects in the `features`, `traits`,
+    * or `actions` arrays are added/removed,
+    * and it is used to determine what level is passed to the `eval`, `removeeval`, and `changeeval` functions.
+    * 
+    * This attribute can be one of two things:
+    * 1. an array with ClassList object names
+    *     The level to use will be the class level of the class(es) entered here.
+    *     If you enter multiple ClassList object names, the highest class level will be used.
+    *     The ClassList object names are always written in all lower case (e.g. "wizard").
+    *     If none of the classes are currently selected by the main character, the sheet will default
+    *     to the total class level, or 1 if the level field is empty.
+    * 2. function that returns the number
+    *     The function is called upon any time a level needs to be determined for the creature,
+    *     be it to determine which level to pass to `changeeval` (see below),
+    *     or to determine which `features`, `traits`, `actions`, or `notes` to add.remove (see `minlevel` above).
+    *     It is passed one variable: a string: the prefix of the Companion page this creature was selected on.
+    *     If it returns false, 0, "", or anything that is not a number, the sheet will default
+    *     to the total class level, or 1 if the level field is empty.
+    * @example ["artificer", "wizard"]
+    * @example function (prefix) { return classes.known.warlock ? classes.known.warlock.level + 1 : 0; },
+    * @since v13.0.6
+    */
+    minLevelLinked?: unknown; // array with ClassList object names (variable length) or function
 
-header: "Summon",
+    header: "Summon",
     /*	header // OPTIONAL //
         TYPE:	string
         USE:	set the single-word header at the top left of the companion page
@@ -780,51 +792,51 @@ header: "Summon",
         { type: "skill", field: "Init", mod: "Int", text: "The purple crawler adds its Intelligence modifier to initiative rolls." },
         { type: "save", field: "all", mod: "max(oCha|1)", text: "The purple crawler adds its master's Charisma modifier (min 1) to all its saving throws." }
     ],
-        /*	addMod // OPTIONAL //
-            TYPE:	array of objects (variable length)
-            USE:	add value to a modifier field
-            ADDED:	v13.0.6
-        
-            This attribute works identical to the `addMod` attribute found in the
-            "_common attributes.js" file.
-            Please look there for a complete explanation.
-        */
-
-        /*	calcChanges // OPTIONAL //
-        TYPE:	object (optional attributes)
-        USE:	change how the hit points automation works
-                This will only affect hit points on the companion page, not wild shapes
+    /*	addMod // OPTIONAL //
+        TYPE:	array of objects (variable length)
+        USE:	add value to a modifier field
         ADDED:	v13.0.6
     
-        The attributes of this object can be `hp` and `setAltHp`.
-    
-        Note that `calcChanges` also appears in the list of common attributes,
-        but only its `hp` attribute is shared with the object here.
+        This attribute works identical to the `addMod` attribute found in the
+        "_common attributes.js" file.
+        Please look there for a complete explanation.
     */
-        calcChanges: { };
 
-
-/*	eval // OPTIONAL //
-    TYPE:	function
-    USE:	runs a piece of code when the creature is selected on the Companion page
+    /*	calcChanges // OPTIONAL //
+    TYPE:	object (optional attributes)
+    USE:	change how the hit points automation works
+            This will only affect hit points on the companion page, not wild shapes
+    ADDED:	v13.0.6
  
-    The function is passed two variables:
-    1) The first variable is a string: the prefix of the Companion page this creature was selected on
-        You can use this variable to call on fields on that page. The example above uses it to set
-        the speed to something else.
-    2) The second variable is an array with 2 numbers: the old level and the new level
-        e.g. lvl = [0,5] when the creature gets added and the character is 5th level
-        The first entry, the old level, is the level that was passed as the second entry the last time
-        this function was called.
-        The first entry will be zero (0) as this is only called when the creature is added for the first time.
-        The second entry, the new level, is the current main character level.
-        The new level passed can be different than the main character level if the attribute
-        `minlevelLinked` exists, see above.
+    The attributes of this object can be `hp` and `setAltHp`.
  
-    This can be any JavaScript you want to have run whenever this creature is selected on a Companion page.
-    This attribute is processed last, after all other attributes are processed.
+    Note that `calcChanges` also appears in the list of common attributes,
+    but only its `hp` attribute is shared with the object here.
 */
-eval: function (prefix, lvl) {
+    calcChanges: {};
+
+
+    /*	eval // OPTIONAL //
+        TYPE:	function
+        USE:	runs a piece of code when the creature is selected on the Companion page
+     
+        The function is passed two variables:
+        1) The first variable is a string: the prefix of the Companion page this creature was selected on
+            You can use this variable to call on fields on that page. The example above uses it to set
+            the speed to something else.
+        2) The second variable is an array with 2 numbers: the old level and the new level
+            e.g. lvl = [0,5] when the creature gets added and the character is 5th level
+            The first entry, the old level, is the level that was passed as the second entry the last time
+            this function was called.
+            The first entry will be zero (0) as this is only called when the creature is added for the first time.
+            The second entry, the new level, is the current main character level.
+            The new level passed can be different than the main character level if the attribute
+            `minlevelLinked` exists, see above.
+     
+        This can be any JavaScript you want to have run whenever this creature is selected on a Companion page.
+        This attribute is processed last, after all other attributes are processed.
+    */
+    eval: function (prefix, lvl) {
     var fldName = prefix + "Comp.Use.Speed";
     var newSpeed = "40 ft, fly 60 ft, swim 40 ft";
     if (What("Unit System") === "metric") newSpeed = ConvertToMetric(newSpeed, 0.5);

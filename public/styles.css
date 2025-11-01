@@ -88,8 +88,20 @@ body {
     overflow: hidden;
 }
 
+.card .cell {}
+
 .spell-card p {
     margin-top: 0;
+}
+
+/* card common styles */
+
+.card .label {
+    font-weight: bold;
+}
+
+.card .source-book {
+    align-self: flex-end;
 }
 
 .spell-card .name,
@@ -115,19 +127,90 @@ body {
     white-space: pre-wrap;
 }
 
-.monster-card .subtitle {
-    font-style: italic;
-}
-
 .spell-card .description {
     font-size: 0.95em;
     white-space: pre-wrap;
 }
 
-.card .label {
-    font-weight: bold;
+/* monster-card styles */
+
+.monster-card .subtitle {
+    font-style: italic;
 }
 
-.card .source-book {
-    align-self: flex-end;
+.monster-card .ability {
+    border: 1px darkslategray;
+
 }
+
+.monster-card .ability-abbr {
+    font-weight: bold;
+    font-variant-caps: small-caps;
+}
+
+.abilities-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    align-items: center
+}
+
+.header {
+    background-color: none;
+    font-size: .5em;
+    font-weight: normal;
+
+    /* light gray text */
+    color: #666666;
+
+    text-transform: uppercase
+}
+
+.ability {
+    display: contents;
+    width: 100%;
+    text-align: end;
+}
+
+.ability:not(.header)> :nth-child(1) {
+    background-color: #e0e0e0;
+    padding-left: .25rem
+}
+
+.ability:not(.header)> :nth-child(2) {
+    background-color: #e0e0e0;
+    padding: 0 .125rem;
+}
+
+.ability:not(.header)> :nth-child(3),
+.ability:not(.header)> :nth-child(4) {
+    background-color: #c0c0c0;
+    padding-left: .125rem;
+    padding-right: .25rem;
+}
+
+/* .temp {
+    Element	Color	Notes
+Header text	#666666	Small, light gray for less prominence
+First two cells	#f5f5f5	Very light gray, neutral background
+Last two cells	#c0c0c0	Slightly darker gray, still soft but distinct
+Hover row (optional)	#e8f4ff	Gentle highlight when hovering a row
+} */
+
+/* .cell {
+    background-color: lightgray;
+} */
+
+/*
+.cell .ability-abbr {
+    width: 1rem;
+} */
+
+/* .ability .name {
+    font-weight: bold;
+    text-align: left;
+}
+
+.ability div {
+    text-align: center; 
+}
+*/

@@ -115,8 +115,100 @@
                 </div>
                 <div><span class="label">HP</span> {{hp}} {{vm.hit_dice}}</div>
                 <div><span class="label">Speed</span> {{speed}}</div>
-                <hr />
-                <div>Scores: {{scores}}</div>
+
+                <!-- todo: need to apply format_modifer() to the numbers -->
+                <div class="row flex-row mt-1">
+                    <div class="abilities-group">
+
+                        <div class="ability header">
+                            <div class=""></div>
+                            <div class=""></div>
+                            <div>MOD</div>
+                            <div>SAVE</div>
+                        </div>
+
+                        <div class="ability">
+                            {{#abilities.str}}
+                            <div class="ability-abbr cell">Str</div>
+                            <div class="cell">{{score}}</div>
+                            <div class="cell">{{mod}}</div>
+                            <div class="cell">{{save_mod}}</div>
+                            {{/abilities.str}}
+                        </div>
+
+                        <div class="ability">
+                            {{#abilities.int}}
+                            <div class="ability-abbr cell">Int</div>
+                            <div class="cell">{{score}}</div>
+                            <div class="cell">{{mod}}</div>
+                            <div class="cell">{{save_mod}}</div>
+                            {{/abilities.int}}
+                        </div>
+
+                    </div><!--/abilities group -->
+
+
+                    <div class="abilities-group">
+
+                        <div class="ability header">
+                            <div class=""></div>
+                            <div class=""></div>
+                            <div>MOD</div>
+                            <div>SAVE</div>
+                        </div>
+
+                        {{#abilities.dex}}
+                        <div class="ability">
+                            <div class="ability-abbr cell">Dex</div>
+                            <div class="cell">{{score}}</div>
+                            <div class="cell">{{mod}}</div>
+                            <div class="cell">{{save_mod}}</div>
+                        </div>
+                        {{/abilities.dex}}
+
+                        <div class="ability">
+                            {{#abilities.wis}}
+                            <div class="ability-abbr cell">Wis</div>
+                            <div class="cell">{{score}}</div>
+                            <div class="cell">{{mod}}</div>
+                            <div class="cell">{{save_mod}}</div>
+                            {{/abilities.wis}}
+                        </div>
+
+                    </div><!--/abilities group -->
+
+
+                    <div class="abilities-group">
+
+
+                        <div class="ability header">
+                            <div class=""></div>
+                            <div class=""></div>
+                            <div>MOD</div>
+                            <div>SAVE</div>
+                        </div>
+
+                        <div class="ability">
+                            {{#abilities.con}}
+                            <div class="ability-abbr cell">Con</div>
+                            <div class="cell">{{score}}</div>
+                            <div class="cell">{{mod}}</div>
+                            <div class="cell">{{save_mod}}</div>
+                            {{/abilities.con}}
+                        </div>
+
+                        <div class="ability">
+                            {{#abilities.cha}}
+                            <span class="ability-abbr cell">Cha</span>
+                            <span class="cell">{{score}}</span>
+                            <span class="cell">{{mod}}</span>
+                            <span class="cell">{{save_mod}}</span>
+                            {{/abilities.cha}}
+                        </div>
+
+                    </div> <!--/abilities group -->
+                </div>
+
                 <div>Skills ?</div>
                 <div>Senses {{senses}}</div>
                 <div>Languages {{languages}}</div>

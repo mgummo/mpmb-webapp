@@ -191,32 +191,40 @@
             return creature;
         }
 
+        // todo: add prof bonus to save_mod if prof
+        // I don't see an attribute for indicating profiency in Creature.d.ts ?
         // [Str, Dex, Con, Int, Wis, Cha]
         build_ability_stats(scores) {
             const abilities = {
                 'str': {
                     score: scores[0],
-                    mod: this.calc_ability_mod(scores[0])
+                    mod: this.calc_ability_mod(scores[0]),
+                    save_mod: this.calc_ability_mod(scores[0])
                 },
                 'dex': {
                     score: scores[1],
-                    mod: this.calc_ability_mod(scores[1])
+                    mod: this.calc_ability_mod(scores[1]),
+                    save_mod: this.calc_ability_mod(scores[1])
                 },
                 'con': {
                     score: scores[2],
-                    mod: this.calc_ability_mod(scores[2])
+                    mod: this.calc_ability_mod(scores[2]),
+                    save_mod: this.calc_ability_mod(scores[2])
                 },
                 'int': {
                     score: scores[3],
-                    mod: this.calc_ability_mod(scores[3])
+                    mod: this.calc_ability_mod(scores[3]),
+                    save_mod: this.calc_ability_mod(scores[3])
                 },
                 'wis': {
                     score: scores[4],
-                    mod: this.calc_ability_mod(scores[4])
+                    mod: this.calc_ability_mod(scores[4]),
+                    save_mod: this.calc_ability_mod(scores[4])
                 },
                 'cha': {
                     score: scores[5],
-                    mod: this.calc_ability_mod(scores[5])
+                    mod: this.calc_ability_mod(scores[5]),
+                    save_mod: this.calc_ability_mod(scores[5])
                 },
 
             }
