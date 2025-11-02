@@ -21,6 +21,9 @@
             // todo: option to roll for this
             vm.hit_dice = this.format_hit_dice(monster)
 
+            vm.skills = this.format_skills(monster);
+            vm.defenses = this.format_defenses(monster);
+
             vm.source = this.format_source_book(monster)
 
             return vm;
@@ -84,7 +87,42 @@
             return text;
         }
 
+        format_skills(monster) {
+            const fragments = []
+            for ( const [skill, mod] of Object.entries(monster.skills)) {
+                fragments.push(`${this.toTitleCase(skill)} ${this.format_modifier(mod)}`)
+            }
+            const text = fragments.join(", ")
+            return text;
+        }
+
+        format_defenses(monster) {
+
+            const vulnerabilities = monster.defenses.damage_vulnerabilities.join(", ");
+            const resistances =  monster.defenses.damage_resistances.join(", ");
+
+            const immunities =  [
+                monster.defenses.damage_immunities.join(", "),
+                monster.defenses.condition_immunities.join(", ") 
+            ]
+                .filter( token => token)
+                .join("; ")
+
+            const defenses = {
+                vulnerabilities,
+                resistances,
+                immunities ,
+            };
+            return defenses;
+        }
+
     }
+
+        // lists: string[][]
+    // returns string
+    function joinLists(...lists) {
+        return lists.flat().join(', ');
+}
 
     global.main.formatters.monster_card = new MonsterCardFormatter();
 

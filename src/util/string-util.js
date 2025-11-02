@@ -9,3 +9,18 @@ function replace_and_report(str, pattern, replacement) {
     });
     return [replaced, count];
 }
+
+
+String.prototype.toTitleCase = function() {
+    const str = this.toString();
+            if (!str) {
+                return "";
+            }
+            return str
+                .toLowerCase()
+                .split(' ')
+                .map(function (word) {
+                    return word.charAt(0).toUpperCase() + word.slice(1);
+                })
+                .join(' ');
+        }

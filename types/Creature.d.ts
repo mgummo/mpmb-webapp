@@ -39,9 +39,11 @@ type score_array = number[6];
 type rich_text = string;
 
 /**
- * The syntax for adding a new crature to the sheet, for use by the companion and wild shape pages.
+ * The Creature type, as defined by MPMB
  * 
  * @remarks
+ * The syntax for adding a new crature to the sheet, for use by the companion and wild shape pages.
+ * 
  * You will also need the syntax for adding a weapon 
  * if you want the creature to have attack options.
  * You will also need the syntax for adding a source 
@@ -50,7 +52,7 @@ type rich_text = string;
  * custom calculation for hit points (calcChanges.hp).
  * @since v24.0.0
  */
-interface Creature {
+type Mpmb<Creature> {
 
     /**
      * name of the creature as it will be used by the sheet
@@ -444,7 +446,7 @@ interface Creature {
         the other attributes together will fit.
         If they don't fit (well), consider using the `wildshapeString` attribute, see below.
     */
-    attacksAction: 2,
+
     /*	attacksAction // REQUIRED //
         TYPE:	number
         USE:	set the number of attacks per action
@@ -453,6 +455,8 @@ interface Creature {
         This value is not displayed on the wild shape page, hence it is recommended to also explain
         the multiattack trait in the description of the appropriate attack and/or in the `traits` attribute.
     */
+    attacksAction: 2,
+
 
     /*	attacks // REQUIRED //
         TYPE:	array (variable length) of WeaponsList objects
@@ -956,7 +960,13 @@ interface WildshapeCreature {
     */
 }
 
-interface Internal<Creature> implments Creature {
+// the entity type, with the properties I don't want thrown out
+type Narrowed<Creature> = Omit<Mpmb<Creature>, 
+"saves" // because this info is captured by ability.x.save_mod
+> {}
+
+// the final entity type, used internally
+type Creature = Narrowed<Creature> & {
 
     /**
      * The key used to register this creature in the CreatureList dictionary.

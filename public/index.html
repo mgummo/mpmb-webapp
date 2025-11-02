@@ -117,7 +117,7 @@
                 <div><span class="label">Speed</span> {{speed}}</div>
 
                 <!-- todo: need to apply format_modifer() to the numbers -->
-                <div class="row flex-row mt-1">
+                <div class="row flex-row my-1">
                     <div class="abilities-group">
 
                         <div class="ability header">
@@ -146,7 +146,6 @@
                         </div>
 
                     </div><!--/abilities group -->
-
 
                     <div class="abilities-group">
 
@@ -177,9 +176,7 @@
 
                     </div><!--/abilities group -->
 
-
                     <div class="abilities-group">
-
 
                         <div class="ability header">
                             <div class=""></div>
@@ -209,25 +206,43 @@
                     </div> <!--/abilities group -->
                 </div>
 
-                <div>Skills ?</div>
+                {{#vm.skills}}
+                <div><span class="label">Skills</span> {{vm.skills}}</div>
+                {{/vm.skills}}
+
+                {{#vm.defenses.vulnerabilities}}
+                <div><span class="label">Vulnerabilities</span> {{vm.defenses.vulnerabilities}}</div>
+                {{/vm.defenses.vulnerabilities}}
+
+                {{#vm.defenses.resistances}}
+                <div><span class="label">Resistances</span> {{vm.defenses.resistances}}</div>
+                {{/vm.defenses.resistances}}
+
+                {{#vm.defenses.immunities}}
+                <div><span class="label">Immunities</span> {{vm.defenses.immunities}}</div>
+                {{/vm.defenses.immunities}}
+
                 <div>Senses {{senses}}</div>
                 <div>Languages {{languages}}</div>
-                <div>Challenge {{challengeRating}} (? XP)</div>
+                <div>CR {{challengeRating}} (XP ?; PB {{proficiencyBonus}})</div>
                 <hr />
             </div>
 
             <div class="row">
                 <div>Actions: {{actions}}</div>
-                <div>condition_immunities: {{condition_immunities}}</div>
-                <div>damage_immunities: {{damage_immunities}}</div>
-                <div>damage_resistances: {{damage_resistances}}</div>
                 <div>Traits: {{json traits}}</div>
             </div>
 
             <div class="row">
-                <div>Proficiency Bonus: {{proficiencyBonus}}</div>
-                <div>attacksAction: {{attacksAction}}</div>
                 <div>nameAlt: {{nameAlt}}</div>
+                <div>saves: {{saves}}</div>
+                <div>attacksAction: {{attacksAction}}</div>
+                <div>attacks: {{attacks}}</div>
+
+                <div>features: {{features}}</div>
+                <div>traits: {{traits}}</div>
+                <div>notes: {{notes}}</div>
+
             </div>
 
             <div class="spacer"></div>

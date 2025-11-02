@@ -188,11 +188,65 @@
 
             creature.abilities = this.build_ability_stats(creature.scores)
 
+            this.calc_save_mods(creature);
+
+            this.fixup_skills(creature);
+            creature.defenses = this.build_defenses(creature);
+
             return creature;
         }
 
+        calc_save_mods(creature) {
+
+                // [Str, Dex, Con, Int, Wis, Cha]
+                const base_save = [
+                    creature.abilities.str.save_mod,
+                    creature.abilities.dex.save_mod,
+                    creature.abilities.con.save_mod,
+                    creature.abilities.int.save_mod,
+                    creature.abilities.wis.save_mod,
+                    creature.abilities.cha.save_mod
+                ]
+
+                const deltas =[undefined,undefined,undefined,undefined,undefined,undefined,]
+                for(let i=0;i<6;i++) {
+                    const x = base_save[i]
+                    const maybe_adjusted = creature.saves?.[i];
+                    const adjusted = (function(maybe_adjusted, x) {
+                        if (maybe_adjusted == null) {
+                            return x;
+                        }
+                        if (typeof(maybe_adjusted) == "undefined") {
+                            return x;
+                        }
+                        if (maybe_adjusted == "") {
+                            return x;
+                        }
+                        return maybe_adjusted;
+
+                    })(maybe_adjusted, x)
+
+                    const delta = adjusted - x 
+                    if (delta != 0)
+                    {
+                        // todo: reset save_mod to adjusted value
+                        // if delta == prof_bonus then assume has saving throw prof.
+                        // otherwise we have an edge case, where there's a saving throw adjustment.
+                        // 
+                        // todo fix up Camel (stats were set on dex not con), and a few others
+                        //
+                        if (delta != creature.proficiencyBonus)
+                                  
+                        {
+                            debugger;
+                        }
+                    }
+                    deltas[i] = delta;
+                }
+        }
+
         // todo: add prof bonus to save_mod if prof
-        // I don't see an attribute for indicating profiency in Creature.d.ts ?
+        // (see calc_save_mods)
         // [Str, Dex, Con, Int, Wis, Cha]
         build_ability_stats(scores) {
             const abilities = {
@@ -236,8 +290,62 @@
             return mod;
         }
 
+        fixup_skills(monster) {
+            monster.skills = monster.skills ?? {};
 
+            if(Array.isArray(monster.skills)) {
+                const result = {}
+                for(const elem of monster.skills) {
+                    for(const [skill, mod] of Object.entries(elem) ) {
+                        result[skill] = mod;
+                    }
+                }
+                monster.skills = result;
+            }
+        }
+
+        build_defenses(monster) {
+            
+            const dv = parse_list(monster.damage_vulnerabilities)   
+            const dr = parse_list(monster.damage_resistances)
+            const di = parse_list(monster.damage_immunities)
+            const ci = parse_list(monster.condition_immunities)
+
+            // const v = parse_list(monster.vulnerabilities)
+            // const r = parse_list(monster.resistances)
+            // const i = parse_list(monster.immunities)
+
+            // not sure what these do - but these don't appear to be set?
+            if (monster.vulnerabilities) { debugger; }
+            if (monster.resistances) { debugger; }
+            if (monster.immunities) { debugger; }
+
+            const defenses = {
+                damage_vulnerabilities: dv,
+                damage_resistances: dr,
+                damage_immunities: di,
+                condition_immunities: ci,
+            };
+
+            return defenses;
+        }
     }
+
+    function parse_list(text) {
+        if (!text) {
+            return []
+        }
+
+        return text.split(",")
+            .map( token => token
+                .trim()
+                .replace(/^and\s+/i, '')
+                .toTitleCase()
+            )
+            .filter(token => token.length > 0);
+    }
+
+
 
     const loader = new Loader();
 

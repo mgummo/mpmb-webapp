@@ -4,6 +4,30 @@
 interface MpmbApp_Lists {
 
     // lists: Record<string, any>;
+    // AmmoList
+    // ArmourList
+    // BackgroundFeatureList
+    // BackgroundSubList
+    // ClassList
+    // ClassSubList
+    // CompanionList
+    // CreatureList
+    // DefaultEvalsList
+    // FeatsList
+    // GearList
+    // MagicItemsList
+    // PacksList
+    // PsionicList
+    // RaceList
+    // RaceSubList
+    // SourceList
+    // SpellsList
+    // ToolsList
+    // WeaponsList
+    // spellLevelList
+    // spellSchoolList
+
+
 
     // I think this is intended to be a lookup table, for the number of lines allowed for each field?
     FieldNumbers: Record<string, number>;
