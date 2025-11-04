@@ -10,6 +10,9 @@
 
     class MonsterCardFormatter extends TBaseFormatter {
 
+        /**
+         * @param {Definition<Creature>} monster
+         */
         build_monstercard_vm(monster) {
             const vm = {}
             vm.size = this.format_creature_size(monster)
@@ -23,6 +26,11 @@
 
             vm.skills = this.format_skills(monster);
             vm.defenses = this.format_defenses(monster);
+            vm.senses = this.format_senses(monster);
+            vm.languages = this.format_languages(monster);
+
+            debugger;
+            vm.proficiencyBonus = this.format_modifier(monster.proficiencyBonus)
 
             vm.source = this.format_source_book(monster)
 
@@ -89,7 +97,7 @@
 
         format_skills(monster) {
             const fragments = []
-            for ( const [skill, mod] of Object.entries(monster.skills)) {
+            for (const [skill, mod] of Object.entries(monster.skills)) {
                 fragments.push(`${this.toTitleCase(skill)} ${this.format_modifier(mod)}`)
             }
             const text = fragments.join(", ")
@@ -99,30 +107,48 @@
         format_defenses(monster) {
 
             const vulnerabilities = monster.defenses.damage_vulnerabilities.join(", ");
-            const resistances =  monster.defenses.damage_resistances.join(", ");
+            const resistances = monster.defenses.damage_resistances.join(", ");
 
-            const immunities =  [
+            const immunities = [
                 monster.defenses.damage_immunities.join(", "),
-                monster.defenses.condition_immunities.join(", ") 
+                monster.defenses.condition_immunities.join(", ")
             ]
-                .filter( token => token)
+                .filter(token => token)
                 .join("; ")
 
             const defenses = {
                 vulnerabilities,
                 resistances,
-                immunities ,
+                immunities,
             };
             return defenses;
         }
 
+        /**
+         * @param {Definition<Creature>} monster
+         */
+        format_senses(monster) {
+            const passive_perception = monster.abilities.wis.mod + 10;
+            const text = [monster.senses, `Passive Perception ${passive_perception}`]
+                .filter(token => token)
+                .join("; ")
+            return text;
+        }
+
+        format_languages(monster) {
+            if (monster.languages == "") {
+                return "None"
+            }
+            return monster.languages;
+        }
+
     }
 
-        // lists: string[][]
+    // lists: string[][]
     // returns string
     function joinLists(...lists) {
         return lists.flat().join(', ');
-}
+    }
 
     global.main.formatters.monster_card = new MonsterCardFormatter();
 

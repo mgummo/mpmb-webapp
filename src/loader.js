@@ -193,56 +193,57 @@
             this.fixup_skills(creature);
             creature.defenses = this.build_defenses(creature);
 
+            // todo: should this be typed as an array?
+            creature.languages = creature.languages ?? ""
+            creature.languages = creature.languages.replace(/^understand/, 'Understand')
+
             return creature;
         }
 
         calc_save_mods(creature) {
 
-                // [Str, Dex, Con, Int, Wis, Cha]
-                const base_save = [
-                    creature.abilities.str.save_mod,
-                    creature.abilities.dex.save_mod,
-                    creature.abilities.con.save_mod,
-                    creature.abilities.int.save_mod,
-                    creature.abilities.wis.save_mod,
-                    creature.abilities.cha.save_mod
-                ]
+            // [Str, Dex, Con, Int, Wis, Cha]
+            const base_save = [
+                creature.abilities.str.save_mod,
+                creature.abilities.dex.save_mod,
+                creature.abilities.con.save_mod,
+                creature.abilities.int.save_mod,
+                creature.abilities.wis.save_mod,
+                creature.abilities.cha.save_mod
+            ]
 
-                const deltas =[undefined,undefined,undefined,undefined,undefined,undefined,]
-                for(let i=0;i<6;i++) {
-                    const x = base_save[i]
-                    const maybe_adjusted = creature.saves?.[i];
-                    const adjusted = (function(maybe_adjusted, x) {
-                        if (maybe_adjusted == null) {
-                            return x;
-                        }
-                        if (typeof(maybe_adjusted) == "undefined") {
-                            return x;
-                        }
-                        if (maybe_adjusted == "") {
-                            return x;
-                        }
-                        return maybe_adjusted;
-
-                    })(maybe_adjusted, x)
-
-                    const delta = adjusted - x 
-                    if (delta != 0)
-                    {
-                        // todo: reset save_mod to adjusted value
-                        // if delta == prof_bonus then assume has saving throw prof.
-                        // otherwise we have an edge case, where there's a saving throw adjustment.
-                        // 
-                        // todo fix up Camel (stats were set on dex not con), and a few others
-                        //
-                        if (delta != creature.proficiencyBonus)
-                                  
-                        {
-                            debugger;
-                        }
+            const deltas = [undefined, undefined, undefined, undefined, undefined, undefined,]
+            for (let i = 0; i < 6; i++) {
+                const x = base_save[i]
+                const maybe_adjusted = creature.saves?.[i];
+                const adjusted = (function (maybe_adjusted, x) {
+                    if (maybe_adjusted == null) {
+                        return x;
                     }
-                    deltas[i] = delta;
+                    if (typeof (maybe_adjusted) == "undefined") {
+                        return x;
+                    }
+                    if (maybe_adjusted == "") {
+                        return x;
+                    }
+                    return maybe_adjusted;
+
+                })(maybe_adjusted, x)
+
+                const delta = adjusted - x
+                if (delta != 0) {
+                    // todo: reset save_mod to adjusted value
+                    // if delta == prof_bonus then assume has saving throw prof.
+                    // otherwise we have an edge case, where there's a saving throw adjustment.
+                    // 
+                    // todo fix up Camel (stats were set on dex not con), and a few others
+                    //
+                    if (delta != creature.proficiencyBonus) {
+                        debugger;
+                    }
                 }
+                deltas[i] = delta;
+            }
         }
 
         // todo: add prof bonus to save_mod if prof
@@ -293,10 +294,10 @@
         fixup_skills(monster) {
             monster.skills = monster.skills ?? {};
 
-            if(Array.isArray(monster.skills)) {
+            if (Array.isArray(monster.skills)) {
                 const result = {}
-                for(const elem of monster.skills) {
-                    for(const [skill, mod] of Object.entries(elem) ) {
+                for (const elem of monster.skills) {
+                    for (const [skill, mod] of Object.entries(elem)) {
                         result[skill] = mod;
                     }
                 }
@@ -305,8 +306,8 @@
         }
 
         build_defenses(monster) {
-            
-            const dv = parse_list(monster.damage_vulnerabilities)   
+
+            const dv = parse_list(monster.damage_vulnerabilities)
             const dr = parse_list(monster.damage_resistances)
             const di = parse_list(monster.damage_immunities)
             const ci = parse_list(monster.condition_immunities)
@@ -337,7 +338,7 @@
         }
 
         return text.split(",")
-            .map( token => token
+            .map(token => token
                 .trim()
                 .replace(/^and\s+/i, '')
                 .toTitleCase()

@@ -14,15 +14,13 @@ A lightweight web app for viewing and printing information from the [MorePurpleM
 
 ## Getting Started
 
-1. **Clone this repository.**  
+1. **Clone** this repository.  
 2. **Clone** the [`2024_MPMBs-Character-Record-Sheet`](https://github.com/morepurplemorebetter/2024_MPMBs-Character-Record-Sheet) repo **next to** this one (Both repos in the same parent folder).  
 3. **Copy** `etc/config.example.js` → `etc/config.js`.  
 4. **Edit** your `config.js` file:  
    - Add URLs for any plugin scripts you want to use.  
-5. **Edit** `main.js`
-   Edit function `select_spells_to_render()` to choose which spells will be displayed.  
-   *TODO: make this configurable in config.js instead)*
-6. **Open** `public/index.html` in your browser.
+   - Specify which cards you want displayed. (All spells, All known spells, All prepared spells, etc.)
+5. **Open** `public/index.html` in your browser.
 
 ## Character Stats
 not yet implemented

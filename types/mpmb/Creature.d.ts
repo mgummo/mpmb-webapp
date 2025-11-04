@@ -17,11 +17,15 @@ type TCreatureType = string
  */
 type score_array = number[6];
 
+type ability_score_stats = {
+    score: number,
+    mod: number,
+    save_mod: number,
+}
+
 /**
  * text that supports rich text formatting
  * @remarks
- *      The `description` can be formatted using the Rich Text formatting characters.
- *      Text between the formatting characters will be displayed differently on the sheet.
  *      The formatting characters are as follows:
  *          *text*   = italic
  *          **text** = bold
@@ -38,6 +42,9 @@ type score_array = number[6];
   */
 type rich_text = string;
 
+
+type EvaluationFn = (field_prefix: string, args: [old_level: number, new_level: number]) => void;
+
 /**
  * The Creature type, as defined by MPMB
  * 
@@ -52,7 +59,7 @@ type rich_text = string;
  * custom calculation for hit points (calcChanges.hp).
  * @since v24.0.0
  */
-type Mpmb<Creature> {
+type Mpmb<Creature> = {
 
     /**
      * name of the creature as it will be used by the sheet
@@ -357,21 +364,21 @@ type Mpmb<Creature> {
      */
     proficiencyBonus: number;
 
-        /*	proficiencyBonusLinked // OPTIONAL //
-        TYPE:	boolean
-        USE:	whether the proficiency bonus is the same (true) as the main character or not (false)
-        ADDED:	v13.0.6
-    
-        Setting this to true will cause the `proficiencyBonus` attribute above to
-        be overwritten on the Companion page with that of the main character (the 1st page),
-        and updated whenever the main character changes level.
-        Even so, setting the `proficiencyBonus` attribute is still required, as it will
-        be used to calculate skill and saving throw proficiencies and bonuses.
-    
-        This attribute has no affect on the Wild Shape page.
-    
-        Setting this attribute to false is the same as not including this attribute.
-    */
+    /*	proficiencyBonusLinked // OPTIONAL //
+    TYPE:	boolean
+    USE:	whether the proficiency bonus is the same (true) as the main character or not (false)
+    ADDED:	v13.0.6
+ 
+    Setting this to true will cause the `proficiencyBonus` attribute above to
+    be overwritten on the Companion page with that of the main character (the 1st page),
+    and updated whenever the main character changes level.
+    Even so, setting the `proficiencyBonus` attribute is still required, as it will
+    be used to calculate skill and saving throw proficiencies and bonuses.
+ 
+    This attribute has no affect on the Wild Shape page.
+ 
+    Setting this attribute to false is the same as not including this attribute.
+*/
     proficiencyBonusLinked: true,
 
     /**
@@ -457,7 +464,6 @@ type Mpmb<Creature> {
     */
     attacksAction: 2,
 
-
     /*	attacks // REQUIRED //
         TYPE:	array (variable length) of WeaponsList objects
         USE:	set the attack entries
@@ -539,21 +545,6 @@ type Mpmb<Creature> {
         As the wild shape pages offer limited space, it is recommended to test if all of these and
         the other attributes together will fit.
         If they don't fit (well), consider using the `wildshapeString` attribute, see below.
-    
-        FORMATTING CHARACTERS (since v14.0.0)
-        These can be formatted using the Rich Text formatting characters.
-        Text between the formatting characters will be displayed differently on the sheet.
-        The formatting characters are as follows:
-            *text*   = italic
-            **text** = bold
-            _text_   = underlined [doesn't work in tooltips/pop-ups]
-            ~text~   = strikethrough [doesn't work in tooltips/pop-ups]
-            #text#   = Header 1:
-                       - bold and theme color (Colourful)
-                       - bold and 15% size increase (Printer Friendly)
-            ##text## = Header 2:
-                       - italic, bold, and theme color (Colourful)
-                       - italic and bold (Printer Friendly)
      */
     damage_vulnerabilities: "cold",
     vulnerabilities: "cold",
@@ -571,13 +562,11 @@ type Mpmb<Creature> {
      * 
      * @example "Common"
      */
-    languages: string;
-
-
+    languages: rich_text;
 
     /**
      * @remarks
-/*	
+	
         TYPE:	array (variable length) with objects
         USE:	add text to the Traits and Features sections on the Companion page
         CHANGE:	v13.1.0 (added `joinString` attribute)
@@ -819,11 +808,10 @@ interface CompanionCreature {
 */
     calcChanges: {};
 
+    /*	 
+        runs a piece of code when the creature is selected on the Companion page
 
-    /*	eval // OPTIONAL //
-        TYPE:	function
-        USE:	runs a piece of code when the creature is selected on the Companion page
-     
+        @remarks
         The function is passed two variables:
         1) The first variable is a string: the prefix of the Companion page this creature was selected on
             You can use this variable to call on fields on that page. The example above uses it to set
@@ -839,99 +827,113 @@ interface CompanionCreature {
      
         This can be any JavaScript you want to have run whenever this creature is selected on a Companion page.
         This attribute is processed last, after all other attributes are processed.
+        @example
+        function (prefix, lvl) {
+            var fldName = prefix + "Comp.Use.Speed";
+            var newSpeed = "40 ft, fly 60 ft, swim 40 ft";
+            if (What("Unit System") === "metric") newSpeed = ConvertToMetric(newSpeed, 0.5);
+            Value(fldName, newSpeed);
+        }
     */
-    eval: function (prefix, lvl) {
-    var fldName = prefix + "Comp.Use.Speed";
-    var newSpeed = "40 ft, fly 60 ft, swim 40 ft";
-    if (What("Unit System") === "metric") newSpeed = ConvertToMetric(newSpeed, 0.5);
-    Value(fldName, newSpeed);
-},
+    eval?: EvaluationFn;
 
-/*	removeeval // OPTIONAL //
-    TYPE:	function
-    USE:	runs a piece of code when the creature is removed from the Companion page
- 
-    The function is passed two variables:
-    1) The first variable is a string: the prefix of the Companion page this creature was selected on
-        You can use this variable to call on fields on that page. The example above uses it to set
-        the speed to something else.
-    2) The second variable is an array with 2 numbers: the old level and the new level
-        e.g. lvl = [0,5] when the creature gets added and the character is 5th level
-        The first entry, the old level, is the level that the creature had before being removed.
-        The second entry, the new level, will be zero (0) as this is only called when the creature is being removed.
- 
-    This can be any JavaScript you want to have run whenever the creature is removed from a Companion page.
-    This attribute is processed last, after all other attributes are processed.
-*/
-removeeval: function (prefix, lvl) {
-    var fldName = prefix + "Comp.Use.Speed";
-    var newSpeed = "30 ft, fly 45 ft, swim 30 ft";
-    if (What("Unit System") === "metric") newSpeed = ConvertToMetric(newSpeed, 0.5);
-    Value(fldName, newSpeed);
-},
+    /*	
+        runs a piece of code when the creature is removed from the Companion page
+     
+        The function is passed two variables:
+        1) The first variable is a string: the prefix of the Companion page this creature was selected on
+            You can use this variable to call on fields on that page. The example above uses it to set
+            the speed to something else.
+        2) The second variable is an array with 2 numbers: the old level and the new level
+            e.g. lvl = [0,5] when the creature gets added and the character is 5th level
+            The first entry, the old level, is the level that the creature had before being removed.
+            The second entry, the new level, will be zero (0) as this is only called when the creature is being removed.
+     
+        This can be any JavaScript you want to have run whenever the creature is removed from a Companion page.
+        This attribute is processed last, after all other attributes are processed.
+        @example
+            function (prefix, lvl) {
+                var fldName = prefix + "Comp.Use.Speed";
+                var newSpeed = "30 ft, fly 45 ft, swim 30 ft";
+                if (What("Unit System") === "metric") newSpeed = ConvertToMetric(newSpeed, 0.5);
+                Value(fldName, newSpeed);
+            }
+    */
+    removeeval?: EvaluationFn;
 
-/*	changeeval // OPTIONAL //
-    TYPE:	function
-    USE:	runs a piece of code every time the main character's level changes
-    ADDED:	v13.0.6
- 
-    "Main character" refers to the character on the first page.
-    A companion doesn't have its own 'level' that is used for the automation.
- 
-    The function is passed two variables:
-    1) The first variable is a string: the prefix of the Companion page this creature was selected on
-        You can use this variable to call on fields on that page. The example above uses it to set the
-        creature's hit dice size depending on the character's level (d8 or d10, if level 15 or higher).
-    2) The second variable is an array with 2 numbers: the old level and the new level
-        e.g. lvl = [0,5] when the creature gets added and the character is 5th level
-        The first entry, the old level, is the level that was passed as the second entry the last time
-        this function was called.
-        The first entry will be zero (0) if the creature is added for the first time.
-        The second entry, the new level, is the current main character level.
-        The new level will be zero (0) if the creature is being removed.
-        The new level passed can be different than the main character level if the attribute
-        `minlevelLinked` exists, see above.
- 
-    This can be any JavaScript you want to have run whenever the level changes.
-    This attribute is processed last, after all other attributes have been processed.
-    It is processed both when the creature is first added to the companion page and
-    when the main character's level changes, but not when the creature is removed.
-*/
-changeeval: function (prefix, lvl) {
-    Value(prefix + "Comp.Use.HD.Die", lvl[1] < 15 ? 8 : 10);
-},
+    /*	        
+        runs a piece of code every time the main character's level changes
+        
+        @remarks
+        "Main character" refers to the character on the first page.
+        A companion doesn't have its own 'level' that is used for the automation.
+     
+        The function is passed two variables:
+        1) The first variable is a string: the prefix of the Companion page this creature was selected on
+            You can use this variable to call on fields on that page. The example above uses it to set the
+            creature's hit dice size depending on the character's level (d8 or d10, if level 15 or higher).
+        2) The second variable is an array with 2 numbers: the old level and the new level
+            e.g. lvl = [0,5] when the creature gets added and the character is 5th level
+            The first entry, the old level, is the level that was passed as the second entry the last time
+            this function was called.
+            The first entry will be zero (0) if the creature is added for the first time.
+            The second entry, the new level, is the current main character level.
+            The new level will be zero (0) if the creature is being removed.
+            The new level passed can be different than the main character level if the attribute
+            `minlevelLinked` exists, see above.
+     
+        This can be any JavaScript you want to have run whenever the level changes.
+        This attribute is processed last, after all other attributes have been processed.
+        It is processed both when the creature is first added to the companion page and
+        when the main character's level changes, but not when the creature is removed.
+
+        @example
+        function (prefix, lvl) {
+            Value(prefix + "Comp.Use.HD.Die", lvl[1] < 15 ? 8 : 10);
+        }
+        @since	v13.0.6
+
+    */
+    changeeval?: EvaluationFn;
 
 }
 
 interface calcChanges {
-    /*	hp // OPTIONAL //
-    TYPE:	function
-    USE:	change how Hit Points are calculated and what the Hit Points tooltip says
+
+    /*	
+    change how Hit Points are calculated and what the Hit Points tooltip says
+
+    @remarks
  
     This function works identical to the `calcChanges.hp` function found in the
     "_common attributes.js" file.
     Please look there for a complete explanation.
-*/
-    hp: function (totalHD, HDobj, prefix) {
-    if (!classes.known.ranger) return;
-    var creaHP = CurrentCompRace[prefix] && CurrentCompRace[prefix].hp ? CurrentCompRace[prefix].hp : 0;
-    var creaName = CurrentCompRace[prefix] && CurrentCompRace[prefix].name ? CurrentCompRace[prefix].name : "the creature";
-    var rngrLvl = classes.known.ranger.level;
-    var rngrCompHp = 4 * rngrLvl;
-    HDobj.alt.push(Math.max(creaHP, rngrCompHp));
-    HDobj.altStr.push(" = the highest of either\n \u2022 " + creaHp + " from " + creaName + "'s normal maximum HP, or\n \u2022 4 \xD7 " + rngrLvl + " from four times my ranger level (" + rngrCompHp + ")");
-},
 
-/*	setAltHp // OPTIONAL //
-TYPE:	boolean
-USE:	set the maximum HP field to automatically assume the alternative calculation method added with the `hp` function
- 
-This attribute will only work if you set the `hp` attribute (see above) in the same object.
-Set this attribute to true if you push a value to the HDobj.alt array with the function in the `hp` attribute.
- 
-Setting this attribute to false is the same as not including it.
+    @example
+    function (totalHD, HDobj, prefix) {
+        if (!classes.known.ranger) return;
+        var creaHP = CurrentCompRace[prefix] && CurrentCompRace[prefix].hp ? CurrentCompRace[prefix].hp : 0;
+        var creaName = CurrentCompRace[prefix] && CurrentCompRace[prefix].name ? CurrentCompRace[prefix].name : "the creature";
+        var rngrLvl = classes.known.ranger.level;
+        var rngrCompHp = 4 * rngrLvl;
+        HDobj.alt.push(Math.max(creaHP, rngrCompHp));
+        HDobj.altStr.push(" = the highest of either\n \u2022 " + creaHp + " from " + creaName + "'s normal maximum HP, or\n \u2022 4 \xD7 " + rngrLvl + " from four times my ranger level (" + rngrCompHp + ")");
+    }
 */
-setAltHp: true,
+    hp?: (totalHD, HDobj, prefix) => void;
+
+    /*	
+    set the maximum HP field to automatically assume the alternative calculation method added with the `hp` function
+    
+    @remarks
+    This attribute will only work if you set the `hp` attribute (see above) in the same object.
+    Set this attribute to true if you push a value to the HDobj.alt array with the function in the `hp` attribute.
+     
+    @defaultValue: false
+    @example true
+
+    */
+    setAltHp?: bool,
 
 }
 
@@ -961,12 +963,28 @@ interface WildshapeCreature {
 }
 
 // the entity type, with the properties I don't want thrown out
-type Narrowed<Creature> = Omit<Mpmb<Creature>, 
-"saves" // because this info is captured by ability.x.save_mod
-> {}
+type Narrowed<Creature> = Omit<Mpmb<Creature>, ""
+
+    // because this info is caputure by abilities.[skill]
+    | "scores"
+
+    // because this info is captured by abilities.[skill].save_mod
+    | "saves"
+
+    // because these have been aggregated to an object and moved to defenses property
+    | "damage_vulnerabilities"
+    | "damage_resistances"
+    | "damage_immunities"
+    | "condition_immunities"
+
+    // because these have been removed - they're obsoleted by the above
+    | "vulnerabilities"
+    | "resistances"
+    | "immunities"
+>;
 
 // the final entity type, used internally
-type Creature = Narrowed<Creature> & {
+type Definition<Creature> = Narrowed<Creature> & {
 
     /**
      * The key used to register this creature in the CreatureList dictionary.
@@ -979,4 +997,23 @@ type Creature = Narrowed<Creature> & {
 
     subtype: string[];
 
+    abilities: {
+        "str": ability_score_stats,
+        "dex": ability_score_stats,
+        "con": ability_score_stats,
+        "int": ability_score_stats,
+        "wis": ability_score_stats,
+        "cha": ability_score_stats,
+    }
+
+    damages: {
+        damage_vulnerabilities: string[],
+        damage_resistances: string[],
+        damage_immunities: string[],
+        condition_immunities: string[],
+    }
 }
+
+type Entity<Creature> = Definition<Creature>
+
+type Creature = {}
