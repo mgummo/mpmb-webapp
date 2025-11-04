@@ -1,13 +1,16 @@
 type character_class = "bard" | "cleric" | "druid" | "paladin" |
 	"ranger" | "sorcerer" | "warlock" | "wizard" | string
 
+type spell_level = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
-// Effect:		This is the syntax for adding a new spell to the sheet.
-
-// Remarks:	This does not add anything to the attack section.
-// 			If you want attack cantrips or spells to be added to the attack section,
-// 			use the syntax for adding a weapon (as well), see "weapon (WeaponsList).js".
-interface Spell {
+/**
+ * This is the syntax for adding a new spell to the sheet.
+ * @remarks
+ * This does not add anything to the attack section.
+ * If you want attack cantrips or spells to be added to the attack section,
+ * use the syntax for adding a weapon (as well), see "weapon (WeaponsList).js".
+ */
+type Mpmb_Spell = {
 
 	/**
 	 * name of the spell as it will be used by the sheet
@@ -17,31 +20,33 @@ interface Spell {
 	 * 
 	 * @example "Sindering Purple"
 	 */
-	name: string,
+	name: string;
 
-	nameAlt: "Sindering Colour",
-	/*	nameAlt // OPTIONAL //
-		TYPE:	string
-		USE:	alternative setting-independent name with which the sheet can recognize the spell
-	
-		This attribute is intended for spells that have a name that is bound to a specific setting,
-		to allow a name that is setting-neutral.
-		For example, the "Bigby's Hand" (PHB 118) is named after the legendary wizard "Bigby" of the Greyhawk setting.
-		As not everybody wants to use the Greyhawk name, the name as given in the SRD page 218 "Arcane Hand" is good to provide as the 'nameAlt'
-	
-		This name will also be used to recognize what is typed into the spell name field if the 'regExpSearch' attribute is not present.
-	*/
+	/**
+	 * alternative setting-independent name with which the sheet can recognize the spell
 
-	nameShort: "Sind. Purple",
-	/*	nameShort // OPTIONAL //
-		TYPE:	string
-		USE:	name of the spell that fits in the spell name field
+	@remarks
+	This attribute is intended for spells that have a name that is bound to a specific setting,
+	to allow a name that is setting-neutral.
+	For example, the "Bigby's Hand" (PHB 118) is named after the legendary wizard "Bigby" of the Greyhawk setting.
+	As not everybody wants to use the Greyhawk name, the name as given in the SRD page 218 "Arcane Hand" is good to provide as the 'nameAlt'
 	
-		Use this attribute if the name of the spell is too long to fit in the field on the Spell Sheet pages.
-		For testing if the name fits, please use the Colourful versions of the sheet, as they are more restrictive.
-	
-		This name will also be used to recognize what is typed into the spell name field if the 'regExpSearch' attribute is not present.
+	This name will also be used to recognize what is typed into the spell name field if the 'regExpSearch' attribute is not present.
+	@example "Sindering Colour"
 	*/
+	nameAlt?: string;
+
+	/**
+	name of the spell that fits in the spell name field
+	
+	@remarks
+	Use this attribute if the name of the spell is too long to fit in the field on the Spell Sheet pages.
+	For testing if the name fits, please use the Colourful versions of the sheet, as they are more restrictive.
+	
+	This name will also be used to recognize what is typed into the spell name field if the 'regExpSearch' attribute is not present.
+	@example "Sind. Purple"
+	*/
+	nameShort?: string;
 
 	/**
 	 * used to match the text in the spell field to see if this spell is present
@@ -58,38 +63,17 @@ interface Spell {
 
 		@example  /^(?=.*sind(\.|ering))(?=.*(colou?r|purple)).*$/i
 	 */
-	regExpSearch?: RegExp,
+	regExpSearch?: RegExp;
 
-	source: ["SRD", 204],
-	source: [["E", 7], ["S", 115]],
-	/*	source // REQUIRED //
-		TYPE:	array with two entries (or array of these arrays)
-		USE:	define where the spell is found
-	
-		This attribute is used by the sheet to determine if the spell should be available depending on the sources included and excluded.
-	
-		This array has two entries, a string followed by a number
-		1. string
-			The first entry has to be the object name of a SourceList object.
-		2. number
-			The second entry is the page number to find the spell at.
-			This can be any number and is ignored if it is a 0.
-	
-		See the "source (SourceList).js" file for learning how to add a custom source.
-	
-		Alternatively, this can be an array of arrays to indicate it appears in multiple sources.
-		The example above says something appears on both page 7 of the Elemental Evil Player's Companion and
-		on page 115 of the Sword Coast Adventure Guide.
-	
-		If a spell is completely homebrew, or you don't want to make a custom source, just put the following:
-			source: ["HB", 0],
-		"HB" refers to the 'homebrew' source.
-	*/
-	defaultExcluded: true,
-	/*	defaultExcluded // OPTIONAL //
-		TYPE:	boolean
-		USE:	whether this spell should be excluded by default (true) or included by default (false)
-	
+	/**
+	 * Which source book(s) define the spell
+	 */
+	source: SourceList;
+
+	/**
+	 * whether this spell should be excluded by default (true) or included by default (false)
+	 * 
+	 * @remarks
 		Include this attribute and set it to true if the spell should appear in the Excluded list of the
 		Source Selection Dialog when the script is added for the first time.
 		It will have to be manually set to be included before it is used by the sheet's automation.
@@ -97,17 +81,17 @@ interface Spell {
 	
 		This is useful for optional spells that you wouldn't normally want to use (e.g. playtest or campaign-specific).
 	
-		Setting this attribute to false is the same as not including this attribute.
+		@example true
+		@default false
 	*/
+	defaultExcluded?: boolean;
 
 	/**
-	 * define for which classes this spell appears on their spell list
+	 * defines the classes that have (default) access to this spell
 	 * 
-	 * @example: ["druid", "ranger", "sorcerer", "wizard"]
-	 */
-	classes?: character_class[],
-	/*		
-		List the classes by their object names in the ClassList object.
+	 * @remarks
+	 * 
+	 * 	List the classes by their object names in the ClassList object.
 	
 		If you the spell doesn't appear on any class' spell list, but should be available as
 		a manually added bonus spell, or through the 'spellcastingBonus' or 'spellcastingExtra'
@@ -116,81 +100,88 @@ interface Spell {
 		For an explanation of the 'spellcastingBonus' and 'spellcastingExtra' attributes, see "_common attributes.js".
 	
 		If you omit this attribute, the spell will only be selectable through the 'dependencies' attribute, see below.
-	*/
+	 * 
+	 * @example: ["druid", "ranger", "sorcerer", "wizard"]
+	 */
+	classes?: character_class[];
 
-	level: 5,
-	/*	level // REQUIRED //
-		TYPE:	number (0-9)
-		USE:	define what the level of the spell is
-	
-		Use level 0 for a cantrip or psionic talent.
-		Use level 1 for a psionic discipline.
+	/**
+	 * define what the level of the spell is
+	 * 
+	 * @remarks
+	Use level 0 for a cantrip or psionic talent.
+	Use level 1 for a psionic discipline.
+	@example 5
 	*/
-	school: "Necro",
-	/*	school // OPTIONAL //
-		TYPE:	string
-		USE:	the school the spell belongs to
+	level: spell_level;
+
+	/**
+	 * the school the spell belongs to
+	 * 
+	 * @remarks
+	The text you add here will be put in the appropriate field on the sheet literally,
+	thus it is important to check that it fits in the field.
 	
-		The text you add here will be put in the appropriate field on the sheet literally,
-		thus it is important to check that it fits in the field.
+	It is recommended to use one of the predefined spell school abbreviations:
+		"Abjur"		// "abjuration"
+		"Conj"		// "conjuration"
+		"Div"		// "divination"
+		"Ench"		// "enchantment"
+		"Evoc"		// "evocation"
+		"Illus"		// "illusion"
+		"Necro"		// "necromancy"
+		"Trans"		// "transmutation"
+		"Avatar"	// "avatar" (psionic order)
+		"Awake"		// "awakened" (psionic order)
+		"Immor"		// "immortal" (psionic order)
+		"Nomad"		// "nomad" (psionic order)
+		"Wu Jen"	// "wu jen" (psionic order)
 	
-		It is recommended to use one of the predefined spell school abbreviations:
-			"Abjur"		// "abjuration"
-			"Conj"		// "conjuration"
-			"Div"		// "divination"
-			"Ench"		// "enchantment"
-			"Evoc"		// "evocation"
-			"Illus"		// "illusion"
-			"Necro"		// "necromancy"
-			"Trans"		// "transmutation"
-			"Avatar"	// "avatar" (psionic order)
-			"Awake"		// "awakened" (psionic order)
-			"Immor"		// "immortal" (psionic order)
-			"Nomad"		// "nomad" (psionic order)
-			"Wu Jen"	// "wu jen" (psionic order)
+	By using one of these pre-defined abbreviations, the right full name of the school is used in the tooltip and pop-ups.
 	
-		By using one of these pre-defined abbreviations, the right full name of the school is used in the tooltip and pop-ups.
-	
-		// ADDING NEW SPELL SCHOOL //
-		You can also define a new spell school abbreviation by adding it to the "spellSchoolList" object, like so:
-			spellSchoolList["NewSc"] = "new school";
-		Be aware that the object name can use capitalization but the entered sting can't.
+	// ADDING NEW SPELL SCHOOL //
+	You can also define a new spell school abbreviation by adding it to the "spellSchoolList" object, like so:
+		spellSchoolList["NewSc"] = "new school";
+	Be aware that the object name can use capitalization but the entered sting can't.
+
+	@example "Necro"
 	*/
-	time: "1 min",
-	/*	time // REQUIRED //
-		TYPE:	string
-		USE:	the casting time of the spell as it should appear on the sheet
-		CHANGE: v24.0.0 (update recommended abbreviations to be more in line with PHB'24)
+	school?: string;
+
+	/**
+	 * the casting time of the spell as it should appear on the sheet
+	 * 
+	 * @remarks
+	The text you add here will be put in the appropriate field on the sheet literally,
+	thus it is important to check that it fits in the field.
 	
-		The text you add here will be put in the appropriate field on the sheet literally,
-		thus it is important to check that it fits in the field.
+	This entry uses abbreviations to make it fit on the sheet and to make everything look uniform.
+	Please always use the following abbreviations:
+		ABBREVIATION	MEANING
+		Act				Action
+		Bns				Bonus Action
+		React			Reaction
+		min				minute(s)
+		h				hours(s)
 	
-		This entry uses abbreviations to make it fit on the sheet and to make everything look uniform.
-		Please always use the following abbreviations:
-			ABBREVIATION	MEANING
-			Act				Action
-			Bns				Bonus Action
-			React			Reaction
-			min				minute(s)
-			h				hours(s)
-	
-		>> 2024 changes
-		The above recommended abbreviations have been changed to be more in line with the 2024
-		rules as presented in the PHB'24. For backwards compatibility, the sheet automatically
-		changes the old abbreviations to the new format.
-		Old way of abbreviating:
-			OLD		NEW			MEANING
-			1 a		Act			Action
-			1 bns	Bns			Bonus Action
-			1 rea	React		Reaction
-	
+	>> 2024 changes
+	The above recommended abbreviations have been changed to be more in line with the 2024
+	rules as presented in the PHB'24. For backwards compatibility, the sheet automatically
+	changes the old abbreviations to the new format.
+	Old way of abbreviating:
+		OLD		NEW			MEANING
+		1 a		Act			Action
+		1 bns	Bns			Bonus Action
+		1 rea	React		Reaction
+	* @example "1 min"
+	* @since v24.0.0 (update recommended abbreviations to be more in line with PHB'24)
 	*/
-	timeFull: "Reaction, which you take when you see a creature within 60 feet of you casting a spell",
-	/*	timeFull // OPTIONAL //
-		TYPE:	string
-		USE:	the casting time of the spell as should appear in the spell's full description
-		ADDED:	v13.1.0
-	
+	time: string;
+
+	/**
+	 * the casting time of the spell as should appear in the spell's full description
+	 * 
+	 * @remarks
 		The text you add here will only be used in the tooltip and dialogs where the spell's
 		full description is shown.
 	
@@ -200,7 +191,11 @@ interface Spell {
 	
 		In the official spells, this `timeFull` attribute is only used for the spells with a casting time
 		of 1 reaction, as those have extra explanatory text.
+		@example "Reaction, which you take when you see a creature within 60 feet of you casting a spell"
+		@since v13.1.0
 	*/
+	timeFull?: string;
+
 	range: "60 ft",
 	/*	range // REQUIRED //
 		TYPE:	string
@@ -221,23 +216,26 @@ interface Spell {
 		Thus, "30-feet radius" is abbreviated to "30-ft rad".
 		And, "Self (15-ft cone)" is written as "S:15-ft cone".
 	*/
-	rangeMetric: "S:8-km rad",
-	/*	range // REQUIRED //
-		TYPE:	string
-		USE:	the range of the spell when using the metric system
-		ADDED:	v13.0.6
+
+	/**
+	 * the range of the spell when using the metric system
+	 * 
+	 * @remarks
+	This attribute works the same as the `range` attribute above,
+	but it is only used if the sheet is set to use the metric system.
+	If this attribute is present, the sheet will not try and convert the `range` attribute
+	to the metric system, but will use this attribute instead.
 	
-		This attribute works the same as the `range` attribute above,
-		but it is only used if the sheet is set to use the metric system.
-		If this attribute is present, the sheet will not try and convert the `range` attribute
-		to the metric system, but will use this attribute instead.
-	
-		The sheet is good at transforming units as long as each number is followed by the unit.
-		For example "60 ft by 20 ft" will successfully be converted to "18 m by 6 m",
-		but "60 by 20 ft" will become "60 by 6 m".
-		It is only for cases like the latter that `rangeMetric` is necessary,
-		all other things can be converted by the sheet on the fly.
+	The sheet is good at transforming units as long as each number is followed by the unit.
+	For example "60 ft by 20 ft" will successfully be converted to "18 m by 6 m",
+	but "60 by 20 ft" will become "60 by 6 m".
+	It is only for cases like the latter that `rangeMetric` is necessary,
+	all other things can be converted by the sheet on the fly.
+	* @example "S:8-km rad"
+	* @since v13.0.6
 	*/
+	rangeMetric?: string,
+
 	components: "V,S,M",
 	/*	components // OPTIONAL //
 		TYPE:	string
@@ -252,6 +250,7 @@ interface Spell {
 		Note how the string doesn't use any spaces, as those would make the text too long to fit in the field.
 		Please never use spaces, just commas.
 	*/
+
 	compMaterial: "A purple gem",
 	/*	compMaterial // OPTIONAL //
 		TYPE:	string
@@ -279,11 +278,10 @@ interface Spell {
 		Thus, "Concentration, up to 10 minutes" is abbreviated to "Conc, 10 min".
 	*/
 
-	save: "Int",
-	/*	save // OPTIONAL //
-		TYPE:	string
-		USE:	the ability score that the spell's saving throw uses
-	
+	/**
+	 * 	the ability score that the spell's saving throw uses
+	 * 
+	 * @remarks
 		The text you add here will be put in the appropriate field on the sheet literally,
 		thus it is important to check that it fits in the field.
 	
@@ -291,13 +289,14 @@ interface Spell {
 		"Str", "Dex", "Con", "Int", "Wis", or "Cha".
 	
 		If the spell doesn't require a saving throw, don't include this attribute.
+		@example "Int"
 	*/
+	save?: string,
 
-	description: "20-ft rad all crea 5d6+1d6/SL Psychic dmg; save half; all flames in area are purple for the duration",
-	/*	description // REQUIRED //
-		TYPE:	string
-		USE:	the text to be filled in the description field of the spell
-	
+	/**
+	 * the text to be filled in the description field of the spell
+	 * 
+	 * @remarks
 		Note that the sheet normally uses the first person for this.
 		Make sure that this description is not too long and fits on the small description field on the spell sheet page.
 		The Colourful sheets have less space for spell descriptions than the Printer Friendly versions,
@@ -331,7 +330,9 @@ interface Spell {
 		
 		If the damage (or only some of the damage) in the description doesn't match this syntax,
 		you can use the `dynamicDamageBonus` object (see below) to tell the script how to find the damage string.
+	* @example "20-ft rad all crea 5d6+1d6/SL Psychic dmg; save half; all flames in area are purple for the duration"
 	*/
+	description: string;
 
 	descriptionCantripDie: "1 creature save or `CD`d12 Poison dmg",
 	/*	descriptionCantripDie // OPTIONAL //
@@ -584,6 +585,7 @@ interface Spell {
 		the sheet will use the 'descriptionCantripDie' attribute when the appropriate checkbox
 		is checked (see 'descriptionCantripDie' explanation above).
 	*/
+
 	descriptionShorterMetric: "6-m rad all crea 5d6+1d6/SL Psychic dmg; save half; flames in area are purple",
 	/*	descriptionShorterMetric // OPTIONAL //
 		TYPE:	string
@@ -679,14 +681,10 @@ interface Spell {
 	*/
 
 	/**
-	 * @example: /((?:\+?\d+d?\d*)+)( crit)/i
-	 */
-	extraDmgGroupsSameType: RegExp,
-	/*	allDmgTypesSingleMoment // OPTIONAL //
-		TYPE:	regular expression
-		USE:	regex to match other damage instances in the description of the same damage type that doesn't adhere to the normal syntax
-	
-		This attribute tells the `genericSpellDmgEdit` function that there is another damage instance
+	 * regex to match other damage instances in the description of the same damage type that doesn't adhere to the normal syntax
+	 * 
+	 * @remarks
+	 * 	This attribute tells the `genericSpellDmgEdit` function that there is another damage instance
 		in the description, but that instance does not adhere to the normal syntax of "[Dice} [Type] dmg".
 	
 		This regular expression is used to match the secondary (or more) damage groups and add the damage
@@ -707,16 +705,15 @@ interface Spell {
 		include a damage type or the word "dmg" (or "damage").
 		The `genericSpellDmgEdit` function would not see this second damage group and thus not account for it.
 		For this spell, you should set this attribute to /(and |\u0026 )((?:\+?\d+d?\d*)+)/i.
-	*/
+	 * 
+	 * @example: /((?:\+?\d+d?\d*)+)( crit)/i
+	 */
+	extraDmgGroupsSameType?: RegExp,
 
-	multipleDmgTypes: {
-		dmgTypes: ["acid", "cold", "fire", "lightning", "thunder"],
-		inDescriptionAs: 'Acid, Cold, Fire, Lightning, or Thunder|Acid/Cold/Fire/Lightning/Thunder'
-	},
-	/*	multipleDmgTypes // OPTIONAL //
-		TYPE:	object (with exactly two attributes)
-		USE:	the damage type of the spell can be two or more different types and/or doesn't adhere to the normal syntax in the description
-		
+	/**
+	 * the damage type of the spell can be two or more different types and/or doesn't adhere to the normal syntax in the description
+	 * 
+	 * @remarks
 		This attribute tells the `genericSpellDmgEdit` function that the damage listed in the description
 		can be with multiple different damage types, which is chosen by the caster at the time of casting.
 		This will (most likely) cause the description to not adhere the normal syntax of "[Dice} [Type] dmg".
@@ -737,15 +734,15 @@ interface Spell {
 		See also the explanation for `descriptionShorter` above for how the `genericSpellDmgEdit` function
 		for the implications of having multiple damage types.
 	*/
+	multipleDmgTypes?: {
+		dmgTypes: ["acid", "cold", "fire", "lightning", "thunder"],
+		inDescriptionAs: 'Acid, Cold, Fire, Lightning, or Thunder|Acid/Cold/Fire/Lightning/Thunder'
+	},
 
 	/**
-	 * @example /(atk .*piercing dmg.*?)/i
-	 */
-	skipDmgGroupIfNotMultiple: RegExp,
-	/*	skipDmgGroupIfNotMultiple // OPTIONAL //
-		TYPE:	regular expression
-		USE:	the spell has multiple damage instances and/or types and if the bonus should only be added to a single roll the `genericSpellDmgEdit` function, skip one or more damage instances before adding the bonus
-	
+	 * 	the spell has multiple damage instances and/or types and if the bonus should only be added to a single roll the `genericSpellDmgEdit` function, skip one or more damage instances before adding the bonus
+	 * 
+	 * @remarks
 		This attribute only does something if the `genericSpellDmgEdit` function is initialised to only
 		add the damage bonus to one roll and this spell's description lists multiple that adhere
 		to the syntax of "[Dice} [Type] dmg".
@@ -764,11 +761,24 @@ interface Spell {
 		Note that if the call for the `genericSpellDmgEdit` function was for a specific damage type
 		that doesn't match the preferred group, but does match this first group that should be skipped,
 		the function is still going to add the damage to the first group, effectively ignoring this attribute.
-	*/
+	 * @example /(atk .*piercing dmg.*?)/i
+	 */
+	skipDmgGroupIfNotMultiple?: RegExp;
 }
 
+// the entity type, with the properties I don't want thrown out
+type Mpmb_Spell_Narrowed = Omit<Mpmb_Spell, ""
+	// too keep it simple, just sticking with the "name" field
+	| "nameAlt"
+	| "nameShort"
+	| "regExpSearch"
 
-interface Internal<Spell> extends Spell {
+	// not implemented
+	| "defaultExcluded"
+	| "rangeMetric"
+>;
+
+type SpellDefinition = Mpmb_Spell_Narrowed & {
 
 	/**
 	 * The key used to register this weapon in the WeaponsList dictionary.
@@ -777,9 +787,15 @@ interface Internal<Spell> extends Spell {
 	 */
 	key: string;
 
+	classes: character_class[];
+
 	// might not be needed? - theres a allowUpCasting property
 	upcastable: boolean;
 
+	// attack actions granted by the spell
 	action: Weapon;
 
 }
+
+type Spell = SpellDefinition
+

@@ -51,23 +51,11 @@ body {
 }
 
 .grid {
-    display: grid;
-    gap: 5mm;
     padding: 5mm;
 
     /* same height as page - I don't know why 100% doesn't work here */
     /* It works for web layout, but not print layout */
     height: 297mm;
-}
-
-.grid-3x3 {
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-}
-
-.grid-2x2 {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
 }
 
 .card {
@@ -87,8 +75,6 @@ body {
     /* prevent overflow from expanding cards */
     overflow: hidden;
 }
-
-.card .cell {}
 
 .spell-card p {
     margin-top: 0;

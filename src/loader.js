@@ -63,6 +63,7 @@
         _normalize(mpmb) {
             this.normalize_spells(mpmb.lists.SpellsList);
             this.normalize_creatures(mpmb.lists.CreatureList);
+            this.normalize_weapons(mpmb.lists.WeaponsList);
 
             let character = main.config.load_character();
             character = this.normalize_character(character);
@@ -102,7 +103,16 @@
 
         }
 
+        /**
+         * @param {Mpmb_Spell} spell 
+         * @param {*} context - caller iteration context 
+         */
         normalize_spell(spell, context) {
+
+            /** 
+             * @type {SpellDefinition} 
+             * @ts-ignore */
+            const result = spell;
 
             const key = context.key;
 
@@ -113,15 +123,13 @@
 
                 const message = "%o is ill-formed: missing source property";
                 context.warnings.push([message, spell])
-                // console.debug(message, spell)
             }
 
             if (!spell.classes) {
-                spell.classes = []
+                result.classes = []
 
                 const message = "%o is ill-formed: missing classes property"
                 context.warnings.push([message, spell])
-                // console.debug(message, spell)
             }
 
             // remove obsolete spells
@@ -132,31 +140,35 @@
             // extend spell object with properties that make it easier to work with:
 
             // spells are easier to work with, if they have a key property
-            spell.key = key
+            result.key = key
 
             // todo: there's already a allowUpCasting property?
-            spell.upcastable = spell.description.includes('/SL');
+            result.upcastable = spell.description.includes('/SL');
 
             // link together the spell with the actions (from the weapon list that it enables)
-            spell.action = mpmb.lists.WeaponsList[spell.key]
+            result.action = mpmb.lists.WeaponsList[key];
 
-            if (spell.action) {
+            // if (!result.action) {
+            //     result.action = [];
+            // }
 
-                // support rolling multiple types of damage dice
-                // todo: replace the old damage value with this value instead
-                // instead of making a new property
-                {
-                    let damages = spell.action.damage;
+            // for (const weapon of result.actions) {
 
-                    if (!damages) {
-                        spell.action.damages = []
-                    }
-                    // if array, need to normalize into a multi-array 
-                    else if (typeof (damages[0]) !== "object") {
-                        spell.action.damages = [damages]
-                    }
-                }
-            }
+            //     if (!weapon) {
+            //         continue;
+            //     }
+
+            //     // support rolling multiple types of damage dice
+            //     {
+            //         if (!weapon.damage) {
+            //             weapon.damage = []
+            //         }
+            //         // if array, need to normalize into a multi-array 
+            //         else if (typeof (weapon.damage[0]) !== "object") {
+            //             weapon.damage = [weapon.damage]
+            //         }
+            //     }
+            // }
 
             // todo: build up the saving throw stats
             // if (spell.save && !spell.action.save)
@@ -197,8 +209,54 @@
             creature.languages = creature.languages ?? ""
             creature.languages = creature.languages.replace(/^understand/, 'Understand')
 
+            // unclear how features & notes differ from traits and attacks
+            // just stuff them into traits
+            creature.traits = creature.traits ?? []
+            creature.attacks = creature.attacks ?? []
+            creature.features = creature.features ?? []
+            creature.notes = creature.notes ?? []
+            creature.traits = [...creature.traits, ...creature.features, ...creature.notes]
+            creature.features = [];
+            creature.notes = [];
+
+
+            for (const attack of creature.attacks) {
+                if (!attack.range) {
+                    attack.range = "Melee"
+                    const message = "%o is ill-formed: missing range property in one of its attacks"
+                    // context.warnings.push([message, creature])
+                    console.warn(message, creature)
+                }
+            }
+
             return creature;
         }
+
+        normalize_weapons(list) {
+            for (const [key, weapon] of Object.entries(list)) {
+                const result = this.normalize_weapon(weapon, key);
+                if (!result) {
+                    delete list[key];
+                }
+            }
+        }
+
+        normalize_weapon(weapon, key) {
+            // support rolling multiple types of damage dice
+            {
+                if (!weapon.damage) {
+                    weapon.damage = []
+                }
+                // if array, need to normalize into a multi-array 
+                else if (typeof (weapon.damage[0]) !== "object") {
+                    weapon.damage = [weapon.damage]
+                }
+            }
+
+            return weapon;
+
+        }
+
 
         calc_save_mods(creature) {
 

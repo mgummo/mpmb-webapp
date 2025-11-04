@@ -108,142 +108,172 @@
             <div class="row">
                 <div class="name">{{name}}</div>
                 <div class="subtitle">{{vm.subtitle}}</div>
+
                 <hr />
-                <div class="flex-row">
-                    <div><span class="label">AC</span> {{ac}}</div>
-                    <div><span class="label">Initiative</span> {{vm.initiative}}</div>
+
+                <div class="mb-1">
+                    <div class="flex-row">
+                        <div><span class="label">AC</span> {{ac}}</div>
+                        <div><span class="label">Initiative</span> {{vm.initiative}}</div>
+                    </div>
+                    <div><span class="label">HP</span> {{hp}} {{vm.hit_dice}}</div>
+                    <div><span class="label">Speed</span> {{speed}}</div>
+
+                    <!-- todo: need to apply format_modifer() to the numbers -->
+                    <div class="row flex-row my-1">
+                        <div class="abilities-group">
+
+                            <div class="ability header">
+                                <div class=""></div>
+                                <div class=""></div>
+                                <div>MOD</div>
+                                <div>SAVE</div>
+                            </div>
+
+                            <div class="ability">
+                                {{#abilities.str}}
+                                <div class="ability-abbr cell">Str</div>
+                                <div class="cell">{{score}}</div>
+                                <div class="cell">{{mod}}</div>
+                                <div class="cell">{{save_mod}}</div>
+                                {{/abilities.str}}
+                            </div>
+
+                            <div class="ability">
+                                {{#abilities.int}}
+                                <div class="ability-abbr cell">Int</div>
+                                <div class="cell">{{score}}</div>
+                                <div class="cell">{{mod}}</div>
+                                <div class="cell">{{save_mod}}</div>
+                                {{/abilities.int}}
+                            </div>
+
+                        </div><!--/abilities group -->
+
+                        <div class="abilities-group">
+
+                            <div class="ability header">
+                                <div class=""></div>
+                                <div class=""></div>
+                                <div>MOD</div>
+                                <div>SAVE</div>
+                            </div>
+
+                            {{#abilities.dex}}
+                            <div class="ability">
+                                <div class="ability-abbr cell">Dex</div>
+                                <div class="cell">{{score}}</div>
+                                <div class="cell">{{mod}}</div>
+                                <div class="cell">{{save_mod}}</div>
+                            </div>
+                            {{/abilities.dex}}
+
+                            <div class="ability">
+                                {{#abilities.wis}}
+                                <div class="ability-abbr cell">Wis</div>
+                                <div class="cell">{{score}}</div>
+                                <div class="cell">{{mod}}</div>
+                                <div class="cell">{{save_mod}}</div>
+                                {{/abilities.wis}}
+                            </div>
+
+                        </div><!--/abilities group -->
+
+                        <div class="abilities-group">
+
+                            <div class="ability header">
+                                <div class=""></div>
+                                <div class=""></div>
+                                <div>MOD</div>
+                                <div>SAVE</div>
+                            </div>
+
+                            <div class="ability">
+                                {{#abilities.con}}
+                                <div class="ability-abbr cell">Con</div>
+                                <div class="cell">{{score}}</div>
+                                <div class="cell">{{mod}}</div>
+                                <div class="cell">{{save_mod}}</div>
+                                {{/abilities.con}}
+                            </div>
+
+                            <div class="ability">
+                                {{#abilities.cha}}
+                                <span class="ability-abbr cell">Cha</span>
+                                <span class="cell">{{score}}</span>
+                                <span class="cell">{{mod}}</span>
+                                <span class="cell">{{save_mod}}</span>
+                                {{/abilities.cha}}
+                            </div>
+
+                        </div> <!--/abilities group -->
+                    </div>
+
+                    {{#vm.skills}}
+                    <div><span class="label">Skills</span> {{vm.skills}}</div>
+                    {{/vm.skills}}
+
+                    {{#vm.defenses.vulnerabilities}}
+                    <div><span class="label">Vulnerabilities</span> {{vm.defenses.vulnerabilities}}</div>
+                    {{/vm.defenses.vulnerabilities}}
+
+                    {{#vm.defenses.resistances}}
+                    <div><span class="label">Resistances</span> {{vm.defenses.resistances}}</div>
+                    {{/vm.defenses.resistances}}
+
+                    {{#vm.defenses.immunities}}
+                    <div><span class="label">Immunities</span> {{vm.defenses.immunities}}</div>
+                    {{/vm.defenses.immunities}}
+
+                    <div><span class="label">Senses</span> {{vm.senses}}</div>
+                    <div><span class="label">Languages</span> {{vm.languages}}</div>
+                    <div><span class="label">CR</span> {{challengeRating}} (XP ?; PB {{vm.proficiencyBonus}})</div>
                 </div>
-                <div><span class="label">HP</span> {{hp}} {{vm.hit_dice}}</div>
-                <div><span class="label">Speed</span> {{speed}}</div>
 
-                <!-- todo: need to apply format_modifer() to the numbers -->
-                <div class="row flex-row my-1">
-                    <div class="abilities-group">
-
-                        <div class="ability header">
-                            <div class=""></div>
-                            <div class=""></div>
-                            <div>MOD</div>
-                            <div>SAVE</div>
-                        </div>
-
-                        <div class="ability">
-                            {{#abilities.str}}
-                            <div class="ability-abbr cell">Str</div>
-                            <div class="cell">{{score}}</div>
-                            <div class="cell">{{mod}}</div>
-                            <div class="cell">{{save_mod}}</div>
-                            {{/abilities.str}}
-                        </div>
-
-                        <div class="ability">
-                            {{#abilities.int}}
-                            <div class="ability-abbr cell">Int</div>
-                            <div class="cell">{{score}}</div>
-                            <div class="cell">{{mod}}</div>
-                            <div class="cell">{{save_mod}}</div>
-                            {{/abilities.int}}
-                        </div>
-
-                    </div><!--/abilities group -->
-
-                    <div class="abilities-group">
-
-                        <div class="ability header">
-                            <div class=""></div>
-                            <div class=""></div>
-                            <div>MOD</div>
-                            <div>SAVE</div>
-                        </div>
-
-                        {{#abilities.dex}}
-                        <div class="ability">
-                            <div class="ability-abbr cell">Dex</div>
-                            <div class="cell">{{score}}</div>
-                            <div class="cell">{{mod}}</div>
-                            <div class="cell">{{save_mod}}</div>
-                        </div>
-                        {{/abilities.dex}}
-
-                        <div class="ability">
-                            {{#abilities.wis}}
-                            <div class="ability-abbr cell">Wis</div>
-                            <div class="cell">{{score}}</div>
-                            <div class="cell">{{mod}}</div>
-                            <div class="cell">{{save_mod}}</div>
-                            {{/abilities.wis}}
-                        </div>
-
-                    </div><!--/abilities group -->
-
-                    <div class="abilities-group">
-
-                        <div class="ability header">
-                            <div class=""></div>
-                            <div class=""></div>
-                            <div>MOD</div>
-                            <div>SAVE</div>
-                        </div>
-
-                        <div class="ability">
-                            {{#abilities.con}}
-                            <div class="ability-abbr cell">Con</div>
-                            <div class="cell">{{score}}</div>
-                            <div class="cell">{{mod}}</div>
-                            <div class="cell">{{save_mod}}</div>
-                            {{/abilities.con}}
-                        </div>
-
-                        <div class="ability">
-                            {{#abilities.cha}}
-                            <span class="ability-abbr cell">Cha</span>
-                            <span class="cell">{{score}}</span>
-                            <span class="cell">{{mod}}</span>
-                            <span class="cell">{{save_mod}}</span>
-                            {{/abilities.cha}}
-                        </div>
-
-                    </div> <!--/abilities group -->
+                {{#traits.length}}
+                <div class="mt-2">
+                    <div class="name">Traits</div>
+                    <hr class="mt-0" />
+                    {{#traits}}
+                    <div class="mb-0.5">
+                        <span class="label">{{name}}</span> <span>{{description}}</span>
+                    </div>
+                    {{/traits}}
                 </div>
+                {{/traits.length}}
 
-                {{#vm.skills}}
-                <div><span class="label">Skills</span> {{vm.skills}}</div>
-                {{/vm.skills}}
+                {{#actions.length}}
+                <div class="mt-2">
+                    <div class="name">Actions</div>
+                    <hr class="mt-0" />
+                    {{#actions}}
+                    <div class="mb-0.5">
+                        <span class="label">{{name}}</span> <span>{{description}}</span>
+                    </div>
+                    {{/actions}}
 
-                {{#vm.defenses.vulnerabilities}}
-                <div><span class="label">Vulnerabilities</span> {{vm.defenses.vulnerabilities}}</div>
-                {{/vm.defenses.vulnerabilities}}
+                </div>
+                {{/actions.length}}
 
-                {{#vm.defenses.resistances}}
-                <div><span class="label">Resistances</span> {{vm.defenses.resistances}}</div>
-                {{/vm.defenses.resistances}}
-
-                {{#vm.defenses.immunities}}
-                <div><span class="label">Immunities</span> {{vm.defenses.immunities}}</div>
-                {{/vm.defenses.immunities}}
-
-                <div><span class="label">Senses</span> {{vm.senses}}</div>
-                <div><span class="label">Languages</span> {{vm.languages}}</div>
-                <div><span class="label">CR</span> {{challengeRating}} (XP ?; PB {{vm.proficiencyBonus}})</div>
-                <hr />
-            </div>
-
-            <div class="row">
-                <div>Actions: {{actions}}</div>
-                <div>Traits: {{json traits}}</div>
-            </div>
-
-            <div class="row">
-                <div>nameAlt: {{nameAlt}}</div>
-                <div>saves: {{saves}}</div>
-                <div>attacksAction: {{attacksAction}}</div>
-                <div>attacks: {{attacks}}</div>
-
-                <div>features: {{features}}</div>
-                <div>traits: {{traits}}</div>
-                <div>notes: {{notes}}</div>
+                <!-- todo: move this to actions-->
+                {{#vm.attacks.length}}
+                <div class="mt-2">
+                    <div class="name">Attacks</div>
+                    <hr class="mt-0" />
+                    {{#vm.attacks}}
+                    <div class="mb-0.5">
+                        <span class="label">{{name}}</span>
+                        <span class="italic">{{range}} Roll:</span> {{attack_mod}}, {{reach}}.
+                        <span>Hit:</span> {{damage}} damage.
+                        <span>{{description}}</span>
+                    </div>
+                    {{/vm.attacks}}
+                </div>
+                {{/vm.attacks.length}}
 
             </div>
+
+            <!-- todo: other sections such as bonus actions, reactions, legendary actions -->
 
             <div class="spacer"></div>
 
@@ -279,6 +309,7 @@
 
     <!-- program logic - formmatters -->
     <script src="../src/formatters/base.js"></script>
+    <script src="../src/formatters/attack.js"></script>
     <script src="../src/formatters/monster-card.js"></script>
     <script src="../src/formatters/spell-card.js"></script>
 

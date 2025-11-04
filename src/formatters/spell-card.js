@@ -10,22 +10,29 @@
 
     class SpellCardFormatter extends TBaseFormatter {
 
+        constructor() {
+            super();
+            this.format_range = global.main.formatters.attack.format_range;
+            this.format_damage_dice = global.main.formatters.attack.format_damage_dice;
+        }
+
         // todo: pass a casting context
         // include things like the caster, upcasted spell slots,k bonuses, etc.
         /**
          * 
          * @param {*} spell 
-         * @param {Character} caster 
+         * @param {Character} character
+         * @param {SpellCasterStats} stats
          * @param {*} casting_context 
          * @returns 
          */
-        build_spellcard_vm(spell, caster, casting_context) {
+        build_spellcard_vm(spell, character, stats, casting_context) {
             const vm = {};
 
             // vm.title = ... ommitted - no need to format the spell title
             vm.subtitle = this.format_spell_subtitle(spell)
 
-            vm.summary = this.format_spell_summary(spell, caster.class);
+            vm.summary = this.format_spell_summary(spell, character, stats);
 
             vm.time = this.format_spell_time(spell);
             vm.range = this.format_spell_range(spell);
@@ -42,15 +49,15 @@
         // formats the spell's casting summary, resolving variables from the caster
         /**
          * 
-         * @param {*} spell 
-         * @param {SpellCaster} caster 
+         * @param {SpellDefinition} spell 
+         * @param {SpellCasterStats} stats 
          * @returns 
          */
-        format_spell_summary(spell, caster) {
+        format_spell_summary(spell, character, stats) {
 
             // todo: handle multiclass case
-            let spell_save = caster.spell_save;
-            let spell_attack_mod = caster.spell_attack_mod;
+            let spell_save = stats.spell_save;
+            let spell_attack_mod = stats.spell_attack_mod;
 
             // example edge cases 
             // - 'Produce Flame' has two actions. The spell itself is a bonus action. But enables a magic attack action.
@@ -68,9 +75,16 @@
             // not worrying about upcasting for now.
             const spell_slot_size = spell.level
 
-            const range = this.format_range(spell);
+            const range = this.format_range(spell.action.range);
             const to_hit = this.format_modifier(spell_attack_mod);
-            const dice = `${this.format_damage_dice(spell, caster.level, spell_slot_size)}`;
+
+            const damages = spell.action.damage;
+            const attack_context = {
+                caster_level: character.level,
+                spell_slot_size: spell_slot_size,
+            };
+
+            const dice = `${this.format_damage_dice(damages, attack_context)}`;
 
             let text = ""
             if (spell.action.dc) {
@@ -104,142 +118,6 @@
             }
 
             return text;
-        }
-
-        format_range(spell) {
-
-            let range = "";
-            const token = spell.action.range;
-
-            const patterns = [
-
-                // ex: `30 ft Melee` => `30 foot Melee`
-                {
-                    regex: /(\d+)\s*(ft|m) melee/i,
-                    handle: (amount, unit) => {
-                        unit = this.unabbreviate(unit);
-                        return `${amount} ${unit} Melee`
-                    }
-                },
-
-                // ex: `60 ft` => `60 foot ranged`
-                {
-                    regex: /(\d+)\s*(ft|m)/i,
-                    handle: (amount, unit) => {
-                        unit = this.unabbreviate(unit);
-                        return `${amount} ${unit} ranged`
-                    }
-                },
-
-                // ex: `Melee` => `melee`
-                {
-
-                    regex: /melee/i,
-                    handle: () => `melee`,
-                },
-
-                // ex: `Touch` => `touch`
-                {
-
-                    regex: /touch/i,
-                    handle: () => `touch`,
-                },
-
-                // ex: `5-ft radius` => `5 foot radius`
-                {
-                    regex: /(\d+)-(.*) (.*)/i,
-                    handle: (amount, unit, shape) => {
-                        unit = this.unabbreviate(unit);
-                        return `${amount} ${unit} ${shape}`
-                    }
-                },
-
-                // ex: `S:15ft cube` => `15 foot cube`
-                {
-                    regex: /S:(\d+)\s*(.*)\s(.*)/i,
-                    handle: (amount, unit, shape) => {
-                        unit = this.unabbreviate(unit);
-                        return `${amount} ${unit} ${shape}`
-                    }
-                },
-            ];
-
-            for (const { regex, handle } of patterns) {
-                const match = token.match(regex);
-                if (match) {
-                    range = handle(...match.slice(1));
-                    return range;
-                }
-            }
-
-            // for the default case, leave as-is but warn
-            console.warn(`${spell.key}: Did not recognize spell range: ${token} `)
-            return token;
-
-        }
-
-        // examples
-        // [1, 8, Fire] => 1d8 Fire
-        format_damage_dice(spell, caster_level, spell_slot_size) {
-
-            // todo: why is this sometimes null - I thought I normalized everything.
-            let damages = spell.action.damages ?? []
-
-            for (let damage of damages) {
-
-                let dice_count = damage[0];
-
-                if (dice_count === 'C') {
-                    if (caster_level < 5) {
-                        dice_count = 1;
-                    }
-                    else if (caster_level < 11) {
-                        dice_count = 2;
-                    }
-                    else if (caster_level < 17) {
-                        dice_count = 3;
-                    }
-                    else {
-                        dice_count = 4;
-                    }
-                }
-
-                if (dice_count === 'USL') {
-                    // upcast spell level is the spell slot used - the default spell slot size
-                    const default_spell_slot_size = 1;
-                    dice_count = spell_slot_size - default_spell_slot_size
-                }
-
-                damage[0] = dice_count
-
-                // let size = spell.action.damage[1];
-
-                // todo: normalize damage type
-                // let type = spell.action.damage[2];
-            }
-
-            // condense damage, by grouping together by dice_size and damage_type
-            // then summing the dice_count
-
-            let groupings = Map.groupBy(damages, x => JSON.stringify([x[1], x[2]]));
-            damages = [...groupings.entries()].map(entry => {
-                const key = JSON.parse(entry[0]);
-                const sum = entry[1].map(x => x[0]).reduce((acc, val) => acc + val)
-                const dice_size = key[0]
-                const damage_type = key[1]
-                const value = [sum, dice_size, damage_type]
-                return value;
-            });
-
-            const damage_strings = damages.map(x => {
-                const dice_count = x[0];
-                const dice_size = x[1];
-                const damage_type = x[2];
-                return `${dice_count}d${dice_size} ${damage_type}`
-            });
-
-            return damage_strings.join(', ')
-
         }
 
         format_spell_subtitle(spell) {

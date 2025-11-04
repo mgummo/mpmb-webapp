@@ -10,8 +10,13 @@
 
     class MonsterCardFormatter extends TBaseFormatter {
 
+        constructor() {
+            super();
+            this.attack_formatter = global.main.formatters.attack;
+        }
+
         /**
-         * @param {Definition<Creature>} monster
+         * @param {CreatureDefinition} monster
          */
         build_monstercard_vm(monster) {
             const vm = {}
@@ -29,8 +34,9 @@
             vm.senses = this.format_senses(monster);
             vm.languages = this.format_languages(monster);
 
-            debugger;
             vm.proficiencyBonus = this.format_modifier(monster.proficiencyBonus)
+
+            vm.attacks = this.format_attacks(monster);
 
             vm.source = this.format_source_book(monster)
 
@@ -125,7 +131,7 @@
         }
 
         /**
-         * @param {Definition<Creature>} monster
+         * @param {CreatureDefinition} monster
          */
         format_senses(monster) {
             const passive_perception = monster.abilities.wis.mod + 10;
@@ -142,6 +148,39 @@
             return monster.languages;
         }
 
+
+        format_attacks(monster) {
+
+            // I don't think we care about this variable? There should be already be a Multiattack action if applicable? 
+            // const attackActions = monster.attacksAction;
+
+            // todo: delegate to weapons formatter?
+            const attacks = [];
+            for (const attack of monster.attacks) {
+                const range = this.attack_formatter.format_range(attack.range)
+                const attack_skill = lookup_ability_by_index(attack.ability);
+                const attack_mod = monster.abilities[attack_skill].mod + monster.proficiencyBonus;
+                const damage_mod = monster.abilities[attack_skill].mod
+                const damages = [
+                    [attack.damage[0], attack.damage[1], damage_mod, attack.damage[2]]
+                ];
+
+                attacks.push({
+                    name: attack.name,
+                    range: range.type,
+                    attack_mod: this.format_modifier(attack_mod),
+                    reach: range.reach,
+                    damage: this.attack_formatter.format_damage_expression(damages),
+                    description: attack.description
+                })
+
+                if (monster.key == "giant squid") debugger;
+
+            }
+
+            return attacks;
+        }
+
     }
 
     // lists: string[][]
@@ -150,7 +189,27 @@
         return lists.flat().join(', ');
     }
 
+    function lookup_ability_by_index(index) {
+        switch (index) {
+            case 1:
+                return "str";
+            case 2:
+                return 'dex';
+            case 3:
+                return 'con';
+            case 4:
+                return 'int';
+            case 5:
+                return 'wis';
+            case 6:
+                return 'cha';
+            default:
+                throw "out of range"
+        }
+    }
+
     global.main.formatters.monster_card = new MonsterCardFormatter();
 
 
 })(window)
+

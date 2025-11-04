@@ -1,3 +1,24 @@
+.grid {
+    display: grid;
+    gap: 5mm;
+}
+
+.grid-3x3 {
+    grid-template-rows: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-2x2 {
+    grid-template-rows: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-2x3 {
+    grid-template-rows: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+}
+
+
 .flex-row {
     display: flex;
     gap: 1rem;
@@ -40,4 +61,16 @@
 
 .mt-2 {
     margin-top: 0.5rem
+}
+
+.mb-0\.5 {
+    margin-bottom: 0.125rem;
+}
+
+.mb-1 {
+    margin-bottom: 0.25rem
+}
+
+.italic {
+    font-style: italic;
 }

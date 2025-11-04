@@ -46,60 +46,31 @@
             }
         };
 
-        // group every 9 cards into a page
-        (function () {
-            const pages = vm.sections["spell-cards"].pages
+        vm.sections["spell-cards"].pages = paginate(spells, 3, 3);
 
-            const cards_per_page = 9;
-            const cards = spells;
+        //todo experiment with what dimensions make sense
+        vm.sections["monster-cards"].pages = paginate(monsters, 2, 2);
+
+        vm.sections["spell-cards"].pages = [
+            ...vm.sections["spell-cards"].pages,
+            ...paginate(spells_that_overflow, 2, 2)
+        ];
+
+        function paginate(cards, rows, columns) {
+            const pages = []
+            const cards_per_page = rows * columns;
+
             for (let i = 0; i < cards.length; i += cards_per_page) {
                 const page = {
                     cards: cards.slice(i, i + cards_per_page),
-                    grid_size: "3x3",
+                    grid_size: `${rows}x${columns}`,
                 };
-
                 pages.push(page);
             }
-        })();
+            return pages;
+        }
 
-        // group every 9 cards into a page
-        (function () {
-            const pages = vm.sections["monster-cards"].pages
-
-            const cards_per_page = 9;
-            const cards = monsters;
-            for (let i = 0; i < cards.length; i += cards_per_page) {
-                const page = {
-                    cards: cards.slice(i, i + cards_per_page),
-                    grid_size: "3x3",
-                };
-
-                pages.push(page);
-            }
-        })();
-
-        // groups overflow cards into 4 / page
-        // (so that they have more room, and shouldn't be overflowing the grid now)
-        (function () {
-
-            const pages = vm.sections["spell-cards"].pages
-
-            const cards_per_page = 4;
-            const cards = spells_that_overflow;
-            for (let i = 0; i < cards.length; i += cards_per_page) {
-                const page = {
-                    cards: cards.slice(i, i + cards_per_page),
-                    grid_size: "2x2",
-                };
-
-                pages.push(page);
-            }
-
-        })();
-
-
-        // todo: experiment with [alpine](https://github.com/alpinejs/alpine)
-        // looks like a vuejs-lite library, to replace mustache with 
+        // todo: replace with vuejs
         const html = Mustache.render(templates.root, vm, templates);
         document.getElementById("app").innerHTML = html;
 
@@ -111,24 +82,6 @@
             });
         }
     }
-
-
-
-
-
-    // function render_creatures(creatures) {
-
-    //     console.info(`I have ${creatures.length} creatures to show.`);
-
-    //     return;
-
-    //     const cardTemplate = document.getElementById("monster-card-template").innerHTML;
-    //     let cards = spells.map(spell => ({
-    //         ...spell,
-    //         html: global.Mustache.render(cardTemplate, spell)
-    //     }));
-    // }
-
 
     function reflow(data) {
         const cards = findOverflowingCards();

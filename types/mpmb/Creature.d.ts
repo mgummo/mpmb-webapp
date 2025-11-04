@@ -59,7 +59,7 @@ type EvaluationFn = (field_prefix: string, args: [old_level: number, new_level: 
  * custom calculation for hit points (calcChanges.hp).
  * @since v24.0.0
  */
-type Mpmb<Creature> = {
+type Mpmb_Creature = {
 
     /**
      * name of the creature as it will be used by the sheet
@@ -454,24 +454,25 @@ type Mpmb<Creature> = {
         If they don't fit (well), consider using the `wildshapeString` attribute, see below.
     */
 
-    /*	attacksAction // REQUIRED //
-        TYPE:	number
-        USE:	set the number of attacks per action
-    
-        This value is put in the attacks per action field (on the companion page) without any changes.
+    /**
+     * set the number of attacks per action
+     * 
+     * @remarks
+     *  This value is put in the attacks per action field (on the companion page) without any changes.
         This value is not displayed on the wild shape page, hence it is recommended to also explain
         the multiattack trait in the description of the appropriate attack and/or in the `traits` attribute.
-    */
-    attacksAction: 2,
+     * 
+     * @example 2
+     */
+    attacksAction: number,
 
-    /*	attacks // REQUIRED //
-        TYPE:	array (variable length) of WeaponsList objects
-        USE:	set the attack entries
+    /**	
+        set the attack entries
     
+        @remarks
         The syntax of the objects is not explained here, but in the "weapon (WeaponsList).js" syntax file.
     
-        TIP: Mention in a attack's description if it can be used multiple times as part of an action.
-    
+        TIP: Mention in a attack's description if it can be used multiple times as part of an action.  
         TIP: Use the `tooltip` attribute to explain complex attacks further.
     
         Each object in the array describes one attack entry.
@@ -482,14 +483,17 @@ type Mpmb<Creature> = {
     
         You can have attacks with identical names as weapon options in the attack drop-down box.
         The companion page will always use the attacks defined in the creature's entry over those in the WeaponsList.
+   
+        @example [{
+            name: "Claws",
+            ability: 1,
+            damage: [2, 6, "slashing"],
+            range: "Melee (5 ft)",
+            description: "Two claws attacks as an Attack action"
+        }]
+
     */
-    attacks: [{
-        name: "Claws",
-        ability: 1,
-        damage: [2, 6, "slashing"],
-        range: "Melee (5 ft)",
-        description: "Two claws attacks as an Attack action"
-    }];
+    attacks: Weapon[];
 
 
     /**
@@ -963,7 +967,7 @@ interface WildshapeCreature {
 }
 
 // the entity type, with the properties I don't want thrown out
-type Narrowed<Creature> = Omit<Mpmb<Creature>, ""
+type Mpmb_Creature_Narrowed = Omit<Mpmb_Creature, ""
 
     // because this info is caputure by abilities.[skill]
     | "scores"
@@ -984,7 +988,7 @@ type Narrowed<Creature> = Omit<Mpmb<Creature>, ""
 >;
 
 // the final entity type, used internally
-type Definition<Creature> = Narrowed<Creature> & {
+type CreatureDefinition = Mpmb_Creature_Narrowed & {
 
     /**
      * The key used to register this creature in the CreatureList dictionary.
@@ -1014,6 +1018,4 @@ type Definition<Creature> = Narrowed<Creature> & {
     }
 }
 
-type Entity<Creature> = Definition<Creature>
-
-type Creature = {}
+type Creature = CreatureDefinition

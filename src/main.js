@@ -31,9 +31,12 @@
 
             const manifest = this.get_print_manifest(this.config, data);
 
+            // todo: handle multi-casting by passing in customizing caster_stats
+            const caster_stats = data.caster.class;
+
             // build up view model that binds to the card
             for (const spell of manifest.spells) {
-                spell.vm = this.formatters.spell_card.build_spellcard_vm(spell, data.caster)
+                spell.vm = this.formatters.spell_card.build_spellcard_vm(spell, data.caster, caster_stats)
             }
 
             // build up view model that binds to the card

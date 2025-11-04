@@ -53,10 +53,11 @@
 
         }
 
+        // todo: format differently
+        // 'name - p123; name - p123'
         format_source_book(entity) {
             return mpmb.stringSource(entity, "full,page,multi");
         }
-
 
         toLowerCase(str) {
             return str.toLowerCase()

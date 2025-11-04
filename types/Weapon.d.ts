@@ -26,17 +26,52 @@ type Skill = Ability
  */
 type Expression = number | string
 
+/**
+ * Describes the dice rolled for damage
+ * @remarks
+*  This array has three entries:
+*  1. string or number
+*      The first entry is the amount of damage die.
+*      For example, for 2d6 damage, this first entry would be '2'.
+*      Another example, for 1d8 damage, this first entry would be '1'.
+*      You can also use the letter 'C', 'B', or 'Q' (capitalized!) for the cantrip die.
+*      The 'C' is replaced with the cantrip die for the current level (e.g. 3 at level 11-16).
+*      The 'B' is replaced with one less than the cantrip die for the current level (e.g. 2 at level 11-16).
+*      The 'Q' is replaced with one more than the cantrip die for the current level (e.g. 4 at level 11-16).
+*  2. number
+*      The second entry is the type of die.
+*      For example for 2d6 damage, this second entry would be '6'.
+*      This can be any number and is ignored if it is a 0.
+*      If the damage is not a die, but just a fixed number, make this second entry an empty string ("").
+*      For example for 1 bludgeoning damage, the whole array would look like:
+*          [1, "", "bludgeoning"]
+*  3. string
+*      The third entry is the type of damage that is dealt.
+*      This can be anything, but most often it is one of the predefined damage types.
+
+*      If you don't use a predefined damage type, the string is put in the Damage Type field exactly as you put it here, including capitalization.
+*
+*   The example below is for 2d4 piercing damage.
+* 
+* @example [2, 4, "piercing"] 
+*/
+type DamageDice = [DiceAmount, DiceSides, DamageType | string];
+
 type DiceAmount = number | "C" | "B" | "Q"
-type DiceType = number
+type DiceSides = number
 type DamageType =
     "acid" | "bludgeoning" | "cold" | "fire" | "force" | "lightning" | "necrotic" |
     "piercing" | "poison" | "psychic" | "radiant" | "slashing" | "thunder"
+
+type DamageExpression = [DiceAmount, DiceSides, DamageMod: number, DamageType]
+
+type SpellCastingEntity = string;
 
 // By adding a new object to the existing WeaponsList object, we create a new weapon/attack.
 // The object name here is 'purple sword'. You can use any object name as long as it is not already in use.
 // If you do use an object name that is already in use, you will be overwriting that object.
 // Note the use of only lower case! Also note the absence of the word "var" and the use of brackets [].
-interface MpmbWeapon {
+interface Mpmb_Weapon {
     /**  
      * The display name of the weapon.
      * 
@@ -184,34 +219,8 @@ interface MpmbWeapon {
     /**
      * determine the damage die and type of the damage
      * 
-     * @remarks
-     *  This array has three entries:
-     *  1. string or number
-     *      The first entry is the amount of damage die.
-     *      For example, for 2d6 damage, this first entry would be '2'.
-     *      Another example, for 1d8 damage, this first entry would be '1'.
-     *      You can also use the letter 'C', 'B', or 'Q' (capitalized!) for the cantrip die.
-     *      The 'C' is replaced with the cantrip die for the current level (e.g. 3 at level 11-16).
-     *      The 'B' is replaced with one less than the cantrip die for the current level (e.g. 2 at level 11-16).
-     *      The 'Q' is replaced with one more than the cantrip die for the current level (e.g. 4 at level 11-16).
-     *  2. number
-     *      The second entry is the type of die.
-     *      For example for 2d6 damage, this second entry would be '6'.
-     *      This can be any number and is ignored if it is a 0.
-     *      If the damage is not a die, but just a fixed number, make this second entry an empty string ("").
-     *      For example for 1 bludgeoning damage, the whole array would look like:
-     *          [1, "", "bludgeoning"]
-     *  3. string
-     *      The third entry is the type of damage that is dealt.
-     *      This can be anything, but most often it is one of the predefined damage types.
-  
-     *      If you don't use a predefined damage type, the string is put in the Damage Type field exactly as you put it here, including capitalization.
-     *
-     *   The example below is for 2d4 piercing damage.
-     * 
-     * @example [2, 4, "piercing"]
      */
-    damage: [DiceAmount, DiceType, DamageType | string],
+    damage: DamageDice,
 
     // todo: check the spelllist def, see if range is more formally defined
     /**
@@ -354,11 +363,7 @@ interface MpmbWeapon {
      * @example ["Prof+Con-2", "Prof+Con-2"]
      */
     modifiers?: [Expression, Expression],
-    /*	
-    
- 
-    */
-    monkweapon: true,
+
     /*	monkweapon // OPTIONAL //
         TYPE:	boolean
         USE:	whether (true) or not (false) this weapon is a monk weapon and should use the Martial Arts die
@@ -367,20 +372,23 @@ interface MpmbWeapon {
     
         Setting this to false is the same as not including this attribute.
     */
-    isMagicWeapon: true,
+    monkweapon: true,
+
     /*	isMagicWeapon // OPTIONAL //
-        TYPE:	boolean
-        USE:	whether (true) or not (false) this weapon is a magical weapon
-    
-        This attribute only has an effect for attack calculations and magic item selection.
-        Add this if you don't want class features and the like to add modifiers or write "Counts as magical" in the description of this attack.
-        Also add this if you don't want this weapon to be an option for magical weapons to add their attributes to.
-        Note that if you set the 'type' attribute to "Cantrip" or "Spell", it will already be treated as a magical attack.
-    
-        Weapons added by magic items using the 'weaponOptions' attribute will always have this attribute added and set to 'true'.
-    
-        Setting this to false is the same as not including this attribute.
+    TYPE:	boolean
+    USE:	whether (true) or not (false) this weapon is a magical weapon
+ 
+    This attribute only has an effect for attack calculations and magic item selection.
+    Add this if you don't want class features and the like to add modifiers or write "Counts as magical" in the description of this attack.
+    Also add this if you don't want this weapon to be an option for magical weapons to add their attributes to.
+    Note that if you set the 'type' attribute to "Cantrip" or "Spell", it will already be treated as a magical attack.
+ 
+    Weapons added by magic items using the 'weaponOptions' attribute will always have this attribute added and set to 'true'.
+ 
+    Setting this to false is the same as not including this attribute.
     */
+    isMagicWeapon: true,
+
     isNotWeapon: true,
     /*	isNotWeapon // OPTIONAL //
         TYPE:	boolean
@@ -412,6 +420,7 @@ interface MpmbWeapon {
     
         Setting this to false is the same as not including this attribute.
     */
+
     isAlwaysProf: true,
     /*	isAlwaysProf // OPTIONAL //
         TYPE:	boolean
@@ -506,11 +515,8 @@ interface MpmbWeapon {
      */
     useSpellcastingAbility?: boolean,
 
-    useSpellMod: ["wizard", "cleric"],
-    useSpellMod: "wizard",
-    /*	useSpellMod // OPTIONAL //
-    TYPE:	string or array of strings
-    USE:	the object name of a spellcasting object that this attack will use the spell attack/DC from
+    /** 
+    the object name of a spellcasting object that this attack will use the spell attack/DC from
     ADDED:	v13.0.6
     CHANGE:	v14.0.0 (can now be an array of strings)
     
@@ -544,7 +550,10 @@ interface MpmbWeapon {
     This attribute is ignored on the Wild Shape pages.
     
     Setting this to an empty string ("") is the same as not including this attribute.
+    @example ["wizard", "cleric"]
+    @example "wizard"
     */
+    useSpellMod?: Arrayable<SpellCastingEntity>
 
     baseWeapon: "longsword",
     /*	baseWeapon // OPTIONAL //
@@ -589,11 +598,14 @@ interface MpmbWeapon {
     selectNow: true,
 }
 
-type Weapon = Omit<MpmbWeapon, 'dc'> & {
+type Mpmb_Weapon_Narrowed = Omit<Mpmb_Weapon, 'damage', 'dc'> & {
+    // support multiple damage expressions in a single attack
+    damage: DamageDice[]
+
     dc: boolean | [skill, Expression, string, string]
 }
 
-type Internal<Weapon> = Weapon & {
+type WeaponDefinition = Mpmb_Weapon_Narrowed & {
     /** 
      * The key used to register this weapon in the WeaponsList dictionary.
      * 
@@ -602,7 +614,7 @@ type Internal<Weapon> = Weapon & {
     key: string
 
     // support multiple damage expressions in a single attack
-    damage: Arrayable<[[DiceAmount, DiceType, DamageType | string]]>
+    damage: DamageDice[]
 
     // support more complex dc checks
     // dc[0] is the skill being checked
@@ -615,4 +627,5 @@ type Internal<Weapon> = Weapon & {
     dc?: [skill, Expression, string, string]
 }
 
+type Weapon = WeaponDefinition
 
