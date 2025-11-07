@@ -1,5 +1,17 @@
+type Merge<T1, T2> = Omit<T1, keyof T2> & T2;
+
 type TCreatureSizeKey = 0 | 1 | 2 | 3 | 4 | 5
+type CreatureSize =
+    "gargantuan" // 0
+    | "huge"       // 1
+    | "large"      // 2
+    | "medium"     // 3
+    | "small"      // 4
+    | "tiny"       // 5
+
 type TCreatureType = string
+
+type Alignment = 'Neutral' // todo: and the rest
 
 /**
  * the six ability scores
@@ -114,27 +126,17 @@ type Mpmb_Creature = {
      * @remarks
      *  This can be either a:
      *  1) Number
-     *      The number corresponding to the size category of the creature (see table below)
+     *      The number corresponding to the size category of the creature 
      *  2) Array (since v13.0.6)
      *      If the creature can be several different size categories, using an array will allow the player
      *      to make a choice which one to use.
-     *      Add the numbers corresponding to the size categories of the creature (see table below) to the array.
-     *      For example, if you do
-     *          size: [4, 3],
-     *      the player will be prompted to select either Small or Medium as the creature's size category.
+     *      Add the numbers corresponding to the size categories of the creature to the array.
+     *      In the 2nd example, the player will be prompted to select either Small or Medium as the creature's size category.
      *
-     *  The corresponding number to the size categories are as follows:
-     *      NO	SIZE
-     *      0	Gargantuan
-     *      1	Huge
-     *      2	Large
-     *      3	Medium
-     *      4	Small
-     *      5	Tiny
      * @example 3
      * @example [4,3]
     */
-    size: Arrayable<number>;
+    size: Arrayable<TCreatureSizeKey>;
 
     /**
      * set the type drop-down box
@@ -194,80 +196,82 @@ type Mpmb_Creature = {
      */
     subtype?: Arrayable<string>;
 
-    companion: "familiar",
-    companion: ["familiar_not_al", "mount"],
-    /*	companion // OPTIONAL //
-        TYPE:	array of strings (or string, for backwards compatibility)
-        USE:	list this creature as an option for a special type of companion
-        CHANGE:	v13.1.0
-        CHANGE:	v13.1.12 ("_not_al" suffix)
-    
-        This attribute is an array of keys corresponding to a CompanionList object name,
-        or, for backwards compatibility, a string of one key.
-        Doing so makes this creature selectable as the listed type of special companion(s),
-        using the Companion Options button on the companion page.
-    
-        Some CompanionList objects have their own filter for determining which creatures are 
-        applicable.
-        However, if you set this attribute to match the CompanionList object key,
-        they will always be available for that CompanionList entry, regardless of its filter.
-    
-        Note that you can change any creature into one of the special options by first selecting
-        a race from the drop-down and selecting	"Change current creature into a ..." with
-        the Companion Options button.
-    
-        Use this `companion` attribute for things that are obvious candidates for the special options.
-    
-        OPTION                 EXPLANATION
-        "familiar"             Find Familiar spell and Pact of the Chain warlock boon
-        "pact_of_the_chain"    Pact of the Chain warlock boon (but not Find Familiar spell)
-        "mount"                Find Steed spell
-        "steed"                Find Greater Steed spell
-        "companion"            Ranger's Companion (Beast Master feature)
-                               Has its own filter, so normally you don't need this option.
-                               Filter: any Beast, Medium or smaller, and CR of 1/4 or lower
-        "companionrr"          2016/09/12 Unearthed Arcana: Revised Ranger's Beast Conclave feature
-        "strixhaven_mascot"    Strixhaven Mascot familiar (Strixhaven Mascot feat), but not Find Familiar spell
-    
-        "_not_al" SUFFIX
-        From v13.1.12 onwards, any of the above can have the "_not_al" suffix (e.g. "mount_not_al").
-        "al" stands for Adventurers League.
-        If this suffix is included, the creature will be listed in the menu with
-        the text "(if DM approves)" added.
-        When the DCI field is visible (i.e. Adventurers League enabled), the creature
-        will not be listed in the menu for that companion type.
+    /**
+     * list this creature as an option for a special type of companion
+     * 
+     * @remarks
+     This attribute is an array of keys corresponding to a CompanionList object name,
+     or, for backwards compatibility, a string of one key.
+     Doing so makes this creature selectable as the listed type of special companion(s),
+     using the Companion Options button on the companion page.
+ 
+     Some CompanionList objects have their own filter for determining which creatures are 
+     applicable.
+     However, if you set this attribute to match the CompanionList object key,
+     they will always be available for that CompanionList entry, regardless of its filter.
+ 
+     Note that you can change any creature into one of the special options by first selecting
+     a race from the drop-down and selecting	"Change current creature into a ..." with
+     the Companion Options button.
+ 
+     Use this `companion` attribute for things that are obvious candidates for the special options.
+ 
+     OPTION                 EXPLANATION
+     "familiar"             Find Familiar spell and Pact of the Chain warlock boon
+     "pact_of_the_chain"    Pact of the Chain warlock boon (but not Find Familiar spell)
+     "mount"                Find Steed spell
+     "steed"                Find Greater Steed spell
+     "companion"            Ranger's Companion (Beast Master feature)
+                            Has its own filter, so normally you don't need this option.
+                            Filter: any Beast, Medium or smaller, and CR of 1/4 or lower
+     "companionrr"          2016/09/12 Unearthed Arcana: Revised Ranger's Beast Conclave feature
+     "strixhaven_mascot"    Strixhaven Mascot familiar (Strixhaven Mascot feat), but not Find Familiar spell
+ 
+     "_not_al" SUFFIX
+     From v13.1.12 onwards, any of the above can have the "_not_al" suffix (e.g. "mount_not_al").
+     "al" stands for Adventurers League.
+     If this suffix is included, the creature will be listed in the menu with
+     the text "(if DM approves)" added.
+     When the DCI field is visible (i.e. Adventurers League enabled), the creature
+     will not be listed in the menu for that companion type.
+    * @example "familiar"
+    * @example ["familiar_not_al", "mount"]
+    * @since v13.1.0, v13.1.12 ("_not_al" suffix)
     */
-    companionApply: "companion",
-    /*	companionApply // OPTIONAL //
-        TYPE:	string
-        USE:	always set this creature to be this special type of companion
-    
-        Setting this to a key in the CompanionList object will make the sheet
-        automatically apply the features of that special companion type.
-    
-        Note that you can change any creature into one of the special options by first selecting
-        a race from the drop-down and selecting	"Change current creature into a ..." with
-        the Companion Options button.
-    
-        Use this `companionApply` attribute only if the creature *always* is that kind of companion.
-    
-        Import scripts can add things to the CompanionList object, but generally these
-        options should be available (if the applicable scripts are imported if they're not SRD):
-    
-        SRD   OBJECT KEY             EXPLANATION
-         V    "familiar"             Find Familiar spell
-         V    "pact_of_the_chain"    Pact of the Chain familiar (Warlock 3rd-level boon)
-         V    "mount"                Find Steed spell
-         -    "steed"                Find Greater Steed spell
-         -    "companion"            Ranger's Companion (Ranger: Beast Master feature)
-         -    "strixhaven_mascot"    Strixhaven Mascot familiar (Strixhaven Mascot feat)
-         -    "companionrr"          Animal Companion (2016/09/12 Unearthed Arcana:
-                                                       Revised Ranger's Beast Conclave feature)
-         -    "mechanicalserv"       Mechanical Servant (2017/01/09 Unearthed Arcana: 
-                                                         Artificer's Mechanical Servant feature)
-    
-        Be aware that this list is slightly different than the one for the `companion` attribute!
+    companion?: string | [string, string];
+
+    /**
+     * always set this creature to be this special type of companion
+     * 
+     * @remarks
+     Setting this to a key in the CompanionList object will make the sheet
+     automatically apply the features of that special companion type.
+ 
+     Note that you can change any creature into one of the special options by first selecting
+     a race from the drop-down and selecting	"Change current creature into a ..." with
+     the Companion Options button.
+ 
+     Use this `companionApply` attribute only if the creature *always* is that kind of companion.
+ 
+     Import scripts can add things to the CompanionList object, but generally these
+     options should be available (if the applicable scripts are imported if they're not SRD):
+ 
+     SRD   OBJECT KEY             EXPLANATION
+      V    "familiar"             Find Familiar spell
+      V    "pact_of_the_chain"    Pact of the Chain familiar (Warlock 3rd-level boon)
+      V    "mount"                Find Steed spell
+      -    "steed"                Find Greater Steed spell
+      -    "companion"            Ranger's Companion (Ranger: Beast Master feature)
+      -    "strixhaven_mascot"    Strixhaven Mascot familiar (Strixhaven Mascot feat)
+      -    "companionrr"          Animal Companion (2016/09/12 Unearthed Arcana:
+                                                    Revised Ranger's Beast Conclave feature)
+      -    "mechanicalserv"       Mechanical Servant (2017/01/09 Unearthed Arcana: 
+                                                      Artificer's Mechanical Servant feature)
+ 
+     Be aware that this list is slightly different than the one for the `companion` attribute!
+     @example "companion"
     */
+    companionApply?: string;
 
     /**
      * set the alignment drop-down box
@@ -288,21 +292,22 @@ type Mpmb_Creature = {
      */
     ac: number;
 
-    /*	hp // REQUIRED //
-    TYPE:	number
-    USE:	set the maximum amount of hit points
- 
-    This number is filled in the Max HP field without any changed, no calculations are done with
-    regards to hit dice, Constitution modifier, or anything like that.
-    It is still possible to enable automatic updates for the Max HP field using the "Set Max HP" button,
-    but by default only the hp value set here will be displayed and it will not automatically update.
-*/
-    hp: 10;
+    /** 
+     * set the maximum amount of hit points
+     * 
+     * @remarks
+     * This number is filled in the Max HP field without any changed, no calculations are done with
+     * regards to hit dice, Constitution modifier, or anything like that.
+     * It is still possible to enable automatic updates for the Max HP field using the "Set Max HP" button,
+     * but by default only the hp value set here will be displayed and it will not automatically update.
+     * @example 10
+     */
+    hp: number;
 
-    /*	hd // REQUIRED //
-     TYPE:	array with two number entries
-     USE:	set the hit dice
- 
+    /**
+     * set the hit dice
+     * 
+     * @remarks
      This array has two entries, both have to be a number or an empty string ""
      1. number
          The first entry is the amount of hit dice.
@@ -313,9 +318,11 @@ type Mpmb_Creature = {
          This will be filled in the "Die" field on the companion page.
          Don't worry, the "d" will be added automatically (e.g. the 4 above will display as "d4").
  
-     The example above is for 3d4 hit dice.
- */
-    hd: [3, 4];
+     The example b is for 3d4 hit dice.
+
+     @example: [3, 4]
+     */
+    hd: [number, number];
 
     /**
      * dynamically set the number of HD to a class level (array) or anything you want (function)
@@ -344,15 +351,17 @@ type Mpmb_Creature = {
      */
     hdLinked?: unknown; // array with ClassList object names (variable length) or function
 
-    speed: "20 ft, climb 30 ft",
-    /*	speed // REQUIRED //
-        TYPE:	string
-        USE:	set the movement speed
+    /**
+     * set the movement speed
+     * 
+     * @remarks
     
         This value is put in the speed field without any changes,
         except that on the Printer Friendly sheets any comma followed by a space is replaced with
         a comma followed by a line break.
+        @example "20 ft, climb 30 ft"
     */
+    speed: string,
 
     /**
      * set the proficiency bonus
@@ -392,7 +401,6 @@ type Mpmb_Creature = {
      */
     challengeRating: string;
 
-
     /**
      * set the ability scores
      * 
@@ -400,59 +408,64 @@ type Mpmb_Creature = {
      */
     scores: score_array;
 
-    saves: ["", 3, "", "", "", ""],
-    /*	saves // OPTIONAL //
-        TYPE:	array of six numbers
-        USE:	set the saving throw proficiencies
-    
-        This array has six entries, all of which can be an empty string or a number.
-        These six correspond to the ability scores in their usual order, see `scores` above.
-    
-        Only list here the saving throw bonus for an ability score if it is not the same as that ability's modifier.
-        Normally this would happen if the creature is proficient in a saving throw, although other modifiers might apply as well,
-    
-        The sheet will take the number given here, look at the ability score and proficiency bonus, 
-        and determine if the creature is proficient and/or has other modifiers.
-        Then it will check the proficiency box and/or fill the modifier field, as appropriate.
+    /**
+     * set the saving throw proficiencies
+     * 
+     * @remarks
+     This array has six entries, all of which can be an empty string or a number.
+     These six correspond to the ability scores in their usual order, see `scores` above.
+ 
+     Only list here the saving throw bonus for an ability score if it is not the same as that ability's modifier.
+     Normally this would happen if the creature is proficient in a saving throw, although other modifiers might apply as well,
+ 
+     The sheet will take the number given here, look at the ability score and proficiency bonus, 
+     and determine if the creature is proficient and/or has other modifiers.
+     Then it will check the proficiency box and/or fill the modifier field, as appropriate.
+     @example ["", 3, "", "", "", ""]
     */
-    savesLinked: true,
-    /*	savesLinked // OPTIONAL //
-        TYPE:	boolean
-        USE:	whether the total save bonus is the same (true) as the main character or not (false)
-        ADDED:	v13.0.6
-    
-        Setting this to true will cause the totals for saving throws on the Companion page
-        to always be identical to those of the main character (on the 1st page).
-        The proficiency checkbox and modifier fields on the Companion page will be ignored.
-    
-        It will effectively cause the `saves` attribute above to be overwritten on
-        the Companion page with the totals of the main character (the 1st page).
-        Even so, setting the `saves` attribute is still functional, as it will
-        be used to calculate saving throw proficiencies on the Wild Shape page.
-    
-        This attribute has no affect on the Wild Shape page.
-    
-        Setting this attribute to false is the same as not including this attribute.
+    saves?: [number | "", number | "", number | "", number | "", number | "", number | ""],
+
+    /**
+     * whether the total save bonus is the same (true) as the main character or not (false)
+     * 
+     * @details
+     Setting this to true will cause the totals for saving throws on the Companion page
+     to always be identical to those of the main character (on the 1st page).
+     The proficiency checkbox and modifier fields on the Companion page will be ignored.
+ 
+     It will effectively cause the `saves` attribute above to be overwritten on
+     the Companion page with the totals of the main character (the 1st page).
+     Even so, setting the `saves` attribute is still functional, as it will
+     be used to calculate saving throw proficiencies on the Wild Shape page.
+ 
+     This attribute has no affect on the Wild Shape page.
+ 
+     @defaultValue false
+     @example true
+     @since v13.0.6
     */
-    senses: "Darkvision 60 ft",
-    /*	senses	// REQUIRED //
-        TYPE:	string
-        USE:	add text to the Senses section on the Companion page
-    
+    savesLinked?: boolean,
+
+    /**
+     * add text to the Senses section on the Companion page
+     * 
+     * @remarks
         Even though most creature stat blocks list Passive Perception under senses, do not include
         it in this attribute. Passive Perception will be calculated automatically from the Perception bonus.
         If Passive Perception is different than 10 + Perception bonus, you can use the `addMod` attribute
         to add the bonus to the modifier field.
     
-        If the creature doesn't have any special senses, set an empty string for this attribute, like so:
-            senses: "",
+        If the creature doesn't have any special senses, set this to an empty string
     
-        This text are also displayed on the wild shape page, but in the singular Traits & Features section,
+        This text is also displayed on the wild shape page, but in the singular Traits & Features section,
         together with all other descriptive string, traits, features, and action attributes.
         As the wild shape pages offer limited space, it is recommended to test if all of these and
         the other attributes together will fit.
         If they don't fit (well), consider using the `wildshapeString` attribute, see below.
+        @example "Darkvision 60 ft"
+        @example ""
     */
+    senses: string,
 
     /**
      * set the number of attacks per action
@@ -493,8 +506,7 @@ type Mpmb_Creature = {
         }]
 
     */
-    attacks: Weapon[];
-
+    attacks: WeaponDefinition[];
 
     /**
      * set the proficiency, expertise, and extra bonus for skills
@@ -966,8 +978,16 @@ interface WildshapeCreature {
     */
 }
 
+// config api I want to use
+type CreatureConfigDefinition = Merge<Mpmb_Creature, {
+    size: Arrayable<CreatureSize>;
+
+    /** set the amount of xp awarded for defeating this monster */
+    xp: number;
+}>;
+
 // the entity type, with the properties I don't want thrown out
-type Mpmb_Creature_Narrowed = Omit<Mpmb_Creature, ""
+type Mpmb_Creature_Narrowed = Omit<CreatureConfigDefinition, ""
 
     // because this info is caputure by abilities.[skill]
     | "scores"
@@ -995,7 +1015,7 @@ type CreatureDefinition = Mpmb_Creature_Narrowed & {
     */
     key: string;
 
-    size: TCreatureSizeKey[];
+    size: Array<TCreatureSizeKey>
 
     type: TCreatureType[];
 

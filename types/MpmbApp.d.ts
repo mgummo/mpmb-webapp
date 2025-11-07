@@ -227,12 +227,11 @@ interface MpmbApp extends
 
 interface MpmbWrapper extends MpmbApp {
 
-    lists: Record<string, any>;
+    lists: MpmbApp_Lists
+
 
     // not to be confused with AddWeapon from functions1.js, which does not do what I thought it did
-    AddWeapon: (key: string, weapon: Partial<Weapon>) => void;
-
-    UpdateWeapon: (key: string, weapon: Partial<Weapon>) => void;
+    // todo: annotate Add / Update methods on lists
 
 }
 

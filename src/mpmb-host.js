@@ -117,24 +117,33 @@
                 spellSchoolList: global.spellSchoolList,
             }
 
+            // enrich lists with add / update methods
+            for (const entity_dict of Object.values(this.lists)) {
+                Object.defineProperty(entity_dict, 'Add', {
+                    value(key, entity) {
+                        entity.key = key;
+                        this[key] = entity;
+                    },
+                    enumerable: false,
+                });
+
+                Object.defineProperty(entity_dict, 'Update', {
+                    value(key, partial_entity) {
+
+                        let entity = this[key]
+                        entity = { ...entity, ...partial_entity }
+                        this[key] = entity;
+                    },
+                    enumerable: false,
+                });
+            }
+
             console.debug("Discovered the following lists from mdmb: %o", this.lists)
         }
 
         get lists() {
             return this._lists;
         }
-
-        AddWeapon(key, weapon) {
-            weapon.key = key;
-            this.lists.WeaponsList[key] = weapon;
-        }
-
-        UpdateWeapon(key, partial_weapon) {
-            let weapon = this.lists.WeaponsList[key]
-            weapon = { ...weapon, ...partial_weapon }
-            this.lists.WeaponsList[key] = weapon;
-        }
-
     }
 
     const mpmb = new MpmbWrapper();
