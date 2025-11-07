@@ -426,17 +426,17 @@ type Mpmb_Spell = {
 	 */
 	descriptionFull?: string | object[], // type here isn't correct
 
-	ritual: true,
-	/*	ritual // OPTIONAL //
-		TYPE:	boolean
-		USE:	whether this spell can be cast as a ritual
-		CHANGE: v24.0.0 (now adds registered trademark symbol instead of "(R)")
-	
-		Spells with the ritual tag will gain a "®" (registered trademark symbol)
-		after their name on the spell sheet.
-	
-		Setting this attribute to false is the same as not including this attribute.
-	*/
+	/**
+	 * whether this spell can be cast as a ritual
+	 * 
+	 * @remarks
+	 * Spells with the ritual tag will gain a "®" (registered trademark symbol)
+	 * after their name on the spell sheet.
+	 * 
+	 * @defaultValue false
+	 * @example true
+	 */
+	ritual: boolean;
 
 	psionic: true,
 	/*	psionic // OPTIONAL //

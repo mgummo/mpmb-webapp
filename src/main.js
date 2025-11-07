@@ -53,12 +53,22 @@
             const all_monsters = data.monsters;
 
             const caster = data.caster;
+            const layout = config.layout["spell-cards"];
 
-            const spell_filter = build_filter(config.layout["spell-cards"].filter);
-            const spells_filtered = Object.values(spells_all).filter((spell) => spell_filter(spell, caster));
+            const fn_preprocess = layout.preprocess ?? (() => Object.values(spells_all));
+            const fn_filter = build_filter(layout.filter, caster);
+            const fn_sort_compare = config.layout["spell-cards"].sort;
 
-            // todo: make this configurable
-            const spells_sorted = sort_spells(spells_filtered);
+            let spells = fn_preprocess(caster);
+            let spells_filtered = spells;
+            if (fn_filter) {
+                spells_filtered = spells.filter((spell) => fn_filter(spell, caster));
+            }
+
+            let spells_sorted = spells_filtered;
+            if (fn_sort_compare) {
+                spells_sorted = spells.sort(fn_sort_compare);
+            }
 
             const monsters = (() => {
                 if (!config.layout["monster-cards"]) {
@@ -78,8 +88,11 @@
 
     }
 
-    // todo: i haven't tested this yet
     function build_filter(filter_factory, context) {
+
+        if (!filter_factory) {
+            return null;
+        }
 
         if (typeof filter_factory !== "function") {
             throw "invalid filter definition"

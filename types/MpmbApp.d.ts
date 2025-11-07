@@ -11,7 +11,7 @@ interface MpmbApp_Lists {
     // ClassList
     // ClassSubList
     // CompanionList
-    // CreatureList
+    CreatureList: Record<string, CreatureDefinition>
     // DefaultEvalsList
     // FeatsList
     // GearList
@@ -21,16 +21,14 @@ interface MpmbApp_Lists {
     // RaceList
     // RaceSubList
     // SourceList
-    // SpellsList
+    SpellsList: Record<string, SpellDefinition>
     // ToolsList
-    // WeaponsList
+    WeaponsList: Record<string, WeaponDefinition>
     // spellLevelList
     // spellSchoolList
 
-
-
     // I think this is intended to be a lookup table, for the number of lines allowed for each field?
-    FieldNumbers: Record<string, number>;
+    // FieldNumbers: Record<string, number>;
 
 }
 
