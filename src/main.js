@@ -10,7 +10,7 @@
         constructor() {
 
             // this is initalized when init() is called
-            this.config = {};
+            this.config = undefined;
 
             // initialized by loader.js
             this.loader = undefined;
@@ -35,12 +35,12 @@
             const caster_stats = data.caster.class;
 
             // build up view model that binds to the card
-            for (const spell of manifest.spells) {
+            for (const spell of manifest.spells ?? []) {
                 spell.vm = this.formatters.spell_card.build_spellcard_vm(spell, data.caster, caster_stats)
             }
 
             // build up view model that binds to the card
-            for (const monster of manifest.monsters) {
+            for (const monster of manifest.monsters ?? []) {
                 monster.vm = this.formatters.monster_card.build_monstercard_vm(monster)
             }
 
@@ -49,11 +49,25 @@
 
         get_print_manifest(config, data) {
 
+            const spells = this._layout_spells(config, data);
+            const monsters = this._layout_monsters(config, data);
+
+            return {
+                spells,
+                monsters,
+            };
+        }
+
+        _layout_spells(config, data) {
             const spells_all = data.spells;
             const all_monsters = data.monsters;
 
             const caster = data.caster;
+
             const layout = config.layout["spell-cards"];
+            if (!layout) {
+                return []
+            }
 
             const fn_preprocess = layout.preprocess ?? (() => Object.values(spells_all));
             const fn_filter = build_filter(layout.filter, caster);
@@ -67,23 +81,38 @@
 
             let spells_sorted = spells_filtered;
             if (fn_sort_compare) {
-                spells_sorted = spells.sort(fn_sort_compare);
+                spells_sorted = spells_filtered.sort(fn_sort_compare);
             }
 
-            const monsters = (() => {
-                if (!config.layout["monster-cards"]) {
-                    return []
-                }
+            return spells_sorted;
+        }
 
-                const monster_filter = build_filter(config.layout["monster-cards"].filter);
-                const monsters = Object.values(all_monsters).filter((monster) => monster_filter(monster))
-                return monsters;
-            })()
+        _layout_monsters(config, data) {
 
-            return {
-                spells: spells_sorted,
-                monsters,
-            };
+            const caster = data.caster;
+
+            const layout = config.layout["monster-cards"];
+            if (!layout) {
+                return []
+            }
+
+            const fn_preprocess = layout.preprocess ?? (() => Object.values(data.monsters));
+            const fn_filter = build_filter(layout.filter, caster);
+            const fn_sort_compare = layout.sort;
+
+            let items = fn_preprocess(caster);
+            let items_filtered = items;
+            if (fn_filter) {
+                items_filtered = items.filter((spell) => fn_filter(spell, caster));
+            }
+
+            let items_sorted = items_filtered;
+            if (fn_sort_compare) {
+                items_sorted = items_filtered.sort(fn_sort_compare);
+            }
+
+            return items_sorted;
+
         }
 
     }
@@ -98,6 +127,7 @@
             throw "invalid filter definition"
         }
 
+        // todo: might make sense to get rid of this flexibility and go through preprocess instead, for global context filter
         // Check how many parameters the function declares
         if (filter_factory.length != 1) {
             // It's the 2-arg form: (item, context)

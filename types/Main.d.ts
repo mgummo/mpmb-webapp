@@ -1,6 +1,7 @@
 interface Main {
     config: {
         load_character: () => void;
+        plugins: string[];
     };
 
     formatters: {

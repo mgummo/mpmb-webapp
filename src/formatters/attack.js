@@ -22,7 +22,6 @@
             const range = this.format_range(spell);
             const to_hit = this.format_modifier(spell_attack_mod);
 
-            if (!spell.action.damages) { debugger; }
             const damages = spell.action.damages;
             const attack_context = {
                 caster_level: attacker.caster_level,
@@ -56,8 +55,9 @@
             }
             else {
 
-                "Make a 30 foot reach Melee spell attack"
-                "Make a 30 foot ranged spell attack"
+                // ex:
+                // "Make a 10 foot reach Melee spell attack"
+                // "Make a 30 foot ranged spell attack"
 
                 text = `Make a ${range} spell attack (${to_hit} to hit); Deals ${dice} damage.`
             }
@@ -65,24 +65,29 @@
             return text;
         }
 
-        format_range(token) {
+        // todo: formalize this
+        // aoe (area-of-effect) =  'Cone' | 'Cube' | 'Cylinder' | 'Emanation' | 'Line' | 'Sphere' 
+        // origin (self, another creature, etc.)
 
-            let range = "";
+        format_range(token) {
 
             const patterns = [
 
-                // ex: `30 ft Melee` => `30 foot Melee`
+                // ex: `10 ft Melee` => ['Melee Attack', 'reach 10 ft']
                 {
-                    regex: /(\d+)\s*(ft|m) melee/i,
+                    regex: /^(\d+)\s*(ft|m) melee^/i,
                     handle: (amount, unit) => {
                         unit = this.unabbreviate(unit);
-                        return `${amount} ${unit} Melee`
+                        return {
+                            type: 'Melee Attack',
+                            reach: `${amount} ${unit}`
+                        }
                     }
                 },
 
                 // ex: `Melee (5 ft)` => ['Melee Attack', 'reach 5 ft']
                 {
-                    regex: /Melee \((\d+)\s*(ft|m)\)/,
+                    regex: /^melee \((\d+)\s*(ft|m)\)$/i,
                     handle: (amount, unit) => {
                         return {
                             type: "Melee Attack",
@@ -93,18 +98,24 @@
 
                 // ex: `80/320 ft` => range 80/320 ft
                 {
-                    regex: /(d+)\\(d+)\s*(ft|m)/,
+                    regex: /^(\d+)\/(\d+)\s*(ft|m)$/i,
                     handle: (short_range, long_range, unit) => {
-                        return `range ${short_range}/${long_range} {unit}`
+                        return {
+                            type: "Ranged Attack",
+                            reach: `range ${short_range}/${long_range} ${unit}`
+                        }
                     }
                 },
 
                 // ex: `60 ft` => `60 foot ranged`
                 {
-                    regex: /(\d+)\s*(ft|m)/i,
+                    regex: /^(\d+)\s*(ft|m)$/i,
                     handle: (amount, unit) => {
                         unit = this.unabbreviate(unit);
-                        return `${amount} ${unit} ranged`
+                        return {
+                            type: "Ranged Attack",
+                            reach: `${amount} ${unit} ranged`
+                        }
                     }
                 },
 
@@ -112,22 +123,32 @@
                 {
 
                     regex: /melee/i,
-                    handle: () => `melee`,
+                    handle: () => {
+                        return {
+                            type: "Melee Attack",
+                            reach: `reach 5 ft`,
+                        }
+                    }
                 },
 
                 // ex: `Touch` => `touch`
                 {
-
                     regex: /touch/i,
-                    handle: () => `touch`,
+                    handle: () => {
+                        return {
+                            range: `touch`,
+                        }
+                    }
                 },
 
                 // ex: `5-ft radius` => `5 foot radius`
                 {
-                    regex: /(\d+)-(.*) (.*)/i,
+                    regex: /$(\d+)-(.*) (.*)^/i,
                     handle: (amount, unit, shape) => {
                         unit = this.unabbreviate(unit);
-                        return `${amount} ${unit} ${shape}`
+                        return {
+                            range: `${amount} ${unit} ${shape}`
+                        }
                     }
                 },
 
@@ -136,46 +157,56 @@
                     regex: /S:(\d+)\s*(.*)\s(.*)/i,
                     handle: (amount, unit, shape) => {
                         unit = this.unabbreviate(unit);
-                        return `${amount} ${unit} ${shape}`
+                        return {
+                            range: `${amount} ${unit} ${shape}`
+                        }
                     }
                 },
 
                 {
                     regex: /One in shared area/i,
                     handle: () => {
-                        // "one Medium or smaller creature in this creature's space"
-                        return "one creature in this creature's space"
+                        return {
+                            range: "one creature in this creature's space"
+                        }
                     }
                 },
 
                 {
                     regex: /All in shared area/i,
                     handle: () => {
-                        return "each creature in this creature's space"
+                        return {
+                            range: "each creature in this creature's space"
+                        }
                     }
                 },
 
             ];
 
+            const range = this._MatchRegexes(token, patterns);
+            return range;
+        }
+
+        _MatchRegexes(token, patterns) {
             for (const { regex, handle } of patterns) {
                 const match = token.match(regex);
                 if (match) {
-                    range = handle(...match.slice(1));
+                    const range = handle(...match.slice(1));
+                    range.regex = regex;
                     return range;
                 }
             }
 
-            // todo: should include the key or attack in the warning
-            // for the default case, leave as-is but warn
-            console.warn(`Did not recognize spell range: ${token} `)
-            debugger;
-            return token;
-
+            return {
+                regex: ".*",
+                type: null,
+                reach: token,
+            };
         }
 
         /**
-         * @param {DamageExpression} damages 
-         * @param {*} attack_context 
+         * @param {DamageExpression[]} damages 
+         * @param {AttackContext} attack_context 
          * @returns 
          * @example        
          * [1, 8, 2, fire] => (1d8 + 2) Fire
@@ -185,26 +216,37 @@
             let resolved_damages = this._ResolveVariables(damages, attack_context);
             resolved_damages = this._AggregateDamageTypes(resolved_damages);
 
-            const damage_strings = damages.map(x => {
+            const damage_strings = resolved_damages.map(x => {
                 const dice_count = x[0];
                 const dice_size = x[1];
 
-                let damage_mod = x[2]
-                if (!damage_mod) {
+                let damage_mod = '';
+                if (!x[2]) {
                     damage_mod = ""
                 }
                 else {
-                    damage_mod = this.format_modifier(damage_mod)
+                    damage_mod = this.format_modifier(x[2])
                 }
 
                 const damage_type = x[3].toTitleCase();
 
+                if (dice_size == 1) {
+                    const damage_amount = dice_count + x[2];
+                    return `(${damage_amount}) ${damage_type}`
+                }
+
                 return `(${dice_count}d${dice_size}${damage_mod}) ${damage_type}`
             });
 
-            return damage_strings.join(', ')
+            return damage_strings.join(' + ')
         }
 
+        /**
+         * 
+         * @param {DamageExpression[]} damages 
+         * @param {AttackContext} attack_context 
+         * @returns {DamageExpression[]}
+         */
         _ResolveVariables(damages, attack_context) {
 
             const caster_level = attack_context?.caster_level;
@@ -212,21 +254,12 @@
 
             const result = damages.map(damage => {
 
+                if (damage.length != 4) debugger;
+
                 let dice_count = damage[0];
 
                 if (dice_count === 'C') {
-                    if (caster_level < 5) {
-                        dice_count = 1;
-                    }
-                    else if (caster_level < 11) {
-                        dice_count = 2;
-                    }
-                    else if (caster_level < 17) {
-                        dice_count = 3;
-                    }
-                    else {
-                        dice_count = 4;
-                    }
+                    dice_count = this.get_cantrip_dice_amount(caster_level);
                 }
 
                 if (dice_count === 'USL') {
@@ -235,8 +268,10 @@
                     dice_count = spell_slot_size - default_spell_slot_size
                 }
 
-                // todo: resolve the modifier also?
                 let damage_mod = damage[2]
+                if (damage_mod == "damage_mod") {
+                    damage_mod = attack_context.damage_mod;
+                }
 
                 return [dice_count, damage[1], damage_mod, damage[3]]
             });
@@ -246,17 +281,36 @@
             return result;
         }
 
+        get_cantrip_dice_amount(caster_level) {
+            let dice_count = null;
+            if (caster_level < 5) {
+                dice_count = 1;
+            }
+            else if (caster_level < 11) {
+                dice_count = 2;
+            }
+            else if (caster_level < 17) {
+                dice_count = 3;
+            }
+            else {
+                dice_count = 4;
+            }
+            return dice_count;
+        }
+
         _AggregateDamageTypes(damages) {
-            // condense damage, by grouping together by dice_size and damage_type
-            // then summing the dice_count
+            // condense damage rolls, 
+            // by grouping together by dice_size and damage_type
+            // then summing the dice_count and damage_mod
 
             let groupings = Map.groupBy(damages, x => JSON.stringify([x[1], x[3]]));
             const result = [...groupings.entries()].map(entry => {
                 const key = JSON.parse(entry[0]);
-                const sum = entry[1].map(x => x[0]).reduce((acc, val) => acc + val)
+                const dice_count = entry[1].map(x => x[0]).reduce((acc, val) => acc + val)
                 const dice_size = key[0]
+                const damage_mod = entry[1].map(x => x[2]).reduce((acc, val) => acc + val)
                 const damage_type = key[1]
-                const value = [sum, dice_size, damage_type]
+                const value = [dice_count, dice_size, damage_mod, damage_type]
                 return value;
             });
             return result

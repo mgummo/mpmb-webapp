@@ -37,7 +37,7 @@
 
 body {
     font-size: 12px;
-    font-family: "Garamond", serif;
+    font-family: "Cinzel", "Roboto", sans-serif;
     background: #f4efe0;
 
     margin: 0;
@@ -88,6 +88,7 @@ body {
 
 .card .source-book {
     align-self: flex-end;
+    white-space: pre-line;
 }
 
 .spell-card .name,

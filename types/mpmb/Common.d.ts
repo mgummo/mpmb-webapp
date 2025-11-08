@@ -26,3 +26,11 @@
 type SourceList = Arrayable<[SourceKey, Page]>;
 type SourceKey = string
 type Page = number
+
+type DamageType =
+    "acid" | "bludgeoning" | "cold" | "fire" | "force" | "lightning" | "necrotic" |
+    "piercing" | "poison" | "psychic" | "radiant" | "slashing" | "thunder"
+
+type Condition = 'charmed' | 'deafened' | 'exhaustion' | 'frightened' | 'grappled' | 'incapacitated' | 'paralyzed' | 'petrified' | 'poisoned' | 'prone' | 'restrained' | 'stunned' | 'unconscious';
+
+type Integer = number;

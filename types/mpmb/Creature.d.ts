@@ -9,9 +9,15 @@ type CreatureSize =
     | "small"      // 4
     | "tiny"       // 5
 
-type TCreatureType = string
+type CreatureType_Swarm = `swarm of ${CreatureSize} ${CreatureType}`
+type CreatureType = 'aberration' | 'beast' | 'celestial' | 'construct' | 'dragon' | 'elemental' | 'fey' | 'fiend' | 'giant' | 'humanoid' | 'monstrosity' | 'ooze' | 'plant' | 'undead'
+    | CreatureType_Swarm
 
-type Alignment = 'Neutral' // todo: and the rest
+// todo: and the rest
+type Alignment = 'unaligned' |
+    'lawful good' |
+    'neutral' |
+    'lawful evil' | 'neutral evil' | 'chaotic evil'
 
 /**
  * the six ability scores
@@ -149,29 +155,13 @@ type Mpmb_Creature = {
      *      If the creature can be several different creature types, using an array will prompt the player
      *      to make a choice which one to use.
      *
-     *  You can put here anything you like, but is usually one of the known creature types:
-     *      Aberration
-     *      Beast
-     *      Celestial
-     *      Construct
-     *      Dragon
-     *      Elemental
-     *      Fey
-     *      Fiend
-     *      Giant
-     *      Humanoid
-     *      Monstrosity
-     *      Ooze
-     *      Plant
-     *      Undead
-     *
      *  This value is put in the type drop-down box of the sheet without any changes,
      *  thus it is recommended to capitalize it for consistency.
      *
      * @example "Fiend"
      * @example ["Celestial", "Fey", "Fiend"]
      */
-    type: Arrayable<TCreatureType>;
+    type: Arrayable<CreatureType>;
 
     /**
      * add the subtype in the type drop-down box
@@ -281,7 +271,7 @@ type Mpmb_Creature = {
      * thus it is recommended to capitalize it for consistency.
      * @example "Unaligned" 
      */
-    alignment: string;
+    alignment: Alignment;
 
     /**	
      * set the armour class
@@ -373,10 +363,10 @@ type Mpmb_Creature = {
      */
     proficiencyBonus: number;
 
-    /*	proficiencyBonusLinked // OPTIONAL //
-    TYPE:	boolean
-    USE:	whether the proficiency bonus is the same (true) as the main character or not (false)
-    ADDED:	v13.0.6
+    /**
+     * whether the proficiency bonus is the same (true) as the main character or not (false)
+     * 
+     * @remarks
  
     Setting this to true will cause the `proficiencyBonus` attribute above to
     be overwritten on the Companion page with that of the main character (the 1st page),
@@ -386,9 +376,11 @@ type Mpmb_Creature = {
  
     This attribute has no affect on the Wild Shape page.
  
-    Setting this attribute to false is the same as not including this attribute.
+    @defaultValue false
+    @example true
+    @since v13.0.6
 */
-    proficiencyBonusLinked: true,
+    proficiencyBonusLinked?: boolean;
 
     /**
      * set the challenge rating
@@ -506,7 +498,7 @@ type Mpmb_Creature = {
         }]
 
     */
-    attacks: WeaponDefinition[];
+    attacks: AttackActionConfigDefinition[];
 
     /**
      * set the proficiency, expertise, and extra bonus for skills
@@ -562,13 +554,17 @@ type Mpmb_Creature = {
         the other attributes together will fit.
         If they don't fit (well), consider using the `wildshapeString` attribute, see below.
      */
-    damage_vulnerabilities: "cold",
-    vulnerabilities: "cold",
-    damage_resistances: "lightning; thunder; bludgeoning, piercing, and slashing from nonmagical weapons",
-    resistances: "Cold, Fire, Lightning",
-    damage_immunities: "poison",
-    condition_immunities: "exhaustion, grappled, paralyzed, petrified, poisoned, prone, restrained, unconscious",
-    immunities: "Acid, Poison; Poisoned",
+    damage_vulnerabilities: "cold";
+    vulnerabilities: "cold";
+    damage_resistances: "lightning; thunder; bludgeoning, piercing, and slashing from nonmagical weapons";
+    resistances: "Cold, Fire, Lightning";
+    damage_immunities: "poison";
+
+    /** @example "exhaustion, grappled, paralyzed, petrified, poisoned, prone, restrained, unconscious" */
+    condition_immunities?: string;
+
+    /** @example "Acid, Poison; Poisoned" */
+    immunities?: string;
 
     /**
      * Defines the language(s) the creature knows
@@ -661,7 +657,7 @@ type Mpmb_Creature = {
      *    joinString: "\n   "
      * }],
      */
-    features?: unknown;
+    features?: unknown[];
 
     /**
      * @example
@@ -672,7 +668,7 @@ type Mpmb_Creature = {
         addMod: [{ type: "skill", field: "all", mod: "max(oCha|1)", text: "The purple crawler adds its master's Charisma modifier (min 1) to all its skill checks." }]
     }]
      */
-    actions?: unknown;
+    actions?: unknown[];
 
     /**
      * @example
@@ -690,7 +686,7 @@ type Mpmb_Creature = {
      *  }
      * }]
      */
-    traits?: unknown
+    traits?: unknown[]
 
     /**
      * 
@@ -978,22 +974,22 @@ interface WildshapeCreature {
     */
 }
 
-// config api I want to use
-type CreatureConfigDefinition = Merge<Mpmb_Creature, {
-    size: Arrayable<CreatureSize>;
+// config options that I don't care about
+type Mpmb_Creature_Definition_Narrowed = Omit<Mpmb_Creature, ""
 
-    /** set the amount of xp awarded for defeating this monster */
-    xp: number;
-}>;
+    // because it's derived from cr
+    | "proficiencyBonus"
 
-// the entity type, with the properties I don't want thrown out
-type Mpmb_Creature_Narrowed = Omit<CreatureConfigDefinition, ""
+    // because it's been renamed to cr
+    | "challengeRating"
 
-    // because this info is caputure by abilities.[skill]
-    | "scores"
+    // because it's not used - assuming there's a trait that describes the multiattack
+    | "attacksAction"
 
-    // because this info is captured by abilities.[skill].save_mod
-    | "saves"
+    // because these have been aggregated to an object and moved to features property
+    | "attacks"
+    | "actions"
+    | "traits"
 
     // because these have been aggregated to an object and moved to defenses property
     | "damage_vulnerabilities"
@@ -1005,6 +1001,55 @@ type Mpmb_Creature_Narrowed = Omit<CreatureConfigDefinition, ""
     | "vulnerabilities"
     | "resistances"
     | "immunities"
+
+>
+
+// config api I want to use
+type CreatureConfigDefinition = Merge<Mpmb_Creature_Definition_Narrowed, {
+    size: Arrayable<CreatureSize>;
+
+    gear?: string[];
+
+    /** challenge rating */
+    cr: 0 | "1/8" | "1/4" | "1/2" | Integer
+
+    /** set the amount of xp awarded for defeating this monster */
+    /** typially derived from cr, but cr 0 may or may not award xp */
+    xp?: number;
+
+    /** profiency bonus */
+    /** derived from cr */
+    pb?: number;
+
+    defenses?: Partial<{
+        damage_vulnerabilities: DamageType[],
+        damage_resistances: DamageType[],
+        damage_immunities: DamageType[],
+        condition_immunities: Condition[],
+    }>;
+
+    // todo: does this break anything? features already exists on mbam creature
+    features: {
+        traits?: Arrayable<Action>;
+        actions?: Arrayable<Action>;
+        attacks?: Arrayable<AttackActionConfigDefinition>;
+        bonus_actions?: Arrayable<Action>;
+        reactions?: Arrayable<{ name, trigger, response }>;
+        legendary?: Arrayable<Action>;
+    };
+
+}>;
+
+// the entity type, with the properties I don't want thrown out
+type Mpmb_Creature_Narrowed = Omit<CreatureConfigDefinition, ""
+
+    // because this info has been parsed into abilities.[skill]
+    | "scores"
+
+    // because this info has been parsed into abilities.[skill].save_mod
+    | "saves"
+
+
 >;
 
 // the final entity type, used internally
@@ -1028,14 +1073,8 @@ type CreatureDefinition = Mpmb_Creature_Narrowed & {
         "int": ability_score_stats,
         "wis": ability_score_stats,
         "cha": ability_score_stats,
-    }
+    };
 
-    damages: {
-        damage_vulnerabilities: string[],
-        damage_resistances: string[],
-        damage_immunities: string[],
-        condition_immunities: string[],
-    }
 }
 
 type Creature = CreatureDefinition

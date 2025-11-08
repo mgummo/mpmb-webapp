@@ -59,11 +59,8 @@ type DamageDice = [DiceAmount, DiceSides, DamageType | string];
 
 type DiceAmount = number | "C" | "B" | "Q"
 type DiceSides = number
-type DamageType =
-    "acid" | "bludgeoning" | "cold" | "fire" | "force" | "lightning" | "necrotic" |
-    "piercing" | "poison" | "psychic" | "radiant" | "slashing" | "thunder"
 
-type DamageExpression = [DiceAmount, DiceSides, DamageMod: number, DamageType]
+type DamageExpression = [DiceAmount, DiceSides, DamageMod: number | string, DamageType]
 
 type SpellCastingEntity = string;
 
@@ -71,14 +68,14 @@ type SpellCastingEntity = string;
 // The object name here is 'purple sword'. You can use any object name as long as it is not already in use.
 // If you do use an object name that is already in use, you will be overwriting that object.
 // Note the use of only lower case! Also note the absence of the word "var" and the use of brackets [].
-interface Mpmb_Weapon {
+type Mpmb_Weapon = {
     /**  
      * The display name of the weapon.
      * 
-     * @example "Purple Sword"
      * @remarks This name will be capitalized (first letter of every word) before being added to the weapon drop-down.
+     * @example "Purple Sword"
      */
-    name: string,
+    name: string;
 
     /**
      * Extra names to be listed in the drop-down box
@@ -91,7 +88,7 @@ interface Mpmb_Weapon {
      * @example ["Sword, Purple", "More Purple More Sword"]
      * @since v13.2.0
      */
-    nameAlt?: string[]
+    nameAlt?: string[];
 
     /**
      * Defines which source book(s) the weapon is found.
@@ -118,7 +115,7 @@ interface Mpmb_Weapon {
      * @example ["SRD", 204]
      * @example [["E", 7], ["S", 115]],
      */
-    source: Arrayable<[SourceKey, Page]>,
+    source: Arrayable<[SourceKey, Page]>;
 
     /**
      * Indicates whether this weapon/attack should be excluded by default (true) or included by default (false)
@@ -132,7 +129,7 @@ interface Mpmb_Weapon {
      *
      *  Setting this attribute to false is the same as not including this attribute. 
      */
-    defaultExcluded?: boolean,
+    defaultExcluded?: boolean;
 
     /**
      * The regex used to match the text in the weapon field to see if this weapon is present
@@ -146,7 +143,7 @@ interface Mpmb_Weapon {
      * @example /^(?=.*sword)(?=.*purple).*$/i,
      * @example /purple sword/i,
      */
-    regExpSearch: RegExp,
+    regExpSearch: RegExp;
 
     /**
      * type of the weapon
@@ -175,7 +172,7 @@ interface Mpmb_Weapon {
      * 
      * @example "Martial"
      */
-    type: string,
+    type: string;
 
     /**
      * The ability score used for weapon/attack
@@ -202,7 +199,7 @@ interface Mpmb_Weapon {
      * 
      * @example 1
      */
-    ability: AbilityId | 0 | false,
+    ability: AbilityId | 0 | false;
 
     /**
      * whether (true) or not (false) to add the ability score modifier to the damage
@@ -214,13 +211,13 @@ interface Mpmb_Weapon {
      * 
      * @example true
      */
-    abilitytodamage: boolean,
+    abilitytodamage: boolean;
 
     /**
      * determine the damage die and type of the damage
      * 
      */
-    damage: DamageDice,
+    damage: DamageDice;
 
     // todo: check the spelllist def, see if range is more formally defined
     /**
@@ -236,7 +233,7 @@ interface Mpmb_Weapon {
      * 
      * @example "Melee, 20/60 ft"
      */
-    range: string,
+    range: string;
 
     /**
      * the text as it will be put in the Description field for the attack
@@ -253,31 +250,33 @@ interface Mpmb_Weapon {
      * 
      * @example "Finesse, light"
      */
-    description: string,
+    description: string;
 
-    tooltip: "Special: I have disadvantage when I use a lance to attack a target within 5 feet. Also, a lance requires two hands to wield when I'm not mounted.",
-    /*	tooltip // OPTIONAL //
-        TYPE:	string
-        USE:	this will be added as a tooltip to the Description field for the attack
-    
+    /**	
+     * this will be added as a tooltip to the Description field for the attack
+     * 
+     * @remarks
         This string is put as a tooltip literally, without any changes.
         The sheet will never use the tooltip for determining functionality of the weapon.
         The tooltip is only available when the sheet is used in Adobe Acrobat,
         it won't show up on a printed version of the sheet (also not when printed to PDF).
+        @example "Special: I have disadvantage when I use a lance to attack a target within 5 feet. Also, a lance requires two hands to wield when I'm not mounted."
     */
+    tooltip?: string;
 
-    special: true,
-    /*	special // OPTIONAL //
-        TYPE:	boolean
-        USE:	whether (true) or not (false) this weapon has the 'special' property
-        ADDED:	v13.0.6
-    
-        This attribute has no direct affect on a weapon entry, but it can be used by other
-        features that have specific rules for weapons with the 'special' property.
-        For example, a Kensei Weapon (XGtE 34) can't have the 'special' property.
-    
-        Setting this to false is the same as not including this attribute.
+    /**	
+     * whether (true) or not (false) this weapon has the 'special' property
+     * 
+     * @remarks
+    This attribute has no direct affect on a weapon entry, but it can be used by other
+    features that have specific rules for weapons with the 'special' property.
+    For example, a Kensei Weapon (XGtE 34) can't have the 'special' property.
+ 
+    @since v13.0.6
+    @defaultValue false
+    @example true
     */
+    special?: boolean;
 
     /**
      * determines the sorting of the weapon in the drop-down field
@@ -473,11 +472,10 @@ interface Mpmb_Weapon {
         Setting this to an empty string ("") is the same as not including this attribute.
     */
 
-    SpellsList: "eldritch blast",
-    /*	SpellsList // OPTIONAL //
-        TYPE:	string
-        USE:	the SpellsList object name that this attack is linked to
-    
+    /**	
+     * the SpellsList object name that this attack is linked to
+     * 
+     * @remarks
         If the attack you are adding is a cantrip/spell and its object name is not identical to
         the object name of the cantrip/spell in the SpellsList, set the reference with this attribute.
     
@@ -485,7 +483,9 @@ interface Mpmb_Weapon {
         As a result, it will be able to determine which ability score to use for it automatically from the character's spellcasting classes.
     
         Setting this to an empty string ("") is the same as not including this attribute.
+        @example "eldritch blast" 
     */
+    SpellsList?: string;
 
     /**
      * force the use of the spellcasting ability for the weapon
@@ -598,23 +598,52 @@ interface Mpmb_Weapon {
     selectNow: true,
 }
 
-type Mpmb_Weapon_Narrowed = Omit<Mpmb_Weapon, 'damage', 'dc'> & {
-    // support multiple damage expressions in a single attack
-    damage: DamageDice[]
+type Mpmb_Weapon_Narrowed = Omit<Mpmb_Weapon, ""
 
-    dc: boolean | [skill, Expression, string, string]
+    // todo: default to weapon name?
+    | "regExpSearch"
+
+    // todo: I think there's two types here, weapons and attacks
+    // weapons have sources, attacks dont (because they belong to creatures or spells that do have sources)
+    | "source"
+
+>
+
+type WeaponConfigDefinition = Merge<Mpmb_Weapon_Narrowed, {
+
+    // support multiple damage expressions in a single attack
+    damage?: Arrayable<DamageExpression>
+
+    dc?: boolean | [Skill, Expression, string, string];
+}>
+
+// todo: do I need to break this apart into attack roll type, and save throw type?
+type AttackActionConfigDefinition = {
+    name: string;
+
+    recharge?: [number] | [min: number, max: number]
+
+    // todo? is this needed?
+    ability?: number | Ability;
+
+    range: string;
+
+    damage?: Arrayable<DamageExpression>
+
+    dc?: [Skill, Expression, string, string];
+
+    description?: string;
+
 }
 
-type WeaponDefinition = Mpmb_Weapon_Narrowed & {
+
+type WeaponDefinition = WeaponConfigDefinition & {
     /** 
      * The key used to register this weapon in the WeaponsList dictionary.
      * 
      * @example 'purple sword'
      * */
-    key: string
-
-    // support multiple damage expressions in a single attack
-    damage: DamageDice[]
+    key: string;
 
     // support more complex dc checks
     // dc[0] is the skill being checked
@@ -624,7 +653,7 @@ type WeaponDefinition = Mpmb_Weapon_Narrowed & {
     // what to indicate for no damage
     // dc[3] fail description
     // ex: "takes damage" // todo: wordsmithing?
-    dc?: [skill, Expression, string, string]
+    dc?: [skill, Expression, string, string];
 }
 
 type Weapon = WeaponDefinition

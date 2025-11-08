@@ -17,7 +17,10 @@
             }
 
             if (!main.config) {
-                main.config = {}
+                main.config = {
+                    load_character: () => { },
+                    plugins: [],
+                }
             }
 
             main.config = {
@@ -198,7 +201,7 @@
             creature.type = castArray(creature.type);
             creature.subtype = castArray(creature.subtype)
 
-            creature.abilities = this.build_ability_stats(creature.scores)
+            creature.abilities = this.build_ability_stats(creature)
 
             this.calc_save_mods(creature);
 
@@ -209,27 +212,212 @@
             creature.languages = creature.languages ?? ""
             creature.languages = creature.languages.replace(/^understand/, 'Understand')
 
+            creature.gear = creature.gear ?? []
+
+            creature.cr = this._normalize_cr(creature);
+            creature.xp = this._normalize_xp(creature);
+            creature.pb = this._normalize_pb(creature);
+
+            // backwards compatiblity
+            creature.proficiencyBonus = creature.pb;
+
+            creature.features = this._normalize_features(creature);
+
+            return creature;
+        }
+
+        _normalize_features(creature) {
+
+            let stashed_features = [];
+            if (Array.isArray(creature.features)) {
+                stashed_features = creature.features;
+            }
+
+            const stashed_traits = this._normalize_traits(creature, creature.traits)
+            const stashed_attacks = this._normalize_traits(creature, creature.attacks)
+            const stashed_actions = this._normalize_traits(creature, creature.actions)
+            const stashed_notes = creature.notes ?? []
+
             // unclear how features & notes differ from traits and attacks
             // just stuff them into traits
-            creature.traits = creature.traits ?? []
-            creature.attacks = creature.attacks ?? []
-            creature.features = creature.features ?? []
-            creature.notes = creature.notes ?? []
-            creature.traits = [...creature.traits, ...creature.features, ...creature.notes]
-            creature.features = [];
-            creature.notes = [];
+            const traits = [
+                ...this._normalize_traits(creature, creature.features?.traits),
+                ...stashed_traits,
+                ...stashed_features,
+                ...stashed_notes,
+            ]
 
+            const attacks = [
+                ...this._normalize_traits(creature, creature.features?.attacks),
+                ...stashed_attacks
+            ]
+            const actions = this._normalize_traits(creature, creature.features?.actions)
+            const bonus_actions = this._normalize_traits(creature, creature.features?.bonus_actions)
+            const reactions = this._normalize_traits(creature, creature.features?.reactions)
 
-            for (const attack of creature.attacks) {
+            for (const attack of attacks) {
                 if (!attack.range) {
                     attack.range = "Melee"
                     const message = "%o is ill-formed: missing range property in one of its attacks"
                     // context.warnings.push([message, creature])
                     console.warn(message, creature)
                 }
+
+                attack.damage = this._normalize_damages(creature, attack.damage);
+                attack.modifiers = attack.modifiers ?? [0, 0]
             }
 
-            return creature;
+            return {
+                traits,
+                actions,
+                attacks,
+                bonus_actions,
+                reactions
+            }
+
+        }
+
+        _normalize_cr(creature) {
+            if (creature.cr != null) {
+                return creature.cr
+            }
+
+            let cr = creature.challengeRating;
+            if (typeof (cr) == "string") {
+                if (cr == "1/8" || cr == "1/4" || cr == "1/2") {
+                    return cr;
+                }
+                cr = +cr;
+            }
+
+            return cr;
+        }
+
+        _normalize_xp(creature) {
+
+            if (creature.xp != null) {
+                return creature.xp
+            }
+
+            return this._cr_lookup_table(creature.cr)[0];
+
+
+        }
+        _normalize_pb(creature) {
+            if (creature.pb != null) {
+                return creature.pb;
+            }
+
+            if (creature.proficiencyBonus != null) {
+                creature.proficiencyBonus
+            }
+
+            return this._cr_lookup_table(creature.cr)[1];
+
+        }
+
+        _cr_lookup_table(cr) {
+            switch (cr) {
+                case 0: return [0, 2]; // mm says 0 or 10 xp
+                case "1/8": return [25, 2];
+                case "1/4": return [50, 2];
+                case "1/2": return [100, 2];
+                case 1: return [200, 2];
+                case 2: return [450, 2];
+                case 3: return [700, 2];
+                case 4: return [1100, 2];
+                case 5: return [1800, 3];
+                case 6: return [2300, 3];
+                case 7: return [2900, 3];
+                case 8: return [3900, 3];
+                case 9: return [5000, 4];
+                case 10: return [5900, 4];
+                case 11: return [7200, 4];
+                case 12: return [8400, 4];
+                case 13: return [10000, 5];
+                case 14: return [11500, 5];
+                case 15: return [13000, 5];
+                case 16: return [15000, 5];
+                case 17: return [18000, 6];
+                case 18: return [20000, 6];
+                case 19: return [22000, 6];
+                case 20: return [25000, 6];
+                case 21: return [33000, 7];
+                case 22: return [41000, 7];
+                case 23: return [50000, 7];
+                case 24: return [62000, 7];
+                case 25: return [75000, 8];
+                case 26: return [90000, 8];
+                case 27: return [105000, 8];
+                case 28: return [120000, 8];
+                case 29: return [135000, 9];
+                case 30: return [155000, 9];
+                default: return [null, null];
+            }
+        }
+
+        _normalize_traits(creature, traits) {
+
+            // if traits == null
+            if (!traits) {
+                return []
+            }
+
+            // if traits == {}
+            if (Object.keys(traits).length === 0) {
+                return []
+            }
+
+            // if traits == [{}]
+            if (traits.length === 1 && Object.keys(traits[0]).length === 0) {
+                return []
+            }
+
+            return castArray(traits)
+        }
+
+
+        /**
+         * @param { (number|string)[][] | (number|string)[] | null} input 
+         * @returns { Array<DamageExpression> }
+         */
+        _normalize_damages(creature, input) {
+
+            if (!input) {
+                return [];
+            }
+
+            if (input.length == 3 && !input[0] && !input[1] && !input[2]) {
+                return []
+            }
+
+            /** @type {(number|string)[][]} */
+            let input_as_array = [];
+            if (!Array.isArray(input[0])) {
+                input_as_array = [/** @type {(number|string)[]} */ (input)]
+            }
+            else {
+                input_as_array = /** @type {(number|string)[][]} */ (input);
+            }
+
+            /** @type {DamageExpression[]} */
+            const damages = [];
+
+            for (const damage of input_as_array) {
+                if (damage.length == 3) {
+                    damages.push([
+                        /** @type {number} */ (damage[0]),
+                        /** @type {number} */ (damage[1]),
+                        "damage_mod",
+                        /** @type {DamageType} */ (damage[2])
+                    ]);
+                }
+                else if (damage.length == 4) {
+                    damages.push(/** @type {DamageExpression} */(damage));
+                }
+            }
+
+            return damages;
         }
 
         normalize_weapons(list) {
@@ -257,8 +445,9 @@
 
         }
 
-
         calc_save_mods(creature) {
+
+            if (!creature.abilities) { return; }
 
             // [Str, Dex, Con, Int, Wis, Cha]
             const base_save = [
@@ -293,9 +482,6 @@
                     // todo: reset save_mod to adjusted value
                     // if delta == prof_bonus then assume has saving throw prof.
                     // otherwise we have an edge case, where there's a saving throw adjustment.
-                    // 
-                    // todo fix up Camel (stats were set on dex not con), and a few others
-                    //
                     if (delta != creature.proficiencyBonus) {
                         debugger;
                     }
@@ -307,37 +493,59 @@
         // todo: add prof bonus to save_mod if prof
         // (see calc_save_mods)
         // [Str, Dex, Con, Int, Wis, Cha]
-        build_ability_stats(scores) {
+        build_ability_stats(creature) {
+
+            const scores = creature.scores;
+            const saves = creature.saves ?? [null, null, null, null, null, null]
+
+            if (!scores) {
+                return;
+            }
+
+            for (let i = 0; i < 6; i++) {
+                const save_mod = saves[i];
+                if (save_mod == null || save_mod === "") {
+                    const mod = this.calc_ability_mod(scores[i]);
+                    saves[i] = mod;
+                }
+            }
+
             const abilities = {
                 'str': {
                     score: scores[0],
                     mod: this.calc_ability_mod(scores[0]),
-                    save_mod: this.calc_ability_mod(scores[0])
+                    save_mod: saves[0],
+                    // save_mod: this.calc_ability_mod(scores[0])
                 },
                 'dex': {
                     score: scores[1],
                     mod: this.calc_ability_mod(scores[1]),
-                    save_mod: this.calc_ability_mod(scores[1])
+                    save_mod: saves[1],
+                    // save_mod: this.calc_ability_mod(scores[1])
                 },
                 'con': {
                     score: scores[2],
                     mod: this.calc_ability_mod(scores[2]),
-                    save_mod: this.calc_ability_mod(scores[2])
+                    save_mod: saves[2],
+                    // save_mod: this.calc_ability_mod(scores[2])
                 },
                 'int': {
                     score: scores[3],
                     mod: this.calc_ability_mod(scores[3]),
-                    save_mod: this.calc_ability_mod(scores[3])
+                    save_mod: saves[3],
+                    // save_mod: this.calc_ability_mod(scores[3])
                 },
                 'wis': {
                     score: scores[4],
                     mod: this.calc_ability_mod(scores[4]),
-                    save_mod: this.calc_ability_mod(scores[4])
+                    save_mod: saves[4],
+                    // save_mod: this.calc_ability_mod(scores[4])
                 },
                 'cha': {
                     score: scores[5],
                     mod: this.calc_ability_mod(scores[5]),
-                    save_mod: this.calc_ability_mod(scores[5])
+                    save_mod: saves[5],
+                    // save_mod: this.calc_ability_mod(scores[5])
                 },
 
             }
@@ -379,14 +587,21 @@
             if (monster.resistances) { debugger; }
             if (monster.immunities) { debugger; }
 
-            const defenses = {
-                damage_vulnerabilities: dv,
-                damage_resistances: dr,
-                damage_immunities: di,
-                condition_immunities: ci,
+            const defenses1 = {
+                damage_vulnerabilities: monster.defenses?.damage_vulnerabilities ?? [],
+                damage_resistances: monster.defenses?.damage_resistances ?? [],
+                damage_immunities: monster.defenses?.damage_immunities ?? [],
+                condition_immunities: monster.defenses?.condition_immunities ?? [],
+            }
+
+            const defenses2 = {
+                damage_vulnerabilities: [...defenses1.damage_vulnerabilities, ...dv],
+                damage_resistances: [...defenses1.damage_resistances, ...dr],
+                damage_immunities: [...defenses1.damage_immunities, ...di],
+                condition_immunities: [...defenses1.condition_immunities, ...ci],
             };
 
-            return defenses;
+            return defenses2;
         }
     }
 

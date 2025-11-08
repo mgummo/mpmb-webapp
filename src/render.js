@@ -6,27 +6,34 @@
 
     const Mustache = global.Mustache;
 
+    const templates = {
+        "root": load_template("root"),
+        "spell-card": load_template("spell-card"),
+        "monster-card": load_template("monster-card"),
+        "monster-card-action": load_template("monster-card-action"),
+    };
+
     function load_template(name) {
-        return document.getElementById(`${name}-template`)?.innerHTML
+
+        const template = document.getElementById(`${name}-template`);
+        if (!template) {
+            throw "Could not find template: " + name
+        }
+
+        return template.innerHTML
             .replaceAll('&gt;', '>');
     }
 
     function render(data, reflow_count) {
-        const spells = data.spells;
+        const spells = data.spells ?? [];
         const spells_that_overflow = data.spells_that_overflow ?? [];
-        const monsters = data.monsters;
+        const monsters = data.monsters ?? [];
 
         if (reflow_count === undefined) {
             // Let's see if we have anything
             console.debug("Rendering the following spells: %o", spells)
             console.debug("Rendering the following monsters: %o", monsters)
         }
-
-        const templates = {
-            "root": load_template("root"),
-            "spell-card": load_template("spell-card"),
-            "monster-card": load_template("monster-card"),
-        };
 
         const vm = {
             sections: {

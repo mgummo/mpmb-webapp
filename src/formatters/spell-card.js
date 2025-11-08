@@ -12,8 +12,7 @@
 
         constructor() {
             super();
-            this.format_range = global.main.formatters.attack.format_range;
-            this.format_damage_dice = global.main.formatters.attack.format_damage_dice;
+            this.attack_formatter = global.main.formatters.attack;
         }
 
         // todo: pass a casting context
@@ -71,11 +70,19 @@
                 return result;
             }
 
-            // todo
-            // not worrying about upcasting for now.
+            if (spell.descriptionCantripDie) {
+                let result = this.unabbreviate(spell.descriptionCantripDie)
+                const dice_amount = this.attack_formatter.get_cantrip_dice_amount(character.level);
+                result = result.replace('`CD`', dice_amount);
+                return result;
+            }
+
+            // todo: none of the below works
+            // I don't have the spell metadata available to do what I want
+
             const spell_slot_size = spell.level
 
-            const range = this.format_range(spell.action.range);
+            const range = this.attack_formatter.format_range(spell.action.range).reach;
             const to_hit = this.format_modifier(spell_attack_mod);
 
             const damages = spell.action.damage;
@@ -84,9 +91,9 @@
                 spell_slot_size: spell_slot_size,
             };
 
-            const dice = `${this.format_damage_dice(damages, attack_context)}`;
+            const dice = `${this.attack_formatter.format_damage_dice(damages, attack_context)}`;
 
-            let text = ""
+            let text = "";
             if (spell.action.dc) {
 
                 // attempt to parse out metadata for the spell save behavior

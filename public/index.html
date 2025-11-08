@@ -107,9 +107,8 @@
         <div class="card monster-card" data-key="{{key}}">
             <div class="row">
                 <div class="name">{{name}}</div>
-                <div class="subtitle">{{vm.subtitle}}</div>
-
                 <hr />
+                <div class="subtitle">{{vm.subtitle}}</div>
 
                 <div class="mb-1">
                     <div class="flex-row">
@@ -225,55 +224,74 @@
                     <div><span class="label">Immunities</span> {{vm.defenses.immunities}}</div>
                     {{/vm.defenses.immunities}}
 
+                    {{#vm.gear.length}}
+                    <div><span class="label">Gear</span> {{vm.gear}}</div>
+                    {{/vm.gear.length}}
+
                     <div><span class="label">Senses</span> {{vm.senses}}</div>
                     <div><span class="label">Languages</span> {{vm.languages}}</div>
-                    <div><span class="label">CR</span> {{challengeRating}} (XP ?; PB {{vm.proficiencyBonus}})</div>
+                    <div><span class="label">CR</span> {{cr}} (XP {{xp}}; PB {{vm.pb}})</div>
                 </div>
 
-                {{#traits.length}}
+                {{#vm.traits.length}}
                 <div class="mt-2">
                     <div class="name">Traits</div>
                     <hr class="mt-0" />
-                    {{#traits}}
-                    <div class="mb-0.5">
-                        <span class="label">{{name}}</span> <span>{{description}}</span>
-                    </div>
-                    {{/traits}}
+                    {{#vm.traits}}
+                    {{> monster-card-action}}
+                    {{/vm.traits}}
                 </div>
-                {{/traits.length}}
+                {{/vm.traits.length}}
 
-                {{#actions.length}}
+                {{#vm.features.actions.length}}
                 <div class="mt-2">
                     <div class="name">Actions</div>
                     <hr class="mt-0" />
-                    {{#actions}}
+                    {{#vm.features.actions}}
                     <div class="mb-0.5">
                         <span class="label">{{name}}</span> <span>{{description}}</span>
                     </div>
-                    {{/actions}}
+                    {{/vm.features.actions}}
 
                 </div>
-                {{/actions.length}}
+                {{/vm.features.actions.length}}
 
-                <!-- todo: move this to actions-->
                 {{#vm.attacks.length}}
                 <div class="mt-2">
                     <div class="name">Attacks</div>
                     <hr class="mt-0" />
                     {{#vm.attacks}}
-                    <div class="mb-0.5">
-                        <span class="label">{{name}}</span>
-                        <span class="italic">{{range}} Roll:</span> {{attack_mod}}, {{reach}}.
-                        <span>Hit:</span> {{damage}} damage.
-                        <span>{{description}}</span>
-                    </div>
+                    {{> monster-card-action}}
                     {{/vm.attacks}}
                 </div>
                 {{/vm.attacks.length}}
 
-            </div>
+                {{#vm.features.bonus_actions.length}}
+                <div class="mt-2">
+                    <div class="name">Bonus Actions</div>
+                    <hr class="mt-0" />
+                    {{#vm.features.bonus_actions}}
+                    <div>
+                        <span class="label">{{name}}</span>
+                        <span>{{description}}</span>
+                    </div>
+                    {{/vm.features.bonus_actions}}
+                </div>
+                {{/vm.features.bonus_actions.length}}
 
-            <!-- todo: other sections such as bonus actions, reactions, legendary actions -->
+                {{#vm.features.reactions.length}}
+                <div class="mt-2">
+                    <div class="name">Reactions</div>
+                    <hr class="mt-0" />
+                    {{#vm.features.reactions}}
+                    <span class="label">{{name}}</span>
+                    <span class="italic">Trigger: </span>{{trigger}}<br />
+                    <span class="italic">Response: </span>{{response}}<br />
+                    {{/vm.features.reactions}}
+                </div>
+                {{/vm.features.reactions.length}}
+
+            </div>
 
             <div class="spacer"></div>
 
@@ -281,6 +299,44 @@
                 {{vm.source}}
             </div>
 
+        </div>
+    </template>
+
+    <template id="monster-card-action-template">
+        <div class="mb-0.5">
+            <span class="label">{{name}}{{recharge}}</span>
+
+            {{#summary}}
+            <span>{{summary}}<br /></span>
+            {{/summary}}
+
+            {{#type}}
+            <span class="italic">{{type}}:</span> {{attack_mod}}{{dc}}, {{range}}.
+            {{/type}}
+
+            {{#on_hit}}
+            <span class="italic">Hit:</span> {{.}}
+            {{/on_hit}}
+
+            <!-- {{#damage}}
+            <div>
+                <span class="italic">Damage:</span> {{.}}
+            </div>
+            {{/damage}} -->
+
+            {{#on_save_failure}}
+            <div>
+                <span class="italic">Failure:</span> {{on_save_failure}}
+            </div>
+            {{/on_save_failure}}
+
+            {{#on_save_success}}
+            <div>
+                <span class="italic">Success:</span> {{on_save_success}}
+            </div>
+            {{/on_save_success}}
+
+            <span>{{description}}</span>
         </div>
     </template>
 
@@ -312,7 +368,6 @@
     <script src="../src/formatters/attack.js"></script>
     <script src="../src/formatters/monster-card.js"></script>
     <script src="../src/formatters/spell-card.js"></script>
-
 
     <script>
         (async () => {

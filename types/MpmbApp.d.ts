@@ -1,5 +1,9 @@
 // define an interface for MorePurpleMoreBetter javascript files 
 
+type MbamRegistry<TConfig, TDefinition> = Record<string, TDefinition> & {
+    Add: (key: string, defintion: TConfig) => void;
+}
+
 // functions from Lists.js
 interface MpmbApp_Lists {
 
@@ -11,7 +15,7 @@ interface MpmbApp_Lists {
     // ClassList
     // ClassSubList
     // CompanionList
-    CreatureList: Record<string, CreatureDefinition>
+    CreatureList: MbamRegistry<CreatureConfigDefinition, CreatureDefinition>
     // DefaultEvalsList
     // FeatsList
     // GearList
