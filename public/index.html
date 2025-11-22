@@ -11,6 +11,9 @@
     <!-- https://unpkg.com/mustache@latest/mustache.min.js -->
     <script src="../lib/mustache.min.js"></script>
 
+    <!--   https://unpkg.com/showdown/dist/showdown.min.js -->
+    <script src="../lib/showdown.min.js"></script>
+
     <!-- todo: put this in the lib folder? -->
     <!-- original reason not to, was because it makes onboarding easier. -->
     <!-- (using npm to manage packages, vs just clone this one dependency yourself) -->
@@ -44,6 +47,7 @@
 
     <template id="root-template">
         {{#sections}}
+
         <section>
             {{#spell-cards.pages}}
             <div class="page">
@@ -55,6 +59,19 @@
             </div>
             {{/spell-cards.pages}}
         </section>
+
+        <section>
+            {{#feature-cards.pages}}
+            <div class="page">
+                <div class="grid grid-{{grid_size}}">
+                    {{#cards}}
+                    {{> feature-card}}
+                    {{/cards}}
+                </div>
+            </div>
+            {{/feature-cards.pages}}
+        </section>
+
         <section>
             {{#monster-cards.pages}}
             <div class="page">
@@ -82,9 +99,9 @@
                 <span class="subtitle">{{vm.subtitle}}</span><br>
             </div>
 
-            <div class="summary">{{vm.summary}}</div>
+            <div class="summary">{{vm.description.concise}}</div>
 
-            <div>
+            <div class="">
                 <span class='label'>Casting Time: </span>{{vm.time}}<br>
                 <span class='label'>Range: </span>{{vm.range}}<br>
                 <span class='label'>Components: </span>{{vm.components}}<br>
@@ -92,7 +109,7 @@
             </div>
 
             <div>
-                <span class="description">{{{vm.descriptionHtml}}}</span>
+                <span class="description">{{{vm.description.summary}}}</span>
             </div>
 
             <div class="spacer"></div>
@@ -101,6 +118,25 @@
                 {{vm.source}}
             </div>
         </div>
+    </template>
+
+    <template id="feature-card-template">
+        <div class="card" data-key="{{key}}">
+            {{#charges_checkboxes}}
+            <div class="feat-charges">{{charges_checkboxes}}</div>
+            {{/charges_checkboxes}}
+            <div class="row">
+                <div>
+                    <span class="name">{{name}}</span>
+                    <span class="italic">{{resolved_for_clause}}</span>
+                </div>
+                <div class="subtitle">{{subtitle}}</div>
+            </div>
+            <div class="row">
+                <div class="">{{{description}}}</div>
+            </div>
+            <div class="spacer"></div>
+            <div class="source-book">{{source}}</div>
     </template>
 
     <template id="monster-card-template">
@@ -363,11 +399,12 @@
     <script src="../src/character-loader.js"></script>
     <script src="../src/render.js"></script>
 
-    <!-- program logic - formmatters -->
+    <!-- program logic - formatters -->
     <script src="../src/formatters/base.js"></script>
     <script src="../src/formatters/attack.js"></script>
     <script src="../src/formatters/monster-card.js"></script>
     <script src="../src/formatters/spell-card.js"></script>
+    <script src="../src/formatters/feat-card.js"></script>
 
     <script>
         (async () => {

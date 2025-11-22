@@ -612,7 +612,7 @@ type Mpmb_Weapon_Narrowed = Omit<Mpmb_Weapon, ""
 type WeaponConfigDefinition = Merge<Mpmb_Weapon_Narrowed, {
 
     // support multiple damage expressions in a single attack
-    damage?: Arrayable<DamageExpression>
+    damage?: Arrayable<DamageExpression>;
 
     dc?: boolean | [Skill, Expression, string, string];
 }>

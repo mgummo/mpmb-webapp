@@ -20,6 +20,9 @@ interface Main {
                 casting_context: *
             )
         };
+        feat_card: {
+            build_featcard_vm: unknown,
+        }
     };
 
     types: {

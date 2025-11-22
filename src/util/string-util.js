@@ -11,16 +11,22 @@ function replace_and_report(str, pattern, replacement) {
 }
 
 
-String.prototype.toTitleCase = function() {
+String.prototype.toTitleCase = function () {
     const str = this.toString();
-            if (!str) {
-                return "";
+    if (!str) {
+        return "";
+    }
+
+    return str
+        .toLowerCase()
+        .split(' ')
+        .map(function (word, index) {
+            if (index > 1) {
+                if (word == "of" || word == "the") {
+                    return word;
+                }
             }
-            return str
-                .toLowerCase()
-                .split(' ')
-                .map(function (word) {
-                    return word.charAt(0).toUpperCase() + word.slice(1);
-                })
-                .join(' ');
-        }
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        })
+        .join(' ');
+}

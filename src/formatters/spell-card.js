@@ -20,9 +20,9 @@
         /**
          * 
          * @param {*} spell 
-         * @param {Character} character
-         * @param {SpellCasterStats} stats
-         * @param {*} casting_context 
+         * @param {Character} character - who is casting the spell?
+         * @param {SpellCasterStats} stats - which character class is being used to cast the spell?
+         * @param {*} casting_context - any modifiers to how the spell is being cast? (upcasting, etc.)
          * @returns 
          */
         build_spellcard_vm(spell, character, stats, casting_context) {
@@ -31,14 +31,15 @@
             // vm.title = ... ommitted - no need to format the spell title
             vm.subtitle = this.format_spell_subtitle(spell)
 
-            vm.summary = this.format_spell_summary(spell, character, stats);
-
             vm.time = this.format_spell_time(spell);
             vm.range = this.format_spell_range(spell);
             vm.components = this.format_spell_components(spell);
             vm.duration = this.format_spell_duration(spell);
 
-            vm.descriptionHtml = this.format_spell_description(spell);
+            vm.description = {
+                concise: this.format_spell_summary(spell, character, stats),
+                summary: this.format_spell_description(spell),
+            }
 
             vm.source = this.format_source_book(spell);
 
@@ -66,12 +67,13 @@
             // not all spells have relevant summaries that need calulating
             // in which case, action isn't set - so just use the summary text from the spell sheet
             if (!spell.action) {
-                const result = this.unabbreviate(spell.description);
+                const result = this.unabbreviate(spell.description.concise);
                 return result;
             }
 
-            if (spell.descriptionCantripDie) {
-                let result = this.unabbreviate(spell.descriptionCantripDie)
+            // the spell defines an action property. format that for the spell's concise description.
+            if (spell.level == 0) {
+                let result = this.unabbreviate(spell.description.concise)
                 const dice_amount = this.attack_formatter.get_cantrip_dice_amount(character.level);
                 result = result.replace('`CD`', dice_amount);
                 return result;
@@ -96,30 +98,32 @@
             let text = "";
             if (spell.action.dc) {
 
+                const dc = spell.action.dc
+
                 // attempt to parse out metadata for the spell save behavior
                 // which I think was a custom extension I made?
                 // If not available, then use the caster's spell save.
 
-                let unformatted_ability = (spell.action.save?.at(0) ?? spell.action.ability);
-
+                // let unformatted_ability = (spell.action.dc?.at(0) ?? spell.action.ability);
+                let unformatted_ability = dc[0];
                 let ability = this.format_ability(unformatted_ability);
-                let fail_result = (spell.action.save ? spell.action.save[1] : null) // todo: haven't come across a fail result that needs templating yet.
-                let save_result = (spell.action.save ? spell.action.save[2] : null) ?? "no"
+                
+                let fail_result = dc[2];
+                let save_result = dc[3];
 
                 // todo: will eventually need to parameterize 'from you'
                 let origin = "you"
 
-                text = `Each target within a ${range} from ${origin} makes a DC ${spell_save} ${ability} saving throw.`
-
-                // todo: will likely need to figure out a way to parameterize this.
-                // I'm assuming all cantrips though, save in the same way.
-                text = text + `\nOn failure, they take ${dice} damage.`
-                text = text + `\nOn success, they take ${save_result} damage.`
+                text = 
+                    `Deals ${dice} damage; ` +
+                    `Each target within a ${range} from ${origin} makes a DC ${spell_save} ${ability} saving throw.\n` +
+                    `Failure: ${fail_result}\n` +
+                    `Success: ${save_result}\n`
             }
             else {
 
-                "Make a 30 foot reach Melee spell attack"
-                "Make a 30 foot ranged spell attack"
+                // "Make a 30 foot reach Melee spell attack"
+                // "Make a 30 foot ranged spell attack"
 
                 text = `Make a ${range} spell attack (${to_hit} to hit); Deals ${dice} damage.`
             }
@@ -141,7 +145,7 @@
                 line1 = `${school} Cantrip ${classes}`
             }
             else {
-                line1 = `Level ${spell.level}${spell.upcastable ? '+' : ''} ${school} ${classes}`
+                line1 = `Level ${spell.level}${spell.allowUpCasting ? '+' : ''} ${school} ${classes}`
             }
 
             if (spell.always_prepared) {
@@ -224,7 +228,16 @@
 
         format_spell_description(spell) {
 
-            let text = mpmb.formatDescriptionFull(spell.descriptionFull, false);
+            let text = ""
+
+            if (spell.description.summary) {
+                text = spell.description.summary;
+                var converter = new global.showdown.Converter();
+                const html = converter.makeHtml(text);
+                return html;
+            }
+
+            text = mpmb.formatDescriptionFull(spell.description.full, false);
 
             return text
 

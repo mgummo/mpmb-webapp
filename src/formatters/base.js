@@ -119,6 +119,7 @@
         base: new BaseFormatter(),
         monster_card: undefined,
         spell_card: undefined,
+        feat_card: undefined,
     };
 
 })(window)

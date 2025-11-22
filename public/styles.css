@@ -70,7 +70,7 @@ body {
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    gap: 2mm;
+    gap: 0.25rem;
 
     /* prevent overflow from expanding cards */
     overflow: hidden;
@@ -91,14 +91,19 @@ body {
     white-space: pre-line;
 }
 
-.spell-card .name,
-.monster-card .name {
+.card .feat-charges {
+    font-size: large;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.card .name {
     margin-top: 0;
     font-size: larger;
     /* font-size: 1.4em; */
 
     display: inline-block;
-    width: 100%;
+    /* width: 100%; */
     font-weight: bold;
 
     font-variant-caps: small-caps;
@@ -106,11 +111,14 @@ body {
     /* border-bottom: 1px solid #ccc; */
 }
 
-.spell-card .subtitle,
-.monster-card .subtitle {
+.card .subtitle {
     font-size: 0.85em;
     color: #555;
     margin-bottom: 0.5em;
+    white-space: pre-wrap;
+}
+
+.card .summary {
     white-space: pre-wrap;
 }
 

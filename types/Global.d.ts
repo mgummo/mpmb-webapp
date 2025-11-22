@@ -5,4 +5,5 @@ interface Global {
     app: AcrobatApp;
     main: Main;
     Mustache: any;
+    showdown: any;
 }

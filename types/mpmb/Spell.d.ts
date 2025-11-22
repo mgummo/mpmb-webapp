@@ -334,11 +334,10 @@ type Mpmb_Spell = {
 	*/
 	description: string;
 
-	descriptionCantripDie: "1 creature save or `CD`d12 Poison dmg",
-	/*	descriptionCantripDie // OPTIONAL //
-		TYPE:	string
-		USE:	the text to be filled in the description field of a cantrip,
-				but showing the damage for the current character level
+	/**
+	 * the text to be filled in the description field of a cantrip, but showing the damage for the current character level
+	 * 
+	 * @remarks
 	
 		This attribute is only used if the checkbox
 			"Apply character level and spellcasting ability to spell description (never for 'full' lists)"
@@ -347,30 +346,33 @@ type Mpmb_Spell = {
 		If set to do so, the sheet replaces the `CD` with the cantrip die for the character's current level.
 		You can also add modifiers to this, as long as they are after the CD and between the back ticks.
 		For example, `CD-1` will produce the cantrip die minus 1, so 0 at level 2, 1 at level 5, 4 at level 15, etc.
+		@example "1 creature save or `CD`d12 Poison dmg"
 	*/
+	descriptionCantripDie?: string,
 
-	descriptionMetric: "6-m rad all crea 5d6+1d6/SL Psychic dmg; save half; all flames in area are purple for the duration",
-	/*	descriptionMetric // OPTIONAL //
-		TYPE:	string
-		USE:	the text to be filled in the description field of the spell when the sheet is set to use the metric system
+	/**
+	 * the text to be filled in the description field of the spell when the sheet is set to use the metric system
+	 * 
+	 * @remarks
+	This attribute works the same as the `description` attribute above,
+	but it is only used if the sheet is set to use the metric system.
+	If this attribute is present, the sheet will not try and convert the `description` attribute
+	to the metric system, but will use this attribute instead.
 	
-		This attribute works the same as the `description` attribute above,
-		but it is only used if the sheet is set to use the metric system.
-		If this attribute is present, the sheet will not try and convert the `description` attribute
-		to the metric system, but will use this attribute instead.
+	The sheet is good at transforming units as long as each number is followed by the unit.
+	For example "60 ft by 20 ft" will successfully be converted to "18 m by 6 m",
+	but "60 by 20 ft" will become "60 by 6 m".
+	It is only for cases like the latter that `descriptionMetric` is necessary,
+	all other things can be converted by the sheet on the fly.
 	
-		The sheet is good at transforming units as long as each number is followed by the unit.
-		For example "60 ft by 20 ft" will successfully be converted to "18 m by 6 m",
-		but "60 by 20 ft" will become "60 by 6 m".
-		It is only for cases like the latter that `descriptionMetric` is necessary,
-		all other things can be converted by the sheet on the fly.
-	
-		// DOES NOT WORK TOGETHER WITH descriptionCantripDie //
-		If the spell has both this attribute and the 'descriptionCantripDie' attribute,
-		the sheet will use the 'descriptionCantripDie' attribute when the appropriate checkbox
-		is checked (see 'descriptionCantripDie' explanation above),
-		regardless of the unit system being set to metric.
+	// DOES NOT WORK TOGETHER WITH descriptionCantripDie //
+	If the spell has both this attribute and the 'descriptionCantripDie' attribute,
+	the sheet will use the 'descriptionCantripDie' attribute when the appropriate checkbox
+	is checked (see 'descriptionCantripDie' explanation above),
+	regardless of the unit system being set to metric.
+	@example "6-m rad all crea 5d6+1d6/SL Psychic dmg; save half; all flames in area are purple for the duration"
 	*/
+	descriptionMetric?: string
 
 	/**
 	 * description of the spell as it appears in its source
@@ -470,22 +472,23 @@ type Mpmb_Spell = {
 		Setting this attribute to an empty string ("") is the same as not including this attribute.
 	*/
 
-	dependencies: ["te1-tremorsense", "te2-unwavering eye", "te3-piercing sight", "te4-truesight"],
-	/*	dependencies // OPTIONAL //
-		TYPE:	array (variable length)
-		USE:	define spells that always will be added to the spell list after this spell
+	/**
+	 * define spells that always will be added to the spell list after this spell
+	 * 
+	 * @remarks
+	List the spell by their object names in the SpellsList object.
+	Even with one entry you still need to put the brackets around it [].
 	
-		List the spell by their object names in the SpellsList object.
-		Even with one entry you still need to put the brackets around it [].
+	This attribute is generally used to add options for the spell, like how psionic disciplines work.
+	Those dependencies generally don't have a 'classes' attribute to make sure that they can't be selected in any other way.
 	
-		This attribute is generally used to add options for the spell, like how psionic disciplines work.
-		Those dependencies generally don't have a 'classes' attribute to make sure that they can't be selected in any other way.
+	This attribute doesn't work recursively, the 'dependencies' attribute will be ignored for
+	those spells added as a result of this attribute.
 	
-		This attribute doesn't work recursively, the 'dependencies' attribute will be ignored for
-		those spells added as a result of this attribute.
-	
-		Setting this attribute to an empty array ([]) is the same as not including this attribute, but doing so will slow the sheet down considerably.
-	*/
+	@defaultValue []
+	@example ["te1-tremorsense", "te2-unwavering eye", "te3-piercing sight", "te4-truesight"],
+*/
+	dependencies?: string[]
 
 	allowUpCasting: false,
 	/*	allowUpCasting // OPTIONAL //
@@ -525,90 +528,92 @@ type Mpmb_Spell = {
 		will add the damage to the first part of the description that matches.
 	*/
 
-	descriptionShorter: "20-ft rad all crea 5d6+1d6/SL Psychic dmg; save half; flames in area are purple",
-	/*	descriptionShorter // OPTIONAL //
-		TYPE:	string
-		USE:	shorter version of the description of the spell to be filled in the description field
-		ADDED:	v13.0.7
+	/**
+	 * shorter version of the description of the spell to be filled in the description field
+	 * 
+	 * @remarks
+	If the description attribute given above is too long to fit an extra bit added by the
+	`genericSpellDmgEdit` function, then you can use this attribute to present an alternative, shorter
+	description that the `genericSpellDmgEdit` function can use to alter.
+	How much shorter you should make this description depends on the addition the `genericSpellDmgEdit`
+	function will do, depending on context, see the three scenarios below.
 	
-		If the description attribute given above is too long to fit an extra bit added by the
-		`genericSpellDmgEdit` function, then you can use this attribute to present an alternative, shorter
-		description that the `genericSpellDmgEdit` function can use to alter.
-		How much shorter you should make this description depends on the addition the `genericSpellDmgEdit`
-		function will do, depending on context, see the three scenarios below.
+	There are four scenarios:
+	1) Single damage instance of single damage type (e.g. instantaneous spell)
+		If the spell has a duration of instant(enous), 1 r(ou)nd, or
+		includes "Next (melee/ranged) weapon at(tac)k" in the description,
+		or has multiple damages listed that fit the syntax (e.g. "1d4 Fire dmg + 1d4 Cold dmg"),
+		it will be considered a spell with a single damage instance.
 	
-		There are four scenarios:
-		1) Single damage instance of single damage type (e.g. instantaneous spell)
-			If the spell has a duration of instant(enous), 1 r(ou)nd, or
-			includes "Next (melee/ranged) weapon at(tac)k" in the description,
-			or has multiple damages listed that fit the syntax (e.g. "1d4 Fire dmg + 1d4 Cold dmg"),
-			it will be considered a spell with a single damage instance.
+		The damage bonus will be added to the current damage string (e.g. "5d6+1d6/SL Psychic dmg" could
+		become "5d6+1d8+1d6/SL Psychic dmg").
+		Thus you will need to make sure "+1d8" fits in the `description` attribute and if not,
+		include a `descriptionShorter` attribute where it would fit.
 	
-			The damage bonus will be added to the current damage string (e.g. "5d6+1d6/SL Psychic dmg" could
-			become "5d6+1d8+1d6/SL Psychic dmg").
-			Thus you will need to make sure "+1d8" fits in the `description` attribute and if not,
-			include a `descriptionShorter` attribute where it would fit.
+	2) Multiple damage instances of single damage type (e.g. spell that deals damage each round)
+		If the spell has a duration other than instant(enous), 1 r(ou)nd,
+		and doesn't include "Next (melee/ranged) weapon at(tac)k" in the description,
+		and doesn't have multiple damages listed that fit the syntax (e.g. "1d4 Fire dmg + 1d4 Cold dmg"),
+		it will be considered a spell with multiple damage instances.
 	
-		2) Multiple damage instances of single damage type (e.g. spell that deals damage each round)
-			If the spell has a duration other than instant(enous), 1 r(ou)nd,
-			and doesn't include "Next (melee/ranged) weapon at(tac)k" in the description,
-			and doesn't have multiple damages listed that fit the syntax (e.g. "1d4 Fire dmg + 1d4 Cold dmg"),
-			it will be considered a spell with multiple damage instances.
+		If the feature only adds damage to a single roll, the damage bonus will be added at the end of the
+		description, in the format "(1× +dX)" (e.g. "(1× +d8)" or (1× +5)),
+		thus you need to make sure "(1× +d8)" fits in the `description` attribute and if not,
+		include a `descriptionShorter` attribute where it would fit.
 	
-			If the feature only adds damage to a single roll, the damage bonus will be added at the end of the
-			description, in the format "(1× +dX)" (e.g. "(1× +d8)" or (1× +5)),
-			thus you need to make sure "(1× +d8)" fits in the `description` attribute and if not,
-			include a `descriptionShorter` attribute where it would fit.
+	3) Single damage instance of multiple damage type
+		Same as 1), but the spell can have different damage types (e.g. you get to choose the type).
+		>> Make sure you also use the `dynamicDamageBonus` attribute below.
 	
-		3) Single damage instance of multiple damage type
-			Same as 1), but the spell can have different damage types (e.g. you get to choose the type).
-			>> Make sure you also use the `dynamicDamageBonus` attribute below.
+		If the feature only adds damage to some of the damage type options, the damage bonus will be added
+		at the end of the description, in the format "(+dX if..)" (e.g. "(+d8 if..)" or (+5 if..)),
+		thus you need to make sure "(+d8 if..)" fits in the `description` attribute and if not,
+		include a `descriptionShorter` attribute where it would fit.
 	
-			If the feature only adds damage to some of the damage type options, the damage bonus will be added
-			at the end of the description, in the format "(+dX if..)" (e.g. "(+d8 if..)" or (+5 if..)),
-			thus you need to make sure "(+d8 if..)" fits in the `description` attribute and if not,
-			include a `descriptionShorter` attribute where it would fit.
+	4) Multiple damage instances instances of multiple damage type
+		Same as 2), but the spell can have different damage types (e.g. you get to choose the type).
+		>> Make sure you also use the `dynamicDamageBonus` attribute below.
 	
-		4) Multiple damage instances instances of multiple damage type
-			Same as 2), but the spell can have different damage types (e.g. you get to choose the type).
-			>> Make sure you also use the `dynamicDamageBonus` attribute below.
+		If the feature only adds damage to some of the damage type options, the damage bonus will be added
+		at the end of the description, in the format "(1× +dX if..)" (e.g. "(1× +d8 if..)" or (1× +5 if..)),
+		thus you need to make sure "(1× +d8 if..)" fits in the `description` attribute and if not,
+		include a `descriptionShorter` attribute where it would fit.
 	
-			If the feature only adds damage to some of the damage type options, the damage bonus will be added
-			at the end of the description, in the format "(1× +dX if..)" (e.g. "(1× +d8 if..)" or (1× +5 if..)),
-			thus you need to make sure "(1× +d8 if..)" fits in the `description` attribute and if not,
-			include a `descriptionShorter` attribute where it would fit.
+	Which scenario a spell falls into can be changed with the `dynamicDamageBonus` attribute below.
 	
-		Which scenario a spell falls into can be changed with the `dynamicDamageBonus` attribute below.
-	
-		// DOES NOT WORK TOGETHER WITH descriptionCantripDie //
-		If the spell has both this attribute and the 'descriptionCantripDie' attribute,
-		the sheet will use the 'descriptionCantripDie' attribute when the appropriate checkbox
-		is checked (see 'descriptionCantripDie' explanation above).
-	*/
+	// DOES NOT WORK TOGETHER WITH descriptionCantripDie //
+	If the spell has both this attribute and the 'descriptionCantripDie' attribute,
+	the sheet will use the 'descriptionCantripDie' attribute when the appropriate checkbox
+	is checked (see 'descriptionCantripDie' explanation above).
+	* @since v13.0.7
+	* @example "20-ft rad all crea 5d6+1d6/SL Psychic dmg; save half; flames in area are purple"
+*/
+	descriptionShorter?: string
 
-	descriptionShorterMetric: "6-m rad all crea 5d6+1d6/SL Psychic dmg; save half; flames in area are purple",
-	/*	descriptionShorterMetric // OPTIONAL //
-		TYPE:	string
-		USE:	shorter version of the description of the spell to be filled in the description field when the sheet is set to use the metric system
-		ADDED:	v13.0.7
+	/**
+	 * shorter version of the description of the spell to be filled in the description field when the sheet is set to use the metric system
+	 * 
+	 * @remarks
+	This attribute works the same as the `descriptionShorter` attribute above,
+	but it is only used if the sheet is set to use the metric system.
+	If this attribute is present, the sheet will not try and convert the `descriptionShorter` attribute
+	to the metric system, but will use this attribute instead.
 	
-		This attribute works the same as the `descriptionShorter` attribute above,
-		but it is only used if the sheet is set to use the metric system.
-		If this attribute is present, the sheet will not try and convert the `descriptionShorter` attribute
-		to the metric system, but will use this attribute instead.
+	The sheet is good at transforming units as long as each number is followed by the unit.
+	For example "60 ft by 20 ft" will successfully be converted to "18 m by 6 m",
+	but "60 by 20 ft" will become "60 by 6 m".
+	It is only for cases like the latter that `descriptionShorterMetric` is necessary,
+	all other things can be converted by the sheet on the fly.
 	
-		The sheet is good at transforming units as long as each number is followed by the unit.
-		For example "60 ft by 20 ft" will successfully be converted to "18 m by 6 m",
-		but "60 by 20 ft" will become "60 by 6 m".
-		It is only for cases like the latter that `descriptionShorterMetric` is necessary,
-		all other things can be converted by the sheet on the fly.
-	
-		// DOES NOT WORK TOGETHER WITH descriptionCantripDie //
-		If the spell has both this attribute and the 'descriptionCantripDie' attribute,
-		the sheet will use the 'descriptionCantripDie' attribute when the appropriate checkbox
-		is checked (see 'descriptionCantripDie' explanation above),
-		regardless of the unit system being set to metric.
+	// DOES NOT WORK TOGETHER WITH descriptionCantripDie //
+	If the spell has both this attribute and the 'descriptionCantripDie' attribute,
+	the sheet will use the 'descriptionCantripDie' attribute when the appropriate checkbox
+	is checked (see 'descriptionCantripDie' explanation above),
+	regardless of the unit system being set to metric.
+	* @since v13.0.7
+	* @example "6-m rad all crea 5d6+1d6/SL Psychic dmg; save half; flames in area are purple",
 	*/
+	descriptionShorterMetric?: string;
 
 	dynamicDamageBonus: object
 	/*	dynamicDamageBonus // OPTIONAL //
@@ -776,9 +781,17 @@ type Mpmb_Spell_Narrowed = Omit<Mpmb_Spell, ""
 	// not implemented
 	| "defaultExcluded"
 	| "rangeMetric"
+
+	// grouped together into a description object
+	| "description"
+	| "descriptionCantripDie"
+	| "descriptionMetric"
+	| "descriptionFull"
+	| "descriptionShorter"
+	| "descriptionShorterMetric"
 >;
 
-type SpellDefinition = Mpmb_Spell_Narrowed & {
+type SpellDefinition = Merge<Mpmb_Spell_Narrowed, {
 
 	/**
 	 * The key used to register this weapon in the WeaponsList dictionary.
@@ -787,15 +800,32 @@ type SpellDefinition = Mpmb_Spell_Narrowed & {
 	 */
 	key: string;
 
+	definition: {
+		/** the one liner description of the spell */
+		concise: string;
+
+		/** summary of the spell - from the 1st person perspective */
+		summary: string;
+
+		/** the description of the spell as-is form the source book */
+		full: string;
+	};
+
 	classes: character_class[];
 
 	// might not be needed? - theres a allowUpCasting property
-	upcastable: boolean;
+	// upcastable: boolean;
 
 	// attack actions granted by the spell
 	action: Weapon;
 
-}
+}>
 
 type Spell = SpellDefinition
 
+type temp = {
+
+
+
+
+}

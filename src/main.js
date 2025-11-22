@@ -32,7 +32,8 @@
             const manifest = this.get_print_manifest(this.config, data);
 
             // todo: handle multi-casting by passing in customizing caster_stats
-            const caster_stats = data.caster.class;
+            // right now, just assume all spells are cast using the first class found for the character.
+            const caster_stats = Object.values(data.caster.class)[0];
 
             // build up view model that binds to the card
             for (const spell of manifest.spells ?? []) {
@@ -43,6 +44,9 @@
             for (const monster of manifest.monsters ?? []) {
                 monster.vm = this.formatters.monster_card.build_monstercard_vm(monster)
             }
+
+            const context = data.caster;
+            manifest.feats = manifest.feats.map(feat => this.formatters.feat_card.build_featcard_vm(feat, context));
 
             return manifest;
         }
@@ -55,6 +59,7 @@
             return {
                 spells,
                 monsters,
+                feats: this._layout_feats(config, data),
             };
         }
 
@@ -113,6 +118,35 @@
 
             return items_sorted;
 
+        }
+
+        _layout_feats(config, data) {
+
+            const caster = data.caster;
+            // Object.values(data.monsters)
+            const all_items = []
+
+            const layout = config.layout["feat-cards"];
+            if (!layout) {
+                return []
+            }
+
+            const fn_preprocess = layout.preprocess ?? (() => all_items);
+            const fn_filter = build_filter(layout.filter, caster);
+            const fn_sort_compare = layout.sort;
+
+            let items = fn_preprocess(caster);
+            let items_filtered = items;
+            if (fn_filter) {
+                items_filtered = items.filter((item) => fn_filter(item, caster));
+            }
+
+            let items_sorted = items_filtered;
+            if (fn_sort_compare) {
+                items_sorted = items_filtered.sort(fn_sort_compare);
+            }
+
+            return items_sorted;
         }
 
     }

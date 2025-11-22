@@ -41,26 +41,6 @@ type ability_score_stats = {
     save_mod: number,
 }
 
-/**
- * text that supports rich text formatting
- * @remarks
- *      The formatting characters are as follows:
- *          *text*   = italic
- *          **text** = bold
- *          _text_   = underlined [doesn't work in tooltips/pop-ups]
- *          ~text~   = strikethrough [doesn't work in tooltips/pop-ups]
- *          #text#   = Header 1:
- *                     - bold and theme color (Colourful)
- *                     - bold and 15% size increase (Printer Friendly)
- *          ##text## = Header 2:
- *                     - italic, bold, and theme color (Colourful)
- *                     - italic and bold (Printer Friendly)
- * 
- * @since v14.0.0
-  */
-type rich_text = string;
-
-
 type EvaluationFn = (field_prefix: string, args: [old_level: number, new_level: number]) => void;
 
 /**

@@ -171,11 +171,12 @@
     });
 
 
+    // move all of the functions that were dumped into the global namespace
+    // to a child namespace
     /** @type {Global} */
-    const global2 = global;
-
-    global2.app = AcrobatApp;
-    global2.mpmb = mpmb;
+    const global_after = global;
+    global_after.app = AcrobatApp;
+    global_after.mpmb = /** @type{any} */ (mpmb);
 
 })(window)
 

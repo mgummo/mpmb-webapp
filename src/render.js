@@ -9,6 +9,7 @@
     const templates = {
         "root": load_template("root"),
         "spell-card": load_template("spell-card"),
+        "feature-card": load_template("feature-card"),
         "monster-card": load_template("monster-card"),
         "monster-card-action": load_template("monster-card-action"),
     };
@@ -33,6 +34,7 @@
             // Let's see if we have anything
             console.debug("Rendering the following spells: %o", spells)
             console.debug("Rendering the following monsters: %o", monsters)
+            console.debug("Rendering the following feats: %o", data.feats)
         }
 
         const vm = {
@@ -40,42 +42,22 @@
                 "character-sheet": {
                 },
                 "spell-cards": {
-                    pages: [
-                        // { cards: spells, grid_size: null, },
-                    ],
+                    pages: paginate(spells, 3, 3),
+                },
+                "feature-cards": {
+                    pages: paginate(data.feats, 3, 3),
                 },
                 "monster-cards": {
-                    pages: [
-                        // { cards: monsters, grid_size: "3x3", },
-                    ],
+                    pages: paginate(monsters, 2, 2),
                 },
 
             }
         };
 
-        vm.sections["spell-cards"].pages = paginate(spells, 3, 3);
-
-        //todo experiment with what dimensions make sense
-        vm.sections["monster-cards"].pages = paginate(monsters, 2, 2);
-
         vm.sections["spell-cards"].pages = [
             ...vm.sections["spell-cards"].pages,
             ...paginate(spells_that_overflow, 2, 2)
         ];
-
-        function paginate(cards, rows, columns) {
-            const pages = []
-            const cards_per_page = rows * columns;
-
-            for (let i = 0; i < cards.length; i += cards_per_page) {
-                const page = {
-                    cards: cards.slice(i, i + cards_per_page),
-                    grid_size: `${rows}x${columns}`,
-                };
-                pages.push(page);
-            }
-            return pages;
-        }
 
         // todo: replace with vuejs
         const html = Mustache.render(templates.root, vm, templates);
@@ -88,6 +70,20 @@
                 reflow(data);
             });
         }
+    }
+
+    function paginate(cards, rows, columns) {
+        const pages = []
+        const cards_per_page = rows * columns;
+
+        for (let i = 0; i < cards.length; i += cards_per_page) {
+            const page = {
+                cards: cards.slice(i, i + cards_per_page),
+                grid_size: `${rows}x${columns}`,
+            };
+            pages.push(page);
+        }
+        return pages;
     }
 
     function reflow(data) {

@@ -67,6 +67,7 @@
             this.normalize_spells(mpmb.lists.SpellsList);
             this.normalize_creatures(mpmb.lists.CreatureList);
             this.normalize_weapons(mpmb.lists.WeaponsList);
+            this.normalize_feats(mpmb.lists.FeatsList);
 
             let character = main.config.load_character();
             character = this.normalize_character(character);
@@ -146,10 +147,12 @@
             result.key = key
 
             // todo: there's already a allowUpCasting property?
-            result.upcastable = spell.description.includes('/SL');
+            // result.upcastable = spell.description.includes('/SL');
 
             // link together the spell with the actions (from the weapon list that it enables)
             result.action = mpmb.lists.WeaponsList[key];
+
+            result.description = this.normalize_description(spell);
 
             // if (!result.action) {
             //     result.action = [];
@@ -179,6 +182,80 @@
             return spell;
 
         }
+
+        normalize_description(entity) {
+
+            let description = {};
+
+            if (!entity.description) {
+
+                let full = entity.descriptionFull;
+                if (Array.isArray(full)) {
+                    full = full.join("\n")
+                }
+                
+                description = {
+                    consise: null,
+                    summary: null,
+                    full,
+                    
+                }
+            }
+            else if (typeof (entity.description) !== "object") {
+                const concise = entity.descriptionCantripDie ?? entity.description ?? null;
+                const summary = null;
+                let full = entity.descriptionFull;
+                if (Array.isArray(full)) {
+                    full = full.join("\n")
+                }
+                description = {
+                    concise,
+                    summary,
+                    full,
+                };
+            }
+            else {
+                description = entity.description
+            }
+
+            if (!description.summary) {
+                description.summary = description.full
+            }
+
+            return description;
+
+
+
+        }
+
+        normalize_feats(list) {
+            for (const [key, feat] of Object.entries(list)) {
+                feat.key = key;
+                const result = this.normalize_feat(feat);
+                if (!result) {
+                    delete list[key];
+                }
+            }
+        }
+
+        /** 
+         * @param {Mbam_Feat} feat
+         * */
+        normalize_feat(feat) {
+            const result = feat;
+
+            if (result.name.includes(" [Origin]")) {
+                result.name = result.name.replace(" [Origin]", "")
+                result.type = 'origin'
+            }
+
+            if (!result.type) {
+                result.type = ""
+            }
+
+            return result;
+        }
+
 
         normalize_creatures(CreaturesList) {
             for (const [key, creature] of Object.entries(CreaturesList)) {

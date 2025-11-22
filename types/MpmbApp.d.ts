@@ -7,33 +7,31 @@ type MbamRegistry<TConfig, TDefinition> = Record<string, TDefinition> & {
 // functions from Lists.js
 interface MpmbApp_Lists {
 
-    // lists: Record<string, any>;
-    // AmmoList
-    // ArmourList
-    // BackgroundFeatureList
-    // BackgroundSubList
-    // ClassList
-    // ClassSubList
-    // CompanionList
+    AmmoList
+    ArmourList
+    BackgroundFeatureList
+    BackgroundSubList
+    ClassList
+    ClassSubList
+    CompanionList
     CreatureList: MbamRegistry<CreatureConfigDefinition, CreatureDefinition>
-    // DefaultEvalsList
-    // FeatsList
-    // GearList
-    // MagicItemsList
-    // PacksList
-    // PsionicList
-    // RaceList
-    // RaceSubList
-    // SourceList
+    DefaultEvalsList
+    FeatsList: Record<string, FeatDefinition>;
+    GearList
+    MagicItemsList
+    PacksList
+    PsionicList
+    RaceList
+    RaceSubList
+    SourceList
     SpellsList: Record<string, SpellDefinition>
-    // ToolsList
+    ToolsList
     WeaponsList: Record<string, WeaponDefinition>
-    // spellLevelList
-    // spellSchoolList
+    spellLevelList
+    spellSchoolList
 
     // I think this is intended to be a lookup table, for the number of lines allowed for each field?
     // FieldNumbers: Record<string, number>;
-
 }
 
 // functions from Functions0.js
@@ -229,14 +227,9 @@ interface MpmbApp extends
     MpmbApp_FunctionsResources {
 }
 
-interface MpmbWrapper extends MpmbApp {
+type MpmbWrapper = MpmbApp & {
 
     lists: MpmbApp_Lists
-
-
-    // not to be confused with AddWeapon from functions1.js, which does not do what I thought it did
-    // todo: annotate Add / Update methods on lists
-
 }
 
 
