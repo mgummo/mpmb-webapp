@@ -24,7 +24,7 @@ type PreReqContext = {
     // N.B. The first entry of both the toolProfs and languageProfs arrays is the contents of the 'More Proficiency' field
 }
 
-type Mbam_Feat = {
+type Mpmb_FeatBase = {
 
     /**
      * name of the feat as it will be used by the sheet
@@ -174,7 +174,7 @@ type Mbam_Feat = {
     @defaultValue false
     @example true
     @since v24.0.0 (`type: "fighting style"` feats ignore this attribute)
-*/
+    */
     allowDuplicates?: boolean
 
     /** 
@@ -189,7 +189,7 @@ type Mbam_Feat = {
     so making something only italic won't be visible on the Colourful sheets.
     @example "Advantage on Charisma (Deception) and (Performance) if wearing something purple. I can mimic casting any spell perfectly, even producing a purple haze while doing so. Wisdom (Insight) vs. Charisma (Deception) to determine there is no spell being cast. [+1 Charisma]",
     @since v14.0.0 (formatting characters)
-*/
+    */
     description: rich_text
 
     /**	descriptionClassFeature // OPTIONAL //
@@ -290,32 +290,22 @@ type Mbam_Feat = {
         The resulting string can be formatted using the Rich Text formatting characters.
         See the `description` attribute above for an explanation of how they work.
     */
+} & CommonAttributes
 
-    /*
-        >>>>>>>>>>>>>>>>>>>>>>>>>
-        >>> Common Attributes >>>
-        >>>>>>>>>>>>>>>>>>>>>>>>>
-    
-        You can have the feat affect different parts of the sheet like adding proficiencies,
-        adding spellcasting abilities, actions, limited features, etc. etc.
-    
-        See the "_common attributes.js" file for documentation on how to do those things and more.
-        All attributes in there can directly be added in this object.
-    */
+/*
+     >>>>>>>>>>>>>>>>>>>>>>>
+     >>> Composite Feats >>>
+     >>>>>>>>>>>>>>>>>>>>>>>
+ 
+     The next part is about the use of the 'choices' attribute, which is optional.
+     The 'choices' attribute will allow the feat to have a subset of options.
+     The player will be forced to select one of those options, the feat will not be usable without a selection.
+ 
+     To set up a choice, add the 'choices' attribute, see below, and add an object for each of those choices.
+     The object name has to be exactly the same as the string in the 'choices' array, but need to be all lowercase.
+ */
+type Mpmb_CompositeFeat = Mpmb_FeatBase & {
 
-
-    /*
-        >>>>>>>>>>>>>>>>>>>>>>>
-        >>> Composite Feats >>>
-        >>>>>>>>>>>>>>>>>>>>>>>
-    
-        The next part is about the use of the 'choices' attribute, which is optional.
-        The 'choices' attribute will allow the feat to have a subset of options.
-        The player will be forced to select one of those options, the feat will not be usable without a selection.
-    
-        To set up a choice, add the 'choices' attribute, see below, and add an object for each of those choices.
-        The object name has to be exactly the same as the string in the 'choices' array, but need to be all lowercase.
-    */
     choices: ['Fire', 'Ice'],
     /*	choices // OPTIONAL //
         TYPE:	array (variable length)
@@ -400,7 +390,12 @@ type Mbam_Feat = {
             The name of an option should be unique, it can't be the same as the parent feat.
         */
 
-        description: "As an action, I can drink this potion or administer it to another to gain the effects of Haste for 1 minute (no concentration required).\rThe potion's yellow fluid is streaked with black and swirls on its own.",
+        /**
+         * Description of the choice
+         * @example: "As an action, I can drink this potion or administer it to another to gain the effects of Haste for 1 minute (no concentration required).\rThe potion's yellow fluid is streaked with black and swirls on its own."
+         */
+        description: string
+
         /*
             >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             >>> FeatsList Attributes (inside choice) >>>
@@ -451,7 +446,30 @@ type Mbam_Feat = {
             merged from the choice object into the parent to generate a single limited feature.
         */
     },
+
 }
+
+type Mpmb_Feat = Mpmb_FeatBase | Mpmb_FeatWithChoices
+
+// the entity type, with the properties I don't want thrown out
+type Mpmb_Feat_Narrowed = Omit<Mpmb_Feat, ""
+    // too keep it simple, just sticking with the "name" field
+    | "nameAlt"
+    | "nameShort"
+    | "regExpSearch"
+
+    // not implemented
+    | "defaultExcluded"
+    | "rangeMetric"
+
+    // grouped together into a description object
+    | "description"
+    | "descriptionCantripDie"
+    | "descriptionMetric"
+    | "descriptionFull"
+    | "descriptionShorter"
+    | "descriptionShorterMetric"
+>;
 
 type FeatDefinition = Mbam_Feat & {
 
@@ -460,11 +478,10 @@ type FeatDefinition = Mbam_Feat & {
      */
     key: string;
 
-    // todo: 
     description: {
-        full: string
-        summary: string
-        short: string
-        concise: string;
+        full: string        // description from the source book 
+        summary: string     // description to display on the card. supports variable replacements.
+        short: string       // shorter summary to be used, if summary doesn't fit (todo: am I using this?)
+        concise: string;    // 1 line description
     }
 }

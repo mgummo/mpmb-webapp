@@ -1,4 +1,4 @@
-export * from "./Common"
+export * from "./CommonTypes"
 export * from "./Character"
 export * from "./CharacterClass"
 export * from "./Creature"

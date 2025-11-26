@@ -68,6 +68,7 @@
             this.normalize_creatures(mpmb.lists.CreatureList);
             this.normalize_weapons(mpmb.lists.WeaponsList);
             this.normalize_feats(mpmb.lists.FeatsList);
+            this.normalize_classes(mpmb.lists.ClassList);
 
             let character = main.config.load_character();
             character = this.normalize_character(character);
@@ -185,7 +186,11 @@
 
         normalize_description(entity) {
 
-            let description = {};
+            let description = {
+                concise: null,
+                summary: null,
+                full: null,
+            };
 
             if (!entity.description) {
 
@@ -193,12 +198,12 @@
                 if (Array.isArray(full)) {
                     full = full.join("\n")
                 }
-                
+
                 description = {
-                    consise: null,
+                    concise: null,
                     summary: null,
                     full,
-                    
+
                 }
             }
             else if (typeof (entity.description) !== "object") {
@@ -223,9 +228,48 @@
             }
 
             return description;
+        }
 
+        normalize_description_2(entity) {
 
+            let description = {};
 
+            if (typeof (entity.description) !== "object") {
+                let full = entity.description;
+
+                description = {
+                    concise: null,
+                    summary: null,
+                    full,
+                };
+            }
+            else {
+                description = entity.description
+            }
+
+            if (!description.summary) {
+                description.summary = description.full
+            }
+
+            return description;
+        }
+
+        normalize_classes(list) {
+            for (const [class_name, def] of Object.entries(list)) {
+                for (const [feat_name, feat] of Object.entries(def.features)) {
+                    feat.type = "class";
+
+                    feat.from = feat.from ?? {
+                        key: class_name,
+                        level: feat.minlevel,
+                        display: class_name.toTitleCase(),
+                        // ${character_class.toTitleCase()} (${feat.from.key.toTitleCase()})
+                    }
+
+                    feat.description = this.normalize_description_2(feat);
+
+                }
+            }
         }
 
         normalize_feats(list) {
@@ -239,7 +283,7 @@
         }
 
         /** 
-         * @param {Mbam_Feat} feat
+         * @param {Mpmb_Feat} feat
          * */
         normalize_feat(feat) {
             const result = feat;

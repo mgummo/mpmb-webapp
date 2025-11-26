@@ -27,7 +27,7 @@ interface Main {
     };
 
     types: {
-        BaseFormatter: BaseFormatter
+        BaseFormatter?: BaseFormatter
     };
     loader: unknown;
 }
