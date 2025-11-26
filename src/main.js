@@ -178,22 +178,6 @@
         return filter_factory;
     }
 
-    function sort_spells(spells) {
-        spells = spells.sort((lhs, rhs) => {
-
-            if (lhs.level < rhs.level) return -1;
-            if (lhs.level > rhs.level) return 1;
-
-            if (lhs.name < rhs.name) return -1;
-            if (lhs.name > rhs.name) return 1;
-
-            return 0;
-        });
-
-        return spells;
-    }
-
-
     global.main = new Main()
 
 })(window)

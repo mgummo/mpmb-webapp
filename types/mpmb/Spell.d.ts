@@ -800,7 +800,7 @@ type SpellDefinition = Merge<Mpmb_Spell_Narrowed, {
 	 */
 	key: string;
 
-	definition: {
+	description: {
 		/** the one liner description of the spell */
 		concise: string;
 

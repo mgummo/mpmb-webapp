@@ -10,6 +10,7 @@ interface Main {
             format_range,
             format_damage_dice,
             format_damage_expression,
+            get_cantrip_dice_amount,
         };
         monster_card: unknown;
         spell_card: {

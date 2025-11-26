@@ -18,21 +18,23 @@
         /**
          * @param {FeatDefinition} feat
          */
-        build_featcard_vm(feat, context) {
+        build_featcard_vm(feat, character_context) {
             const vm = {}
 
             vm.name = feat.name;
 
-            // todo: resolve using context
-            const level = 4;
-            const class_level = 4;
-            const character_class = 'druid'
+            const character_class = feat.from.key;
+            const class_level = feat.from.level;
+
+            let data = {};
+            if (feat.resolve_context) {
+                data = feat.resolve_context(character_context);
+            }
 
             if (feat.type == 'class') {
 
                 if (feat.from) {
-                    const feat_level = feat.minlevel;
-                    vm.subtitle = `${character_class.toTitleCase()} (${feat.from.key.toTitleCase()}) Level ${feat_level} Feat`
+                    vm.subtitle = `${feat.from.display} Level ${feat.from.level} Feat`
                 }
                 else {
                     const feat_level = feat.minlevel;
@@ -49,12 +51,7 @@
             // else 
             if (feat.description) {
 
-                let data = {};
-                if (feat.resolve_context) {
-                    data = feat.resolve_context(context);
-                }
-
-                const template = feat.description;
+                const template = feat.description.full;
                 const text = global.Mustache.render(template, data);
 
                 var converter = new global.showdown.Converter();
@@ -68,9 +65,9 @@
             }
             vm.source = this.format_source_book(feat);
 
-            if (feat.usages?.length) {
-                const charges = feat.usages[class_level];
-                vm.charges_checkboxes = new Array(charges).fill("☐").join(" ");
+            if (data.max_charges) {
+                // const charges = feat.usages[class_level];
+                vm.charges_checkboxes = new Array(data.max_charges).fill("☐").join(" ");
             }
 
             return vm;
