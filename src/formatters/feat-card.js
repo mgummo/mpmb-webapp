@@ -23,8 +23,9 @@
 
             vm.name = feat.name;
 
-            const character_class = feat.from.key;
-            const class_level = feat.from.level;
+            // todo: what to do if this is null
+            const character_class = feat.from?.key;
+            const class_level = feat.from?.level;
 
             let data = {};
             if (feat.resolve_context) {
@@ -51,7 +52,7 @@
             // else 
             if (feat.description) {
 
-                const template = feat.description.full;
+                const template = feat.description.full ?? feat.description.summary;
                 const text = global.Mustache.render(template, data);
 
                 var converter = new global.showdown.Converter();

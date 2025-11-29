@@ -402,62 +402,7 @@ type Proficiencies = {
 
 }
 
-/**
- * 	`select`
-		OPTIONAL
-		TYPE: string
-		USE: sets the value for the armour drop-down on the 1st page
-	
-		The armour will only be set if there is currently no armour selected, or
-		if the currently selected armour gives a lower AC total than this armour.
-		The string will be added exactly as you write it here, capitalisation and all.
-	
-		If nothing has to change about the current armour selection, then
-		don't include this attribute.
-	
-	`options`
-		OPTIONAL
-		TYPE: array of strings
-		USE: add options to 1st page armour drop-down box
-	
-		Each string in the array will be added as an option in the armour drop-down box
-		on the 1st page.
-		Each will be added at the top of list, along with those added by
-		`armorOptions` (see below), and sorted alphabetically.
-		The strings will be added exactly as written, capitalisation and all.
-	
-		If no options have to be added to the list in the drop-down box, then
-		don't include this attribute.
-	
-	`noStealthDis`
-		OPTIONAL
-		TYPE: regular expression
-		USE: make an armour never impose disadvantage to stealth checks
-	
-		If the content entered into the armour field matches the provided regular expression,
-		the checkbox for the armour granting disadvantage will always be unchecked.
-		N.B. this checkbox is a "modifier field" on the printer friendly sheets, and thus
-		only visible when the modifier fields are toggled to be shown.
-	
-		Use this if you are adding an armour that normally imposes disadvantage on stealth,
-		but the variation added by the feature doesn't.
-	
-	`forceStealthDis`
-		OPTIONAL
-		TYPE: regular expression
-		USE: make an armour always impose disadvantage to stealth checks
-	
-		If the content entered into the armour field matches the provided regular expression,
-		the checkbox for the armour granting disadvantage will always be checked.
-		N.B. this checkbox is a "modifier field" on the printer friendly sheets, and thus
-		only visible when the modifier fields are toggled to be shown.
-	
-		Use this if you are adding an armour that normally doesn't impose disadvantage on
-		stealth, but the variation added by the feature does.
-	
-	If a feature with this attribute is removed, the selection/options
-	will be removed as well.
-
+/**	
  * @example {
 		select: "Breastplate +1",
 		options: ["Glamoured Studded Leather", "Unarmored Defense (Con)"],
@@ -466,9 +411,62 @@ type Proficiencies = {
 	}
  */
 type ArmorAddOptions = {
+
+	/**
+	 * sets the value for the armour drop-down on the 1st page
+	 * 
+	 * @remarks
+		The armour will only be set if there is currently no armour selected, or
+		if the currently selected armour gives a lower AC total than this armour.
+		The string will be added exactly as you write it here, capitalisation and all.
+	
+		If nothing has to change about the current armour selection, then
+		don't include this attribute.
+	 */
 	select?: string;
+
+	/**
+	 * add options to 1st page armour drop-down box
+	 * 
+	 * @remarks
+		Each string in the array will be added as an option in the armour drop-down box
+		on the 1st page.
+		Each will be added at the top of list, along with those added by
+		`armorOptions` (see below), and sorted alphabetically.
+		The strings will be added exactly as written, capitalisation and all.
+	
+		If no options have to be added to the list in the drop-down box, then
+		don't include this attribute.
+	 */
 	options?: string[];
+
+	/**
+	 * make an armour never impose disadvantage to stealth checks
+	 * 
+	 * @remarks
+		If the content entered into the armour field matches the provided regular expression,
+		the checkbox for the armour granting disadvantage will always be unchecked.
+		N.B. this checkbox is a "modifier field" on the printer friendly sheets, and thus
+		only visible when the modifier fields are toggled to be shown.
+	
+		Use this if you are adding an armour that normally imposes disadvantage on stealth,
+		but the variation added by the feature doesn't.
+	 */
 	noStealthDis?: RegExp;
+
+	/**
+	 * make an armour always impose disadvantage to stealth checks
+	 * 
+	 * @remarks
+	
+	If the content entered into the armour field matches the provided regular expression,
+	the checkbox for the armour granting disadvantage will always be checked.
+	N.B. this checkbox is a "modifier field" on the printer friendly sheets, and thus
+	only visible when the modifier fields are toggled to be shown.
+
+	Use this if you are adding an armour that normally doesn't impose disadvantage on
+	stealth, but the variation added by the feature does.
+	*/
 	forceStealthDis?: RegExp;
 }
 

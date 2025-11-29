@@ -1,3 +1,15 @@
+/**
+        Common usage examples:
+            "return CurrentRace.known.indexOf('dwarf') !== -1;" // Test if race is a dwarf
+            "return classes.known.cleric ? true : false;" // Test if character has any levels in the cleric class
+            "return What('Dex') >= 13;" // Test if character has a Dexterity score of 13 or more
+        @example 
+        function (v) {
+            return v.isSpellcaster && CurrentRace.known.indexOf('dwarf') !== -1;
+        }
+        @example
+        "CurrentSpells.toSource() !== '({})' && CurrentRace.known.indexOf('dwarf') !== -1"
+ */
 type PreReqContext = {
 
     isSpellcaster,  	// boolean; true if the character has spellcasting from a source other than magic items
