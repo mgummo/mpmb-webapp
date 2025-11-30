@@ -5,14 +5,10 @@
     const global = window;
     const mpmb = global.mpmb;
 
-    /** @type {BaseFormatter} */
-    const TBaseFormatter = global.main.types.BaseFormatter;
-
-    class FeatCardFormatter extends TBaseFormatter {
+    class FeatCardFormatter {
 
         constructor() {
-            super();
-            //this.attack_formatter = global.main.formatters.attack;
+            this.base = global.main.formatters.base;
         }
 
         /**
@@ -64,7 +60,7 @@
             if (feat.additional?.length) {
                 vm.resolved_for_clause = `(Level ${class_level} ${character_class.toTitleCase()})`
             }
-            vm.source = this.format_source_book(feat);
+            vm.source = this.base.format_source_book(feat);
 
             if (data.max_charges) {
                 // const charges = feat.usages[class_level];

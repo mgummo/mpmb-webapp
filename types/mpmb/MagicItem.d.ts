@@ -722,3 +722,5 @@ type MagicItemDefinition = Mpmb_MagicItem & {
      */
     key: string
 }
+
+type ItemCard = any

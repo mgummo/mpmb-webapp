@@ -5,13 +5,10 @@
     const global = window;
     const mpmb = global.mpmb;
 
-    /** @type {BaseFormatter} */
-    const TBaseFormatter = global.main.types.BaseFormatter;
-
-    class MonsterCardFormatter extends TBaseFormatter {
+    class MonsterCardFormatter {
 
         constructor() {
-            super();
+            this.base = global.main.formatters.base;
             this.attack_formatter = global.main.formatters.attack;
         }
 
@@ -34,7 +31,7 @@
             vm.gear = monster.gear.join(", ");
             vm.senses = this.format_senses(monster);
             vm.languages = this.format_languages(monster);
-            vm.pb = this.format_modifier(monster.pb)
+            vm.pb = this.base.format_modifier(monster.pb)
 
             vm.traits = this.format_attacks(monster, monster.features.traits);
             vm.attacks = this.format_attacks(monster, monster.features.attacks);
@@ -45,7 +42,7 @@
                 reactions: monster.features.reactions,
             }
 
-            vm.source = this.format_source_book(monster)
+            vm.source = this.base.format_source_book(monster)
 
             return vm;
         }
@@ -107,7 +104,7 @@
                 return undefined;
             }
 
-            const initiative_mod = this.format_modifier(monster.abilities.dex.mod);
+            const initiative_mod = this.base.format_modifier(monster.abilities.dex.mod);
             const initiative_average = 10 + monster.abilities.dex.mod;
             return `${initiative_mod} (${initiative_average})`
         }
@@ -121,7 +118,7 @@
             const hit_dice_amount = monster.hd[0];
             const hit_dice_type = monster.hd[1];
             let hit_dice_mod = hit_dice_amount * monster.abilities.con.mod;
-            hit_dice_mod = this.format_modifier(hit_dice_mod);
+            hit_dice_mod = this.base.format_modifier(hit_dice_mod);
 
             const text = `(${hit_dice_amount}d${hit_dice_type}${hit_dice_mod})`
             return text;
@@ -133,7 +130,7 @@
 
             const fragments = []
             for (const [skill, mod] of Object.entries(monster.skills)) {
-                fragments.push(`${this.toTitleCase(skill)} ${this.format_modifier(mod)}`)
+                fragments.push(`${this.base.toTitleCase(skill)} ${this.base.format_modifier(mod)}`)
             }
             const text = fragments.join(", ")
             return text;
@@ -243,7 +240,7 @@
                         on_hit = `${fragment} damage.`
                     }
 
-                    vm.attack_mod = this.format_modifier(attack_mod);
+                    vm.attack_mod = this.base.format_modifier(attack_mod);
                     vm.on_hit = on_hit;
                 }
                 else {

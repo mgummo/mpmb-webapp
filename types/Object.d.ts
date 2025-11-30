@@ -10,4 +10,10 @@ declare global {
     }
 }
 
+declare global {
+    interface HTMLElement {
+        replaceWithHTML(string): void;
+    }
+}
+
 export { };

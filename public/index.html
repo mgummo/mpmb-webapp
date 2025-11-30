@@ -48,7 +48,7 @@
     <template id="root-template">
         {{#sections}}
 
-        <section>
+        <section data-card="spell-card">
             {{#spell-cards.pages}}
             <div class="page">
                 <div class="grid grid-{{grid_size}}">
@@ -60,7 +60,7 @@
             {{/spell-cards.pages}}
         </section>
 
-        <section>
+        <section data-card="feature-card">
             {{#feature-cards.pages}}
             <div class="page">
                 <div class="grid grid-{{grid_size}}">
@@ -72,7 +72,19 @@
             {{/feature-cards.pages}}
         </section>
 
-        <section>
+        <section data-card="item-card">
+            {{#item-cards.pages}}
+            <div class="page">
+                <div class="grid grid-{{grid_size}}">
+                    {{#cards}}
+                    {{> item-card}}
+                    {{/cards}}
+                </div>
+            </div>
+            {{/item-cards.pages}}
+        </section>
+
+        <section data-card="monster-card">
             {{#monster-cards.pages}}
             <div class="page">
                 <div class="grid grid-{{grid_size}}">
@@ -122,9 +134,6 @@
 
     <template id="feature-card-template">
         <div class="card" data-key="{{key}}">
-            {{#charges_checkboxes}}
-            <div class="feat-charges">{{charges_checkboxes}}</div>
-            {{/charges_checkboxes}}
             <div class="row">
                 <div>
                     <span class="name">{{name}}</span>
@@ -136,7 +145,29 @@
                 <div class="">{{{description}}}</div>
             </div>
             <div class="spacer"></div>
+            {{#charges_checkboxes}}
+            <div class="charges">{{charges_checkboxes}}</div>
+            {{/charges_checkboxes}}
             <div class="source-book">{{source}}</div>
+    </template>
+
+    <template id="item-card-template">
+        <div class="card" data-key="{{key}}">
+            <div class="row">
+                <div><span class="name">{{name}}</span></div>
+                <div class="subtitle">{{subtitle}}</div>
+            </div>
+            <div class="row illustration">
+            </div>
+            <div class="row">
+                <div class="">{{{description}}}</div>
+            </div>
+            <div class="spacer"></div>
+            {{#charges_checkboxes}}
+            <div class="charges">{{charges_checkboxes}}</div>
+            {{/charges_checkboxes}}
+            <div class="source-book">{{source}}</div>
+        </div>
     </template>
 
     <template id="monster-card-template">
@@ -402,6 +433,7 @@
     <!-- program logic - formatters -->
     <script src="../src/formatters/base.js"></script>
     <script src="../src/formatters/attack.js"></script>
+    <script src="../src/formatters/item-card.js"></script>
     <script src="../src/formatters/monster-card.js"></script>
     <script src="../src/formatters/spell-card.js"></script>
     <script src="../src/formatters/feat-card.js"></script>

@@ -10,6 +10,7 @@
         "root": load_template("root"),
         "spell-card": load_template("spell-card"),
         "feature-card": load_template("feature-card"),
+        "item-card": load_template("item-card"),
         "monster-card": load_template("monster-card"),
         "monster-card-action": load_template("monster-card-action"),
     };
@@ -25,7 +26,8 @@
             .replaceAll('&gt;', '>');
     }
 
-    function render(data, reflow_count) {
+    function render(manifest, reflow_count) {
+        const data = manifest;
         const spells = data.spells ?? [];
         const spells_that_overflow = data.spells_that_overflow ?? [];
         const monsters = data.monsters ?? [];
@@ -46,6 +48,9 @@
                 },
                 "feature-cards": {
                     pages: paginate(data.feats, 3, 3),
+                },
+                "item-cards": {
+                    pages: paginate(manifest.inventory, 3, 3),
                 },
                 "monster-cards": {
                     pages: paginate(monsters, 2, 2),
@@ -87,11 +92,28 @@
     }
 
     function reflow(data) {
+        /** @type {HTMLElement[]} */
         const cards = findOverflowingCards();
+
         if (!cards.length) {
             return;
         }
 
+        for (const card of cards) {
+            const key = card.dataset.key
+            const type = card.closest("section").dataset.card
+
+            const model = global.mpmb.lists.MagicItemsList[key];
+            const vm = global.main.formatters.item_card.build_vm(model);
+
+            // use a shorter description, in order to get it to fit
+            vm.description = model.description;
+
+            const html = Mustache.render(templates[type], vm, templates);
+            card.replaceWithHTML(html);
+        }
+
+        /*
         const spells = data.spells;
 
         const keys = new Set(cards.map(_ => _.dataset.key))
@@ -106,16 +128,18 @@
         data.spells_that_overflow = spells_that_overflow
 
         render(data, 1);
+        */
 
     }
 
     function findOverflowingCards() {
-        const cards = document.querySelectorAll('.spell-card');
+        const cards = document.querySelectorAll('.card');
         const overflowing = [];
 
         cards.forEach(card => {
             if (card.scrollHeight > card.clientHeight) {
                 overflowing.push(card);
+                card.className = card.className + " overflowing"
             }
         });
 
@@ -123,51 +147,6 @@
         return overflowing;
     }
 
-    // random junk
-
-    /*
-    function f(aSpell) {
-        if (aSpell.descriptionCantripDie) {
-            var cDie = cantripDie[Math.min(CurrentFeats.level, cantripDie.length) - 1];
-            var newCantripDieDescr = isMetric && aSpell.descriptionCantripDieMetric ? aSpell.descriptionCantripDieMetric : aSpell.descriptionCantripDie;
-            var rxCanDie = /`CD([\-+*] *\d *\.?\d *)`/;
-            var execCanDie = rxCanDie.exec(newCantripDieDescr);
-            while (execCanDie !== null) {
-                var aDie = execCanDie[1].indexOf("*") !== -1 ? cDie * Number(execCanDie[1].replace("*", "")) : cDie + Number(execCanDie[1]);
-                newCantripDieDescr = newCantripDieDescr.replace(execCanDie[0], Math.round(aDie));
-                execCanDie = rxCanDie.exec(newCantripDieDescr);
-            }
-            aSpell.description = newCantripDieDescr.replace(/\b0d\d+/g, "0");
-            if (isMetric && !aSpell.descriptionCantripDieMetric) {
-                aSpell.description = ConvertToMetric(aSpell.description, 0.5);
-            }
-        }
-        // apply ability score modifier or check
-        var spellAbiDescr = applySpellcastingAbility(aSpell, aCast);
-        if (spellAbiDescr) {
-            aSpell.descriptionBeforeamendSpDescr = aSpell.description;
-            aSpell.amendSpDescrCaster = theCast;
-            aSpell.description = spellAbiDescr;
-        }
-    }
-        */
-
     global.main.render = render
-
-    // Name          Prof?   Ability Range TO HIT DAMAGE DAMAGE TYPE
-    // Produce Flame :check: Wis     60ft  +5     1d8    Fire
-
-    // Make a 60 foot ranged spell attack (+5 to hit); Deals 1d8 Fire damage.
-
-    // looks like the description is out-of-date?
-    // 10-ft. radius bright light and 10-ft. radius dim light until thrown
-
-    // "Flame emits 20ft rad bright light/20ft dim; 1 a 60ft ranged spell atk for 1d8 Fire; +1d8 at CL 5, 11, & 17"
-    // "Flame emits 20ft rad bright light/20ft dim; 1 a 60ft ranged spell atk for `CD`d8 Fire dmg"
-    //
-
-    // todo: clean this up
-    // can't figure out how GetSpellObject works
-    // spell.temp2;
 
 })(window)

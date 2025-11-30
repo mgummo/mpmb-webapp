@@ -5,13 +5,10 @@
     const global = window;
     const mpmb = global.mpmb;
 
-    /** @type {BaseFormatter} */
-    const TBaseFormatter = global.main.types.BaseFormatter;
-
-    class SpellCardFormatter extends TBaseFormatter {
+    class SpellCardFormatter {
 
         constructor() {
-            super();
+            this.base = global.main.formatters.base;
             this.attack_formatter = global.main.formatters.attack;
         }
 
@@ -41,7 +38,7 @@
                 summary: this.format_spell_description(spell),
             }
 
-            vm.source = this.format_source_book(spell);
+            vm.source = this.base.format_source_book(spell);
 
             return vm;
         }
@@ -67,13 +64,13 @@
             // not all spells have relevant summaries that need calulating
             // in which case, action isn't set - so just use the summary text from the spell sheet
             if (!spell.action) {
-                const result = this.unabbreviate(spell.description.concise);
+                const result = this.base.unabbreviate(spell.description.concise);
                 return result;
             }
 
             // the spell defines an action property. format that for the spell's concise description.
             if (spell.level == 0) {
-                let result = this.unabbreviate(spell.description.concise)
+                let result = this.base.unabbreviate(spell.description.concise)
                 const dice_amount = this.attack_formatter.get_cantrip_dice_amount(character.level);
                 result = result.replace('`CD`', dice_amount);
                 return result;
@@ -85,7 +82,7 @@
             const spell_slot_size = spell.level
 
             const range = this.attack_formatter.format_range(spell.action.range).reach;
-            const to_hit = this.format_modifier(spell_attack_mod);
+            const to_hit = this.base.format_modifier(spell_attack_mod);
 
             const damages = spell.action.damage;
             const attack_context = {
@@ -106,15 +103,15 @@
 
                 // let unformatted_ability = (spell.action.dc?.at(0) ?? spell.action.ability);
                 let unformatted_ability = dc[0];
-                let ability = this.format_ability(unformatted_ability);
-                
+                let ability = this.base.format_ability(unformatted_ability);
+
                 let fail_result = dc[2];
                 let save_result = dc[3];
 
                 // todo: will eventually need to parameterize 'from you'
                 let origin = "you"
 
-                text = 
+                text =
                     `Deals ${dice} damage; ` +
                     `Each target within a ${range} from ${origin} makes a DC ${spell_save} ${ability} saving throw.\n` +
                     `Failure: ${fail_result}\n` +
@@ -135,8 +132,8 @@
 
             const dict = mpmb.lists.spellSchoolList;
 
-            const school = this.toTitleCase(dict[spell.school]);
-            const classes = `(${this.toTitleCase(spell.classes.join(', '))
+            const school = this.base.toTitleCase(dict[spell.school]);
+            const classes = `(${this.base.toTitleCase(spell.classes.join(', '))
                 })`;
 
             let line1 = "";

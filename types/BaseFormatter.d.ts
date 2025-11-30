@@ -1,5 +1,5 @@
 interface BaseFormatter {
-    new(options?: any): BaseFormatter;
+    // new(options?: any): BaseFormatter;
 
     format_ability;
     format_modifier;

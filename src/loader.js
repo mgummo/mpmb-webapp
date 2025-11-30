@@ -69,6 +69,8 @@
             this.normalize_weapons(mpmb.lists.WeaponsList);
             this.normalize_feats(mpmb.lists.FeatsList);
             this.normalize_classes(mpmb.lists.ClassList);
+            this.normalize_magicitems(mpmb.lists.MagicItemsList);
+
 
             let character = main.config.load_character();
             character = this.normalize_character(character);
@@ -88,6 +90,19 @@
             console.log("pdf fields: %o", global.app.getFields())
 
             return character;
+        }
+
+        normalize_magicitems(list) {
+            const context = {
+                warnings: []
+            }
+            for (const [key, config] of Object.entries(list)) {
+                context.key = key;
+                const result = global.main.formatters.item_card.build_definition(config, context);
+                if (!result) {
+                    delete list[key]
+                }
+            }
         }
 
         normalize_spells(SpellsList) {

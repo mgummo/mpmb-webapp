@@ -8,3 +8,9 @@ function castArray(value) {
 
     return Array.isArray(value) ? value : [value];
 }
+
+HTMLElement.prototype.replaceWithHTML = function (html) {
+    const t = document.createElement('template');
+    t.innerHTML = html;
+    this.replaceWith(t.content.firstElementChild);
+}

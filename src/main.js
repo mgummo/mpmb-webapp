@@ -5,6 +5,7 @@
     const global = window;
     const mpmb = global.mpmb;
 
+    /** @type {Main} */
     class Main {
 
         constructor() {
@@ -17,6 +18,9 @@
 
             // initialized by formatters/base.js
             this.formatters = undefined;
+
+            // initialized by render.js
+            this.render = undefined;
 
             // populated by various modules that need to register their types
             // (to make available for inheritance, etc.)
@@ -46,7 +50,11 @@
             }
 
             const context = data.caster;
-            manifest.feats = manifest.feats.map(feat => this.formatters.feat_card.build_featcard_vm(feat, context));
+            manifest.feats = manifest.feats
+                .map(feat => this.formatters.feat_card.build_featcard_vm(feat, context));
+
+            manifest.inventory = manifest.inventory
+                .map(item => this.formatters.item_card.build_vm(item));
 
             return manifest;
         }
@@ -56,10 +64,13 @@
             const spells = this._layout_spells(config, data);
             const monsters = this._layout_monsters(config, data);
 
+            const inventory = Object.values(mpmb.lists.MagicItemsList);
+
             return {
                 spells,
                 monsters,
                 feats: this._layout_feats(config, data),
+                inventory,
             };
         }
 

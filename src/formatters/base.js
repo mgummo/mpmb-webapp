@@ -9,6 +9,7 @@
 
     const { glossary, regex } = build_abbreviation_glossary();
 
+    /** @type {BaseFormatter} */
     class BaseFormatter {
 
         // todo: confirm this function isn't defined elsewhere, in mpmb repo
@@ -67,13 +68,26 @@
             if (!str) {
                 return "";
             }
+
+            const ignore = new Set(["to", "of", "the", "or"]);
+
             return str
-                .toLowerCase()
-                .split(' ')
-                .map(function (word) {
-                    return word.charAt(0).toUpperCase() + word.slice(1);
+                .split(/\s+/)
+                .map((word, index) => {
+                    const lower = word.toLowerCase();
+
+                    // If this is not the first word AND it's on the ignore list, leave it lowercase
+                    if (index > 0 && ignore.has(lower)) {
+                        return lower;
+                    }
+
+                    // Title-case the word, even if it begins with punctuation
+                    return word.replace(
+                        /^(\p{P}?)(.)(.*)$/u,
+                        (match, punct, first, rest) => punct + first.toUpperCase() + rest.toLowerCase()
+                    );
                 })
-                .join(' ');
+                .join(" ");
         }
 
 
@@ -113,10 +127,11 @@
         return { glossary, regex }
     }
 
-    global.main.types.BaseFormatter = BaseFormatter
-
+    // poor man modules - formatters are registered in the corresponding .js file
     global.main.formatters = {
         base: new BaseFormatter(),
+        attack: undefined,
+        item_card: undefined,
         monster_card: undefined,
         spell_card: undefined,
         feat_card: undefined,

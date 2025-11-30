@@ -5,9 +5,11 @@
     const global = window;
     const mpmb = global.mpmb;
 
-    const BaseFormatter = global.main.types.BaseFormatter;
+    class AttackFormatter {
 
-    class AttackFormatter extends BaseFormatter {
+        constructor() {
+            this.base = global.main.formatters.base;
+        }
 
         /**
          * @param {Weapon} attack
@@ -20,7 +22,7 @@
             let spell_attack_mod = attacker.spell_attack_mod;
 
             const range = this.format_range(spell);
-            const to_hit = this.format_modifier(spell_attack_mod);
+            const to_hit = this.base.format_modifier(spell_attack_mod);
 
             const damages = spell.action.damages;
             const attack_context = {
@@ -39,7 +41,7 @@
 
                 let unformatted_ability = (attack.save?.at(0) ?? attack.ability);
 
-                let ability = this.format_ability(unformatted_ability);
+                let ability = this.base.format_ability(unformatted_ability);
                 let fail_result = (spell.action.save ? spell.action.save[1] : null) // todo: haven't come across a fail result that needs templating yet.
                 let save_result = (spell.action.save ? spell.action.save[2] : null) ?? "no"
 
@@ -77,7 +79,7 @@
                 {
                     regex: /^(\d+)\s*(ft|m) melee^/i,
                     handle: (amount, unit) => {
-                        unit = this.unabbreviate(unit);
+                        unit = this.base.unabbreviate(unit);
                         return {
                             type: 'Melee Attack',
                             reach: `${amount} ${unit}`
@@ -111,7 +113,7 @@
                 {
                     regex: /^(\d+)\s*(ft|m)$/i,
                     handle: (amount, unit) => {
-                        unit = this.unabbreviate(unit);
+                        unit = this.base.unabbreviate(unit);
                         return {
                             type: "Ranged Attack",
                             reach: `${amount} ${unit} ranged`
@@ -145,7 +147,7 @@
                 {
                     regex: /$(\d+)-(.*) (.*)^/i,
                     handle: (amount, unit, shape) => {
-                        unit = this.unabbreviate(unit);
+                        unit = this.base.unabbreviate(unit);
                         return {
                             range: `${amount} ${unit} ${shape}`
                         }
@@ -156,7 +158,7 @@
                 {
                     regex: /S:(\d+)\s*(.*)\s(.*)/i,
                     handle: (amount, unit, shape) => {
-                        unit = this.unabbreviate(unit);
+                        unit = this.base.unabbreviate(unit);
                         return {
                             range: `${amount} ${unit} ${shape}`
                         }
@@ -225,7 +227,7 @@
                     damage_mod = ""
                 }
                 else {
-                    damage_mod = this.format_modifier(x[2])
+                    damage_mod = this.base.format_modifier(x[2])
                 }
 
                 const damage_type = x[3].toTitleCase();
